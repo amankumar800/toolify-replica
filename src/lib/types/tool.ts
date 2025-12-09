@@ -1,4 +1,4 @@
-export type PricingType = 'Free' | 'Freemium' | 'Paid' | 'Free Trial';
+export type PricingType = 'Free' | 'Freemium' | 'Paid' | 'Free Trial' | 'Contact for Pricing';
 
 export interface Tool {
     id: string;
@@ -14,7 +14,9 @@ export interface Tool {
     savedCount: number;
     reviewCount: number;
     reviewScore: number; // 0-5
-    verified?: boolean;
+    verified?: boolean; // New: Blue tick support
+    isNew?: boolean;    // New: "New" badge
+    isFeatured?: boolean; // New: "Fire" icon
     dateAdded?: string; // ISO Date string
 }
 
@@ -23,10 +25,14 @@ export type Category = {
     name: string;
     slug: string;
     count: number;
+    description?: string;
+    // Computed fields
+    toolCount?: number;
 };
 
 export interface CategoryGroup {
     id: string;
     name: string;
+    iconName?: string; // New: Lucide icon mapping key
     categories: Category[];
 }

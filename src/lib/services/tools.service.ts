@@ -1,8 +1,35 @@
 import { cache } from 'react';
 import { Tool, Category, CategoryGroup } from '@/lib/types/tool';
 import mockDb from '@/data/mock-db.json';
+import { generateMockTools, enrichCategoriesWithCounts } from '@/lib/utils/mock-generator';
 
-// Performance Engineer: React.cache() is crucial to dedup in Server Components
+// Cache the heavy generation so it only happens once per server lifecycle
+const getDatabase = cache(() => {
+    const rawTools = mockDb.tools as Tool[];
+    const rawGroups = mockDb.categoryGroups as CategoryGroup[];
+
+    // Generate 1000+ tools for realistic stress testing
+    const tools = generateMockTools(rawTools, 50); // 20 * 50 = 1000 tools
+
+    // Compute real-time counts
+    const categoryGroups = enrichCategoriesWithCounts(rawGroups, tools);
+
+    return {
+        tools,
+        categoryGroups
+    };
+});
+
+/**
+ * Fetches tools with optional filtering, pagination, and sorting.
+ * Caches the result using React.cache for request-scoped deduplication.
+ * 
+ * @param query - Search term for tool name or description
+ * @param categorySlug - Slug of the category to filter by
+ * @param page - Page number (1-based)
+ * @param limit - Number of items per page
+ * @param sort - Sorting method ('newest' | 'popular')
+ */
 export const getTools = cache(async (
     query?: string,
     categorySlug?: string,
@@ -10,10 +37,12 @@ export const getTools = cache(async (
     limit: number = 20,
     sort?: 'newest' | 'popular'
 ): Promise<{ tools: Tool[]; total: number }> => {
-    // Simulate network latency
-    await new Promise(resolve => setTimeout(resolve, 300));
+    const db = getDatabase();
 
-    let filtered = mockDb.tools as Tool[];
+    // Simulate network latency (reduced for better UX during dev)
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    let filtered = db.tools;
 
     if (categorySlug) {
         filtered = filtered.filter(t => t.categories.some(c =>
@@ -51,10 +80,10 @@ export const getTools = cache(async (
 });
 
 export const getCategories = cache(async (): Promise<Category[]> => {
-    // Flatten categories from groups for backward compatibility
-    const groups = mockDb.categoryGroups || [];
+    const db = getDatabase();
+    // Flatten categories from groups
     const allCategories: Category[] = [];
-    groups.forEach((g: any) => {
+    db.categoryGroups.forEach((g: any) => {
         if (g.categories) {
             allCategories.push(...g.categories);
         }
@@ -63,20 +92,24 @@ export const getCategories = cache(async (): Promise<Category[]> => {
 });
 
 export const getToolBySlug = cache(async (slug: string): Promise<Tool | undefined> => {
-    return (mockDb.tools as Tool[]).find(t => t.slug === slug);
+    const db = getDatabase();
+    return db.tools.find(t => t.slug === slug);
 });
 
 // For Typeahead
 export const searchTools = cache(async (query: string): Promise<Tool[]> => {
     if (!query || query.length < 2) return [];
 
-    // Fast partial match for typeahead
+    const db = getDatabase();
     const q = query.toLowerCase();
-    return (mockDb.tools as Tool[]).filter(t =>
+
+    // Fast partial match for typeahead
+    return db.tools.filter(t =>
         t.name.toLowerCase().includes(q)
     ).slice(0, 5); // Limit 5 for dropdown
 });
 
 export const getCategoryGroups = cache(async (): Promise<CategoryGroup[]> => {
-    return mockDb.categoryGroups || [];
+    const db = getDatabase();
+    return db.categoryGroups;
 });
