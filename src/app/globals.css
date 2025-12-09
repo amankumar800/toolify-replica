@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Colors - Derived from Toolify.ai Analysis */
+  --primary: #5800FF;
+  --primary-foreground: #FFFFFF;
+
+  --background: #FFFFFF;
+  --foreground: #111827;
+  /* Gray-900 */
+
+  --muted: #F3F4F6;
+  /* Gray-100 */
+  --muted-foreground: #6B7280;
+  /* Gray-500 */
+
+  --border: #E5E7EB;
+  /* Gray-200 */
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+
+  /* Spacing - Strict 4px Grid */
+  --spacing-1: 0.25rem;
+  /* 4px */
+  --spacing-2: 0.5rem;
+  /* 8px */
+  --spacing-3: 0.75rem;
+  /* 12px */
+  --spacing-4: 1rem;
+  /* 16px */
+  --spacing-5: 1.25rem;
+  /* 20px */
+  --spacing-6: 1.5rem;
+  /* 24px */
+  --spacing-8: 2rem;
+  /* 32px */
+  --spacing-12: 3rem;
+  /* 48px */
+
+  /* Radius - Senior Engineer Mandate */
+  --radius: 12px;
+  /* Cards */
+  --radius-sm: 8px;
+  /* Buttons */
+  --radius-full: 9999px;
+
+  /* Layout */
+  --header-height: 64px;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Future proofing - keeping it light for exact replica first, but structure is here */
+}
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Semantic & Utility */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  /* Standard wide container */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-4);
+  padding-right: var(--spacing-4);
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-left: var(--spacing-8);
+    padding-right: var(--spacing-8);
+  }
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  cursor: pointer;
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
