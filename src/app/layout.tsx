@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
 };
 
+import { AuthProviderContext } from "@/components/providers/AuthProviderContext";
+
+// ... (Metadata remains same)
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.variable}`}>
-        {children}
+        <AuthProviderContext>
+          {children}
+        </AuthProviderContext>
       </body>
     </html>
   );

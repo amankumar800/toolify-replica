@@ -1,9 +1,27 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Container } from './Container';
-import { Search } from 'lucide-react';
+import { Search, LogOut } from 'lucide-react';
 import { SearchBar } from '@/components/features/SearchBar';
+import { MobileNav } from './MobileNav';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import Image from 'next/image';
 
 export function Header() {
+    const pathname = usePathname();
+    const { data: session, status } = useSession();
+
+    const navLinks = [
+        { href: '/Best-trending-AI-Tools', label: 'Ranking' },
+        { href: '/midjourney-library', label: 'Midjourney' },
+        { href: '/category', label: 'Categories' },
+        { href: '/submit', label: 'Submit Tool' },
+    ];
+
     return (
         <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--background)/80] backdrop-blur supports-[backdrop-filter]:bg-[var(--background)/60]">
             <Container className="h-[var(--header-height)] flex items-center justify-between">
@@ -16,32 +34,70 @@ export function Header() {
 
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex items-center gap-6">
-                    <Link href="/category/ai-video" className="text-sm font-medium hover:text-[var(--primary)] transition-colors">
-                        AI Video
-                    </Link>
-                    <Link href="/category/ai-image" className="text-sm font-medium hover:text-[var(--primary)] transition-colors">
-                        AI Image
-                    </Link>
-                    <Link href="/category" className="text-sm font-medium hover:text-[var(--primary)] transition-colors">
-                        Category
-                    </Link>
-                    <Link href="/submit" className="text-sm font-medium hover:text-[var(--primary)] transition-colors">
-                        Submit Tool
-                    </Link>
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                "text-sm font-medium transition-colors hover:text-[var(--primary)]",
+                                pathname === link.href ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"
+                            )}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
                 </nav>
 
-                {/* Search Bar */}
+                {/* Right Side Actions */}
                 <div className="flex items-center gap-4">
                     <div className="hidden md:block w-64">
                         <SearchBar variant="header" />
                     </div>
+
+                    {/* Mobile Search Trigger */}
                     <button type="button" className="md:hidden p-2 text-[var(--muted-foreground)]" aria-label="Search">
-                        <Search className="w-6 h-6" />
+                        <Search className="w-5 h-5" />
                     </button>
 
-                    <button type="button" className="hidden md:block bg-[var(--primary)] text-white px-4 py-2 rounded-[var(--radius-sm)] text-sm font-medium hover:opacity-90 transition-opacity">
-                        Sign In
-                    </button>
+                    {/* Auth UI */}
+                    {status === 'loading' ? (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+                    ) : session ? (
+                        <div className="flex items-center gap-2">
+                            {session.user?.image ? (
+                                <Image
+                                    src={session.user.image}
+                                    alt={session.user.name || 'User'}
+                                    width={32}
+                                    height={32}
+                                    className="rounded-full border border-gray-200"
+                                />
+                            ) : (
+                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                    {session.user?.name?.[0] || 'U'}
+                                </div>
+                            )}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => signOut()}
+                                title="Sign Out"
+                            >
+                                <LogOut className="w-4 h-4 text-gray-500" />
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button
+                            className="hidden md:inline-flex"
+                            size="sm"
+                            onClick={() => signIn('google')}
+                        >
+                            Sign In
+                        </Button>
+                    )}
+
+                    {/* Mobile Menu */}
+                    <MobileNav />
                 </div>
             </Container>
         </header>

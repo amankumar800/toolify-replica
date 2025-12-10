@@ -1,11 +1,11 @@
 import {
-    MessageSquare, Image, Music, Video, Code, Terminal,
-    Briefcase, GraduationCap, DollarSign, Database,
-    Layout, Search, PenTool, Share2, Shield, Settings,
-    Cpu, Globe, Smartphone, Gamepad2, Mic, LucideIcon
+    MessageSquare, Image, Music, Video, Code,
+    Briefcase, GraduationCap, DollarSign,
+    Layout, Search, PenTool, Share2, Settings,
+    Mic, LucideIcon, Gamepad2
 } from 'lucide-react';
 
-export const CATEGORY_ICON_MAP: Record<string, any> = {
+export const CATEGORY_ICON_MAP: Record<string, LucideIcon> = {
     'text': MessageSquare,
     'image': Image,
     'audio': Music,

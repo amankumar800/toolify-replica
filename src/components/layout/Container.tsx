@@ -1,10 +1,18 @@
 import { clsx } from 'clsx';
 import { ComponentProps } from 'react';
 
-export function Container({ className, ...props }: ComponentProps<'div'>) {
+interface ContainerProps extends ComponentProps<'div'> {
+    fluid?: boolean;
+}
+
+export function Container({ className, fluid, ...props }: ContainerProps) {
     return (
         <div
-            className={clsx('container mx-auto px-4 sm:px-6 lg:px-8', className)}
+            className={clsx(
+                'mx-auto px-4 sm:px-6 lg:px-8',
+                fluid ? 'max-w-full' : 'container',
+                className
+            )}
             {...props}
         />
     );

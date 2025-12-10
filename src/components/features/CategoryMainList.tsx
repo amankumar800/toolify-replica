@@ -47,7 +47,7 @@ export function CategoryMainList({ groups, allTools }: CategoryMainListProps) {
     if (processedTools.length === 0) {
         return (
             <div className="py-20 text-center text-toolify-gray-500">
-                <p className="text-lg font-medium">No tools found matching "{searchQuery}"</p>
+                <p className="text-lg font-medium">No tools found matching &quot;{searchQuery}&quot;</p>
                 <p className="text-sm mt-2">Try adjusting your search terms</p>
             </div>
         );

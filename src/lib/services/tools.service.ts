@@ -83,7 +83,7 @@ export const getCategories = cache(async (): Promise<Category[]> => {
     const db = getDatabase();
     // Flatten categories from groups
     const allCategories: Category[] = [];
-    db.categoryGroups.forEach((g: any) => {
+    db.categoryGroups.forEach((g: CategoryGroup) => {
         if (g.categories) {
             allCategories.push(...g.categories);
         }

@@ -18,6 +18,8 @@ export interface Tool {
     isNew?: boolean;    // New: "New" badge
     isFeatured?: boolean; // New: "Fire" icon
     dateAdded?: string; // ISO Date string
+    monthlyVisits?: number; // New for Ranking: e.g. 5000000
+    changePercentage?: number; // New for Ranking: e.g. 15.4 or -2.1
 }
 
 export type Category = {

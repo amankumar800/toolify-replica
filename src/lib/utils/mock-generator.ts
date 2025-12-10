@@ -1,4 +1,4 @@
-import { Tool, CategoryGroup, Category } from '@/lib/types/tool';
+import { Tool, CategoryGroup } from '@/lib/types/tool';
 
 /**
  * Runtime Data Generator
@@ -23,6 +23,8 @@ export function generateMockTools(seedTools: Tool[], multiplier: number = 5): To
             verified: Math.random() > 0.7,
             isNew: Math.random() > 0.8,
             isFeatured: Math.random() > 0.9,
+            monthlyVisits: Math.floor(Math.random() * 10000000) + 50000, // 50k to 10M
+            changePercentage: parseFloat((Math.random() * 60 - 10).toFixed(1)), // -10% to +50%
         });
     }
 

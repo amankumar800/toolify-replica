@@ -122,7 +122,7 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                             onClick={() => { router.push(`/?q=${query}`); setIsOpen(false); }}
                             className="block px-4 py-3 text-center text-sm font-medium text-[var(--primary)] border-t border-[var(--border)] hover:bg-gray-50 cursor-pointer min-h-[48px] flex items-center justify-center"
                         >
-                            View all results for "{query}"
+                            View all results for &quot;{query}&quot;
                         </div>
                     </div>
                 </div>
