@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Project Structure
+
+### Production Code (src/)
+Contains all code that runs in the deployed application:
+- `src/app/` - Next.js pages and API routes
+- `src/components/` - React components
+- `src/lib/` - Core services, utilities, and types
+
+### Development Tools (tools/)
+Contains development utilities separate from production:
+- `tools/page-cloning-agent/` - Web page cloning automation tool (see [README](tools/page-cloning-agent/README.md))
+
 ## Getting Started
 
 First, run the development server:

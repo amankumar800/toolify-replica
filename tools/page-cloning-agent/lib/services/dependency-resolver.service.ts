@@ -21,7 +21,7 @@ import type {
   ComponentPlan,
   DataFilePlan,
   ServiceUpdate,
-} from '@/lib/types/page-cloning';
+} from '../types/page-cloning';
 
 // =============================================================================
 // Types

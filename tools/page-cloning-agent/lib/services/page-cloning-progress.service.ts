@@ -20,8 +20,8 @@ import type {
   ExtractedData,
   ImplementationPlan,
   ErrorLog,
-} from '@/lib/types/page-cloning';
-import { ProgressFileSchema } from '@/lib/types/page-cloning.schemas';
+} from '../types/page-cloning';
+import { ProgressFileSchema } from '../types/page-cloning.schemas';
 
 // =============================================================================
 // Constants

@@ -26,8 +26,7 @@ import {
   logError,
   incrementVerificationAttempts,
 } from './page-cloning-progress.service';
-import type { ExtractedData, ImplementationPlan } from '@/lib/types/page-cloning';
-import type { PhaseType } from '@/lib/types/page-cloning';
+import type { ExtractedData, ImplementationPlan, PhaseType } from '../types/page-cloning';
 
 // =============================================================================
 // Test Setup and Cleanup

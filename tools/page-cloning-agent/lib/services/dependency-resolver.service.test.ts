@@ -27,7 +27,7 @@ import type {
   ImplementationPlan,
   PageDependency,
   DependencyGraph,
-} from '@/lib/types/page-cloning';
+} from '../types/page-cloning';
 
 // =============================================================================
 // Test Setup and Cleanup

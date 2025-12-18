@@ -41,11 +41,9 @@ import { extractPageData, extractPageDataSilent } from './page-cloning-extract.s
 import { createImplementationPlan, type PlanOptions } from './page-cloning-plan.service';
 import { verifyClone, MAX_VERIFICATION_ATTEMPTS, type VerificationResult } from './page-cloning-verify.service';
 
-import { RateLimiter, withRateLimiting } from './rate-limiter.service';
+import { RateLimiter } from './rate-limiter.service';
 import {
   ScrapingError,
-  ImplementationError,
-  VerificationError,
   classifyError,
   getRecoveryStrategy,
   detectCaptcha,

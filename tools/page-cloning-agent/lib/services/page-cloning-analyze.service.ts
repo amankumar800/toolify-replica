@@ -61,6 +61,7 @@ const ROLE_TO_SECTION_TYPE: Record<string, SectionType> = {
   section: 'panel',
 };
 
+
 /** Roles that indicate interactive elements */
 const INTERACTIVE_ROLES: Record<string, InteractiveElementType> = {
   button: 'button',
@@ -365,6 +366,7 @@ function generateActionDescription(
   }
 }
 
+
 // =============================================================================
 // Breakpoint Identification
 // =============================================================================
@@ -536,6 +538,7 @@ function extractDependencies(navigation: NavigationPattern[]): string[] {
 
   return dependencies;
 }
+
 
 // =============================================================================
 // Main Analysis Function

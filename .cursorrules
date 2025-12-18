@@ -1,0 +1,37 @@
+# Cursor Rules - Page Cloning Agent
+
+When asked to clone a page, follow the instructions in PAGE_CLONING_AGENT.md
+
+## Quick Command
+```
+Clone [URL] to [feature-name]
+```
+
+## Process (5 Phases)
+1. **Navigate & Analyze** - Open URL, handle bot protection, scroll to load content
+2. **Extract Data** - Get text, images, links, metadata; try API interception for dynamic sites
+3. **Plan** - Determine route structure (static/dynamic), plan file organization
+4. **Implement** - Create types, services, components, pages
+5. **Verify & Iterate** - Check errors, compare with source, fix issues (max 5 iterations)
+
+## Key Files
+- `PAGE_CLONING_AGENT.md` - Complete instructions
+- `src/lib/services/page-cloning-*.ts` - Analysis, extraction, planning, verification services
+- `src/lib/utils/` - Sanitization, error handling, link processing utilities
+- `src/lib/types/page-cloning.ts` - Type definitions
+
+## Requirements
+- Next.js Image for all images (add domains to next.config.js)
+- Next.js Link for internal navigation
+- External links: target="_blank" rel="noopener noreferrer"
+- Tailwind CSS for styling
+- Responsive design (mobile-first)
+- SEO metadata (title, description, OG tags)
+- Loading skeleton + Error boundary
+- TypeScript with proper types
+- ISR caching (revalidate = 3600)
+
+## Performance
+- Virtualize lists with 100+ items
+- Split large data files by category
+- Use lazy loading for images
