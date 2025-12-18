@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "scrape:free-ai-tools": "npx ts-node scripts/scrape-free-ai-tools.ts",
+    "clone-page": "npx ts-node scripts/clone-page.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -29,14 +34,19 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.0.15",
     "autoprefixer": "^10.4.22",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "eslint-plugin-jsx-a11y": "^6.10.2",
+    "fast-check": "^4.4.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "playwright": "^1.57.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5",
+    "vitest": "^4.0.15"
   }
 }

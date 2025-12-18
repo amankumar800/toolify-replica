@@ -1,0 +1,282 @@
+{
+  "sourceUrl": "https://source.com/test-page",
+  "pageSlug": "test-page-integration",
+  "startedAt": "2025-12-15T09:53:02.975Z",
+  "lastUpdatedAt": "2025-12-15T09:53:03.024Z",
+  "status": "completed",
+  "phases": {
+    "analyze": {
+      "status": "completed",
+      "startedAt": "2025-12-15T09:53:02.979Z",
+      "completedAt": "2025-12-15T09:53:02.982Z"
+    },
+    "extract": {
+      "status": "completed",
+      "startedAt": "2025-12-15T09:53:02.985Z",
+      "completedAt": "2025-12-15T09:53:02.993Z"
+    },
+    "plan": {
+      "status": "completed",
+      "startedAt": "2025-12-15T09:53:02.996Z",
+      "completedAt": "2025-12-15T09:53:03.001Z"
+    },
+    "implement": {
+      "status": "completed",
+      "startedAt": "2025-12-15T09:53:03.004Z",
+      "completedAt": "2025-12-15T09:53:03.011Z"
+    },
+    "verify": {
+      "status": "completed",
+      "startedAt": "2025-12-15T09:53:03.014Z",
+      "completedAt": "2025-12-15T09:53:03.021Z"
+    }
+  },
+  "extractedData": {
+    "metadata": {
+      "title": "Test Page",
+      "description": "A test page for cloning",
+      "ogTitle": "Test Page OG",
+      "ogDescription": "A test page for cloning",
+      "ogImage": "",
+      "canonical": "https://source.com/test-page"
+    },
+    "textContent": [
+      {
+        "id": "text-0",
+        "content": "Welcome to Test Page",
+        "tag": "h1",
+        "order": 0
+      },
+      {
+        "id": "text-1",
+        "content": "This is a test paragraph with some content.",
+        "tag": "p",
+        "order": 1
+      },
+      {
+        "id": "text-2",
+        "content": "Item 1",
+        "tag": "li",
+        "order": 2
+      },
+      {
+        "id": "text-3",
+        "content": "Item 2",
+        "tag": "li",
+        "order": 3
+      },
+      {
+        "id": "text-4",
+        "content": "Footer content",
+        "tag": "p",
+        "order": 4
+      }
+    ],
+    "images": [
+      {
+        "src": "https://cdn.example.com/image.jpg",
+        "alt": "Test image",
+        "width": 300,
+        "height": 200
+      }
+    ],
+    "links": [
+      {
+        "href": "https://source.com/",
+        "text": "Home",
+        "type": "internal",
+        "attributes": {}
+      },
+      {
+        "href": "https://source.com/about",
+        "text": "About",
+        "type": "internal",
+        "attributes": {}
+      },
+      {
+        "href": "https://example.com",
+        "text": "External Link",
+        "type": "external",
+        "attributes": {
+          "target": "_blank",
+          "rel": "noopener noreferrer"
+        }
+      }
+    ],
+    "lists": [
+      {
+        "id": "list-0",
+        "items": [
+          "Item 1",
+          "Item 2"
+        ],
+        "ordered": false,
+        "order": 0
+      }
+    ],
+    "forms": [],
+    "structuredData": {},
+    "extractedAt": "2025-12-15T09:53:02.989Z",
+    "itemCounts": {
+      "text": 5,
+      "images": 1,
+      "links": 3,
+      "listItems": 2
+    }
+  },
+  "implementationPlan": {
+    "pageRoute": "test-feature",
+    "components": [
+      {
+        "name": "TestFeatureHeader",
+        "path": "src/components/features/test-feature/TestFeatureHeader.tsx",
+        "props": [
+          "navigation",
+          "items",
+          "className"
+        ],
+        "reusesExisting": null
+      },
+      {
+        "name": "TestFeatureHeader",
+        "path": "src/components/features/test-feature/TestFeatureHeader.tsx",
+        "props": [
+          "navigation",
+          "className"
+        ],
+        "reusesExisting": null
+      },
+      {
+        "name": "TestFeatureMainContent",
+        "path": "src/components/features/test-feature/TestFeatureMainContent.tsx",
+        "props": [
+          "data",
+          "className"
+        ],
+        "reusesExisting": null
+      },
+      {
+        "name": "TestFeatureFooter",
+        "path": "src/components/features/test-feature/TestFeatureFooter.tsx",
+        "props": [
+          "className"
+        ],
+        "reusesExisting": null
+      },
+      {
+        "name": "TestFeaturePage",
+        "path": "src/app/(site)/test-feature/page.tsx",
+        "props": [
+          "data"
+        ],
+        "reusesExisting": null
+      },
+      {
+        "name": "TestFeatureLoading",
+        "path": "src/app/(site)/test-feature/loading.tsx",
+        "props": [],
+        "reusesExisting": "src/components/features/GridSkeleton.tsx"
+      },
+      {
+        "name": "TestFeatureError",
+        "path": "src/app/(site)/test-feature/error.tsx",
+        "props": [
+          "error",
+          "reset"
+        ],
+        "reusesExisting": null
+      }
+    ],
+    "dataFiles": [
+      {
+        "path": "src/data/test-feature/test-page-integration.json",
+        "schema": {
+          "_metadata": {
+            "sourceUrl": "string",
+            "extractedAt": "string (ISO date)",
+            "itemCounts": "ItemCounts"
+          },
+          "metadata": "PageMetadata",
+          "textContent": "TextBlock[]",
+          "images": "ImageData[]",
+          "links": "LinkData[]",
+          "lists": "ListData[]"
+        },
+        "sourceMapping": {
+          "metadata": "extractedData.metadata",
+          "textContent": "extractedData.textContent",
+          "images": "extractedData.images",
+          "links": "extractedData.links",
+          "lists": "extractedData.lists"
+        }
+      },
+      {
+        "path": "src/data/test-feature/metadata.json",
+        "schema": {
+          "lastScrapedAt": "string (ISO date)",
+          "sourceUrl": "string",
+          "version": "string",
+          "itemCounts": "ItemCounts"
+        },
+        "sourceMapping": {
+          "lastScrapedAt": "extractedData.extractedAt",
+          "sourceUrl": "analysis.url",
+          "itemCounts": "extractedData.itemCounts"
+        }
+      }
+    ],
+    "serviceUpdates": [
+      {
+        "path": "src/lib/services/test-feature.service.ts",
+        "functions": [
+          "getTestFeatureData",
+          "searchTestFeature",
+          "invalidateTestFeatureCache"
+        ]
+      }
+    ],
+    "typeDefinitions": [
+      {
+        "name": "TestFeatureData",
+        "path": "src/lib/types/test-feature.ts",
+        "properties": {
+          "metadata": "PageMetadata",
+          "textContent": "TextBlock[]",
+          "images": "ImageData[]",
+          "links": "LinkData[]",
+          "lists": "ListData[]",
+          "extractedAt": "string"
+        }
+      },
+      {
+        "name": "TestFeatureListItem",
+        "path": "src/lib/types/test-feature.ts",
+        "properties": {
+          "id": "string",
+          "content": "string",
+          "order": "number"
+        }
+      }
+    ],
+    "configUpdates": [
+      {
+        "path": "next.config.js",
+        "changes": {
+          "images.remotePatterns": [
+            {
+              "protocol": "https",
+              "hostname": "cdn.example.com"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "filesCreated": [
+    "src/app/(site)/test-feature/page.tsx"
+  ],
+  "filesModified": [],
+  "errors": [],
+  "verificationAttempts": 1,
+  "completedAt": "2025-12-15T09:53:03.024Z"
+}

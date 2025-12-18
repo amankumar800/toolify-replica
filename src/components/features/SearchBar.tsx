@@ -79,6 +79,7 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                     placeholder={isHero ? "Search 10,000+ AI Tools..." : "Search..."}
                     className="flex-1 bg-transparent border-none outline-none text-base placeholder:text-gray-400 w-full"
                     aria-label="Search AI tools"
+                    data-search-input={variant}
                 />
 
                 {loading && <Loader2 className="w-4 h-4 animate-spin text-[var(--primary)]" />}
@@ -90,7 +91,7 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                 )}
             </div>
 
-            {/* Typeahead Dropdown */}
+            {/* Typeahead Dropdown - Results */}
             {isOpen && results.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[var(--radius)] shadow-xl border border-[var(--border)] overflow-hidden z-50">
                     <div className="py-2">
@@ -111,7 +112,11 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <div className="font-medium text-gray-900 truncate">{tool.name}</div>
-                                    <div className="text-xs text-gray-500 truncate">{tool.shortDescription}</div>
+                                    <div className="text-xs text-gray-500 truncate">
+                                        {tool.categories?.[0] && <span className="text-[var(--primary)]">{tool.categories[0]}</span>}
+                                        {tool.categories?.[0] && tool.shortDescription && ' · '}
+                                        {tool.shortDescription}
+                                    </div>
                                 </div>
                                 <span className="text-xs text-[var(--primary)] font-medium bg-purple-50 px-2 py-0.5 rounded-full">
                                     {tool.pricing}
@@ -123,6 +128,40 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                             className="block px-4 py-3 text-center text-sm font-medium text-[var(--primary)] border-t border-[var(--border)] hover:bg-gray-50 cursor-pointer min-h-[48px] flex items-center justify-center"
                         >
                             View all results for &quot;{query}&quot;
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* No Results - Requirement 18.6 */}
+            {isOpen && results.length === 0 && query.length >= 2 && !loading && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[var(--radius)] shadow-xl border border-[var(--border)] overflow-hidden z-50">
+                    <div className="py-6 px-4 text-center">
+                        <div className="text-gray-500 mb-4">
+                            No results found for &quot;{query}&quot;
+                        </div>
+                        <div className="text-sm text-gray-400 mb-4">
+                            Try searching for:
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {['chatbot', 'image generator', 'writing assistant', 'code helper'].map((suggestion) => (
+                                <button
+                                    key={suggestion}
+                                    type="button"
+                                    onClick={() => setQuery(suggestion)}
+                                    className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition-colors"
+                                >
+                                    {suggestion}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                            <a
+                                href="/free-ai-tools"
+                                className="text-sm text-[var(--primary)] hover:underline"
+                            >
+                                Browse all Free AI Tools →
+                            </a>
                         </div>
                     </div>
                 </div>

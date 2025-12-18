@@ -1,0 +1,61 @@
+{
+  "id": "chatbots-virtual-companions",
+  "name": "Chatbots & Virtual Companions",
+  "slug": "chatbots-virtual-companions",
+  "icon": "💬",
+  "description": "AI Chatbot, AI Character, AI Girlfriend, AI Roleplay, AI Boyfriend, AI Companion",
+  "toolCount": 156,
+  "subcategories": [
+    {
+      "id": "free-ai-chatbot",
+      "name": "Free AI Chatbot",
+      "toolCount": 45,
+      "tools": [
+        {
+          "id": "chatgpt",
+          "name": "ChatGPT",
+          "slug": "chatgpt",
+          "externalUrl": "https://chat.openai.com",
+          "description": "Free / Unlimited basic conversations / GPT-3.5 access - From $20/month for Plus",
+          "freeTierDetails": "Unlimited basic conversations with GPT-3.5",
+          "pricing": "From $20/month",
+          "categoryIds": ["chatbots-virtual-companions"]
+        },
+        {
+          "id": "claude",
+          "name": "Claude",
+          "slug": "claude",
+          "externalUrl": "https://claude.ai",
+          "description": "Free / Daily message limit / Claude 3 Sonnet access - From $20/month for Pro",
+          "freeTierDetails": "Daily message limit with Claude 3 Sonnet",
+          "pricing": "From $20/month",
+          "categoryIds": ["chatbots-virtual-companions"]
+        }
+      ]
+    },
+    {
+      "id": "free-ai-character",
+      "name": "Free AI Character",
+      "toolCount": 30,
+      "tools": [
+        {
+          "id": "character-ai",
+          "name": "Character.AI",
+          "slug": "character-ai",
+          "externalUrl": "https://character.ai",
+          "description": "Free / Unlimited character chats / Create custom characters - From $9.99/month for Plus",
+          "freeTierDetails": "Unlimited character conversations",
+          "pricing": "From $9.99/month",
+          "categoryIds": ["chatbots-virtual-companions"]
+        }
+      ]
+    }
+  ],
+  "previousCategory": null,
+  "nextCategory": {
+    "name": "Office & Productivity",
+    "slug": "office-productivity"
+  },
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}

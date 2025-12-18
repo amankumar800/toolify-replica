@@ -1,0 +1,11 @@
+[
+  {
+    "id": "placeholder",
+    "name": "Placeholder Tool",
+    "slug": "placeholder-tool",
+    "imageUrl": "https://placehold.co/48x48/e5e7eb/6b7280?text=AI",
+    "description": "Placeholder description",
+    "badge": null,
+    "displayOrder": 0
+  }
+]

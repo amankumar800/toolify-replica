@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getTools, getCategories } from '@/lib/services/tools.service';
+import { freeAIToolsService } from '@/lib/services/free-ai-tools.service';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -28,5 +29,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
     }));
 
-    return [...routes, ...categoryRoutes, ...toolRoutes];
+    // Free AI Tools - Main page
+    const freeAIToolsMainRoute = {
+        url: `${baseUrl}/free-ai-tools`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+    };
+
+    // Free AI Tools - Category pages
+    const freeAIToolsCategories = await freeAIToolsService.getCategories();
+    const freeAIToolsCategoryRoutes = freeAIToolsCategories.map((cat) => ({
+        url: `${baseUrl}/free-ai-tools/${cat.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+    }));
+
+    return [
+        ...routes,
+        ...categoryRoutes,
+        ...toolRoutes,
+        freeAIToolsMainRoute,
+        ...freeAIToolsCategoryRoutes,
+    ];
 }

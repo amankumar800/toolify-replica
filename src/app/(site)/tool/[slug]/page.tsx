@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getToolBySlug } from '@/lib/services/tools.service';
@@ -8,6 +8,16 @@ import type { Metadata } from 'next';
 
 interface PageProps {
     params: Promise<{ slug: string }>;
+}
+
+/**
+ * Converts a slug to a human-readable search query
+ * Per Requirement 14.7: Redirect to search with tool name as query
+ */
+function slugToSearchQuery(slug: string): string {
+    return slug
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -30,8 +40,10 @@ export default async function ToolPage({ params }: PageProps) {
     const { slug } = await params;
     const tool = await getToolBySlug(slug);
 
+    // Per Requirement 14.7: Redirect to search results page when tool doesn't exist
     if (!tool) {
-        notFound();
+        const searchQuery = slugToSearchQuery(slug);
+        redirect(`/?search=${encodeURIComponent(searchQuery)}`);
     }
 
     return (

@@ -16,6 +16,7 @@ export function Header() {
     const { data: session, status } = useSession();
 
     const navLinks = [
+        { href: '/free-ai-tools', label: 'Free AI Tools' },
         { href: '/Best-trending-AI-Tools', label: 'Ranking' },
         { href: '/midjourney-library', label: 'Midjourney' },
         { href: '/category', label: 'Categories' },
@@ -34,18 +35,22 @@ export function Header() {
 
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex items-center gap-6">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                "text-sm font-medium transition-colors hover:text-[var(--primary)]",
-                                pathname === link.href ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"
-                            )}
-                        >
-                            {link.label}
-                        </Link>
-                    ))}
+                    {navLinks.map((link) => {
+                        // Active state: exact match OR starts with path + '/' for nested routes
+                        const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+                        return (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={cn(
+                                    "text-sm font-medium transition-colors hover:text-[var(--primary)]",
+                                    isActive ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"
+                                )}
+                            >
+                                {link.label}
+                            </Link>
+                        );
+                    })}
                 </nav>
 
                 {/* Right Side Actions */}

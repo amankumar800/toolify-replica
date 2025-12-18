@@ -14,6 +14,7 @@ export function MobileNav() {
     const toggleMenu = () => setIsOpen(!isOpen);
 
     const links = [
+        { href: '/free-ai-tools', label: 'Free AI Tools' },
         { href: '/Best-trending-AI-Tools', label: 'Ranking' },
         { href: '/midjourney-library', label: 'Midjourney' },
         { href: '/category', label: 'Category' },
@@ -54,7 +55,8 @@ export function MobileNav() {
                     <div className="flex-1 overflow-y-auto py-4 px-4">
                         <nav className="flex flex-col gap-2">
                             {links.map((link) => {
-                                const isActive = pathname === link.href;
+                                // Active state: exact match OR starts with path + '/' for nested routes
+                                const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
                                 return (
                                     <Link
                                         key={link.href}
