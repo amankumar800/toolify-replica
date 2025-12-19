@@ -1,11 +1,13 @@
 'use server';
 
-import { searchTools, getTools } from '@/lib/services/tools.service';
+import { getTools } from '@/lib/services/tools.service';
 
 export async function searchToolsAction(query: string) {
-    return await searchTools(query);
+    return await getTools({ search: query });
 }
 
 export async function filterToolsAction(category: string | undefined, page: number) {
-    return await getTools(undefined, category, page);
+    const limit = 20;
+    const offset = (page - 1) * limit;
+    return await getTools({ category, limit, offset });
 }

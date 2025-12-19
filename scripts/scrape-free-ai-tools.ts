@@ -3,11 +3,27 @@
  * 
  * Playwright-based scraper that extracts tool data from toolify.ai/free-ai-tools
  * Implements Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.10, 6.11, 6.12
+ * 
+ * Now also writes directly to Supabase database using ScraperDbService.
+ * Implements Requirements: 12.1, 12.2, 12.3, 12.4, 12.5
  */
 
 import { chromium, Browser, Page } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import {
+  ScraperDbService,
+  createScraperDbService,
+  type ScraperCategoryInsert,
+  type ScraperToolInsert,
+  type ScraperToolCategoryInsert,
+  type ScraperFaqInsert,
+  type ScraperResult,
+} from './lib/scraper-db.service';
+
+// Load environment variables
+require('dotenv').config();
 
 // =============================================================================
 // Configuration
@@ -21,7 +37,60 @@ const CONFIG = {
   outputDir: 'src/data/free-ai-tools',
   categoriesDir: 'src/data/free-ai-tools/categories',
   version: '1.0.0',
+  // Database configuration
+  writeToDatabase: true, // Set to false to only write JSON files
+  writeToJsonFiles: true, // Set to false to only write to database
 };
+
+// =============================================================================
+// Database Client Factory
+// =============================================================================
+
+/**
+ * Creates a Supabase admin client for database operations.
+ * Returns null if credentials are not configured.
+ */
+function createAdminClient(): SupabaseClient | null {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.warn('[Database] Supabase credentials not configured. Database writes will be skipped.');
+    return null;
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
+/**
+ * Normalize pricing value to valid database enum
+ */
+function normalizePricing(pricing: string | null): string {
+  if (!pricing) return 'Freemium';
+  
+  const validPricing = ['Free', 'Freemium', 'Paid', 'Free Trial', 'Contact for Pricing'];
+  
+  if (validPricing.includes(pricing)) {
+    return pricing;
+  }
+  
+  const lowerPricing = pricing.toLowerCase();
+  if (lowerPricing.includes('free') && !lowerPricing.includes('trial')) {
+    return lowerPricing === 'free' ? 'Free' : 'Freemium';
+  }
+  if (lowerPricing.includes('trial')) return 'Free Trial';
+  if (lowerPricing.includes('paid') || lowerPricing.includes('$') || lowerPricing.includes('from')) {
+    return 'Paid';
+  }
+  if (lowerPricing.includes('contact')) return 'Contact for Pricing';
+  
+  return 'Freemium';
+}
 
 // =============================================================================
 // Types for Scraped Data
@@ -257,9 +326,30 @@ class FreeAIToolsScraper {
   private page: Page | null = null;
   private logger: ProgressLogger;
   private toolsBySlug: Map<string, ScrapedTool & { categoryIds: string[] }> = new Map();
+  private scraperDb: ScraperDbService | null = null;
+  private dbResults: {
+    categories: ScraperResult;
+    tools: ScraperResult;
+    toolCategories: ScraperResult;
+    faqs: ScraperResult;
+  } = {
+    categories: { success: 0, failed: 0, errors: [] },
+    tools: { success: 0, failed: 0, errors: [] },
+    toolCategories: { success: 0, failed: 0, errors: [] },
+    faqs: { success: 0, failed: 0, errors: [] },
+  };
 
   constructor() {
     this.logger = new ProgressLogger();
+    
+    // Initialize database service if configured
+    if (CONFIG.writeToDatabase) {
+      const supabase = createAdminClient();
+      if (supabase) {
+        this.scraperDb = createScraperDbService(supabase);
+        console.log('[Database] Supabase connection initialized');
+      }
+    }
   }
 
   /**
@@ -652,14 +742,177 @@ class FreeAIToolsScraper {
         }
       }
       
-      // Step 3: Write output files
-      console.log('\n[Step 3] Writing output files...');
+      // Step 3: Write output JSON files
+      console.log('\n[Step 3] Writing output JSON files...');
       await this.writeOutputFiles(categories, categoryData, featuredTools, faqItems);
+      
+      // Step 4: Write to Supabase database
+      await this.writeToDatabase(categories, categoryData, faqItems);
       
     } finally {
       await this.close();
-      this.logger.logComplete();
+      this.logComplete();
     }
+  }
+
+  /**
+   * Log completion summary including database results
+   */
+  private logComplete(): void {
+    this.logger.logComplete();
+    
+    // Log database results if database writes were enabled
+    if (CONFIG.writeToDatabase && this.scraperDb) {
+      console.log('\n' + '='.repeat(60));
+      console.log('DATABASE SUMMARY');
+      console.log('='.repeat(60));
+      console.log(`Categories:       ${this.dbResults.categories.success} success, ${this.dbResults.categories.failed} failed`);
+      console.log(`Tools:            ${this.dbResults.tools.success} success, ${this.dbResults.tools.failed} failed`);
+      console.log(`Tool-Categories:  ${this.dbResults.toolCategories.success} success, ${this.dbResults.toolCategories.failed} failed`);
+      console.log(`FAQs:             ${this.dbResults.faqs.success} success, ${this.dbResults.faqs.failed} failed`);
+      
+      const totalErrors = 
+        this.dbResults.categories.errors.length +
+        this.dbResults.tools.errors.length +
+        this.dbResults.toolCategories.errors.length +
+        this.dbResults.faqs.errors.length;
+      
+      if (totalErrors > 0) {
+        console.log(`\n⚠️ Total database errors: ${totalErrors}`);
+        
+        if (this.dbResults.categories.errors.length > 0) {
+          console.log('\nCategory errors:');
+          this.dbResults.categories.errors.slice(0, 5).forEach(e => console.log(`  - ${e}`));
+          if (this.dbResults.categories.errors.length > 5) {
+            console.log(`  ... and ${this.dbResults.categories.errors.length - 5} more`);
+          }
+        }
+        
+        if (this.dbResults.tools.errors.length > 0) {
+          console.log('\nTool errors:');
+          this.dbResults.tools.errors.slice(0, 5).forEach(e => console.log(`  - ${e}`));
+          if (this.dbResults.tools.errors.length > 5) {
+            console.log(`  ... and ${this.dbResults.tools.errors.length - 5} more`);
+          }
+        }
+      }
+      
+      console.log('='.repeat(60));
+    }
+  }
+
+  /**
+   * Write data to Supabase database
+   * Requirements 12.1, 12.2, 12.3, 12.4, 12.5
+   */
+  private async writeToDatabase(
+    categories: ScrapedCategory[],
+    categoryData: Map<string, ScrapedCategoryPage>,
+    faqItems: ScrapedFAQItem[]
+  ): Promise<void> {
+    if (!this.scraperDb) {
+      console.log('    [Database] Skipping database writes (not configured)');
+      return;
+    }
+
+    console.log('\n[Step 4] Writing to Supabase database...');
+
+    // 1. Upsert categories
+    console.log('    Upserting categories...');
+    const categoryInserts: ScraperCategoryInsert[] = categories.map((cat, index) => ({
+      name: cat.name,
+      slug: cat.slug,
+      icon: cat.iconUrl || null,
+      tool_count: categoryData.get(cat.slug)?.subcategories.reduce(
+        (sum, s) => sum + s.tools.length, 0
+      ) || 0,
+      display_order: index,
+    }));
+
+    const categoryResult = await this.scraperDb.upsertCategories(categoryInserts);
+    this.dbResults.categories = categoryResult;
+    console.log(`    ✅ Categories: ${categoryResult.success} success, ${categoryResult.failed} failed`);
+
+    // 2. Build category slug to ID map
+    const categorySlugToId = new Map<string, string>();
+    for (const cat of categories) {
+      const dbCat = await this.scraperDb.getCategoryBySlug(cat.slug);
+      if (dbCat) {
+        categorySlugToId.set(cat.slug, dbCat.id);
+      }
+    }
+
+    // 3. Upsert tools from all categories
+    console.log('    Upserting tools...');
+    const toolInserts: ScraperToolInsert[] = [];
+    const toolCategoryRelations: { toolSlug: string; categorySlug: string }[] = [];
+
+    for (const [categorySlug, data] of categoryData) {
+      for (const subcategory of data.subcategories) {
+        for (const tool of subcategory.tools) {
+          // Check if we already have this tool (deduplication)
+          const existingIndex = toolInserts.findIndex(t => t.slug === tool.slug);
+          if (existingIndex === -1) {
+            toolInserts.push({
+              name: tool.name,
+              slug: tool.slug,
+              website_url: tool.externalUrl || `https://${tool.slug}.com`,
+              external_url: tool.externalUrl || null,
+              description: tool.description || null,
+              free_tier_details: tool.freeTierDetails || null,
+              pricing: normalizePricing(tool.pricing),
+            });
+          }
+          
+          // Track tool-category relationship
+          toolCategoryRelations.push({
+            toolSlug: tool.slug,
+            categorySlug,
+          });
+        }
+      }
+    }
+
+    const toolResult = await this.scraperDb.upsertTools(toolInserts);
+    this.dbResults.tools = toolResult;
+    console.log(`    ✅ Tools: ${toolResult.success} success, ${toolResult.failed} failed`);
+
+    // 4. Build tool slug to ID map and create tool-category relationships
+    console.log('    Creating tool-category relationships...');
+    const toolCategoryInserts: ScraperToolCategoryInsert[] = [];
+    const processedRelations = new Set<string>();
+
+    for (const rel of toolCategoryRelations) {
+      const relationKey = `${rel.toolSlug}:${rel.categorySlug}`;
+      if (processedRelations.has(relationKey)) continue;
+      processedRelations.add(relationKey);
+
+      const tool = await this.scraperDb.getToolBySlug(rel.toolSlug);
+      const categoryId = categorySlugToId.get(rel.categorySlug);
+
+      if (tool && categoryId) {
+        toolCategoryInserts.push({
+          tool_id: tool.id,
+          category_id: categoryId,
+        });
+      }
+    }
+
+    const toolCategoryResult = await this.scraperDb.upsertToolCategories(toolCategoryInserts);
+    this.dbResults.toolCategories = toolCategoryResult;
+    console.log(`    ✅ Tool-Categories: ${toolCategoryResult.success} success, ${toolCategoryResult.failed} failed`);
+
+    // 5. Upsert FAQs
+    console.log('    Upserting FAQs...');
+    const faqInserts: ScraperFaqInsert[] = faqItems.map((faq, index) => ({
+      question: faq.question,
+      answer: faq.answer,
+      display_order: index,
+    }));
+
+    const faqResult = await this.scraperDb.upsertFaqs(faqInserts);
+    this.dbResults.faqs = faqResult;
+    console.log(`    ✅ FAQs: ${faqResult.success} success, ${faqResult.failed} failed`);
   }
 
   /**
@@ -672,6 +925,11 @@ class FreeAIToolsScraper {
     featuredTools: ScrapedFeaturedTool[],
     faqItems: ScrapedFAQItem[]
   ): Promise<void> {
+    if (!CONFIG.writeToJsonFiles) {
+      console.log('    [JSON] Skipping JSON file writes (disabled)');
+      return;
+    }
+
     // Ensure directories exist
     if (!fs.existsSync(CONFIG.outputDir)) {
       fs.mkdirSync(CONFIG.outputDir, { recursive: true });

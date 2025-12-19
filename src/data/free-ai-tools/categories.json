@@ -1,156 +1,23 @@
 [
   {
-    "id": "cat-1",
-    "name": "Chatbots & Virtual Companions",
-    "slug": "chatbots-virtual-companions",
-    "icon": "💬",
-    "toolCount": 156
-  },
-  {
-    "id": "cat-2",
-    "name": "Office & Productivity",
-    "slug": "office-productivity",
-    "icon": "📊",
-    "toolCount": 89
-  },
-  {
-    "id": "cat-3",
-    "name": "Image Generation & Editing",
-    "slug": "image-generation-editing",
-    "icon": "🖼️",
-    "toolCount": 234
-  },
-  {
-    "id": "cat-4",
-    "name": "Art & Creative Design",
+    "id": "1",
     "slug": "art-creative-design",
-    "icon": "🎨",
-    "toolCount": 112
+    "name": "Art & Creative Design",
+    "icon": "palette",
+    "toolCount": 0
   },
   {
-    "id": "cat-5",
-    "name": "Coding & Development",
-    "slug": "coding-development",
-    "icon": "💻",
-    "toolCount": 78
+    "id": "2",
+    "slug": "writing-content",
+    "name": "Writing & Content",
+    "icon": "pencil",
+    "toolCount": 0
   },
   {
-    "id": "cat-6",
-    "name": "Video & Animation",
-    "slug": "video-animation",
-    "icon": "🎬",
-    "toolCount": 145
-  },
-  {
-    "id": "cat-7",
-    "name": "Education & Translation",
-    "slug": "education-translation",
-    "icon": "📚",
-    "toolCount": 67
-  },
-  {
-    "id": "cat-8",
-    "name": "Writing & Editing",
-    "slug": "writing-editing",
-    "icon": "✍️",
-    "toolCount": 198
-  },
-  {
-    "id": "cat-9",
-    "name": "Voice Generation & Conversion",
-    "slug": "voice-generation-conversion",
-    "icon": "🎤",
-    "toolCount": 54
-  },
-  {
-    "id": "cat-10",
-    "name": "Business Management",
-    "slug": "business-management",
-    "icon": "💼",
-    "toolCount": 43
-  },
-  {
-    "id": "cat-11",
-    "name": "Music & Audio",
-    "slug": "music-audio",
-    "icon": "🎵",
-    "toolCount": 76
-  },
-  {
-    "id": "cat-12",
-    "name": "AI Detection & Anti-Detection",
-    "slug": "ai-detection-anti-detection",
-    "icon": "🔍",
-    "toolCount": 32
-  },
-  {
-    "id": "cat-13",
-    "name": "Marketing & Advertising",
-    "slug": "marketing-advertising",
-    "icon": "📢",
-    "toolCount": 87
-  },
-  {
-    "id": "cat-14",
-    "name": "Research & Data Analysis",
-    "slug": "research-data-analysis",
-    "icon": "📈",
-    "toolCount": 56
-  },
-  {
-    "id": "cat-15",
-    "name": "Social Media",
-    "slug": "social-media",
-    "icon": "📱",
-    "toolCount": 94
-  },
-  {
-    "id": "cat-16",
-    "name": "Legal & Finance",
-    "slug": "legal-finance",
-    "icon": "⚖️",
-    "toolCount": 28
-  },
-  {
-    "id": "cat-17",
-    "name": "Daily Life",
-    "slug": "daily-life",
-    "icon": "🏠",
-    "toolCount": 45
-  },
-  {
-    "id": "cat-18",
-    "name": "Health & Wellness",
-    "slug": "health-wellness",
-    "icon": "❤️",
-    "toolCount": 38
-  },
-  {
-    "id": "cat-19",
-    "name": "Image Analysis",
-    "slug": "image-analysis",
-    "icon": "👁️",
-    "toolCount": 41
-  },
-  {
-    "id": "cat-20",
-    "name": "Interior & Architectural Design",
-    "slug": "interior-architectural-design",
-    "icon": "🏛️",
-    "toolCount": 23
-  },
-  {
-    "id": "cat-21",
-    "name": "Business Research",
-    "slug": "business-research",
-    "icon": "🔬",
-    "toolCount": 19
-  },
-  {
-    "id": "cat-22",
-    "name": "Other",
-    "slug": "other-1",
-    "icon": "📦",
-    "toolCount": 67
+    "id": "3",
+    "slug": "productivity",
+    "name": "Productivity",
+    "icon": "zap",
+    "toolCount": 0
   }
 ]

@@ -1,11 +1,11 @@
 [
   {
-    "id": "placeholder",
-    "name": "Placeholder Tool",
-    "slug": "placeholder-tool",
-    "imageUrl": "https://placehold.co/48x48/e5e7eb/6b7280?text=AI",
-    "description": "Placeholder description",
+    "id": "1",
+    "name": "Sample AI Tool",
+    "slug": "sample-ai-tool",
+    "description": "A sample AI tool for demonstration purposes",
+    "imageUrl": "https://placehold.co/400x300",
     "badge": null,
-    "displayOrder": 0
+    "displayOrder": 1
   }
 ]

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getCategories } from '@/lib/services/tools.service';
+import { getCategories } from '@/lib/services/categories.service';
 
 export async function Sidebar() {
     const categories = await getCategories();

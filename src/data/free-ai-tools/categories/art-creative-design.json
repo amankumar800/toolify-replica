@@ -1,0 +1,23 @@
+{
+  "id": "1",
+  "slug": "art-creative-design",
+  "name": "Art & Creative Design",
+  "description": "AI tools for art generation, creative design, and visual content creation",
+  "icon": "palette",
+  "toolCount": 0,
+  "previousCategory": null,
+  "nextCategory": {
+    "slug": "writing-content",
+    "name": "Writing & Content"
+  },
+  "subcategories": [
+    {
+      "id": "1",
+      "name": "Image Generation",
+      "toolCount": 0,
+      "tools": []
+    }
+  ],
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}

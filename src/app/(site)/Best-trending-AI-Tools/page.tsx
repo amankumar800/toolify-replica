@@ -9,14 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default async function RankingPage() {
-    // In a real app, we'd have a specific sort params for "visits"
-    // For now, we reuse the tool service but we know our mock data now supports it.
-    // We will fetch more tools to make a good list (e.g., 50)
-    const { tools } = await getTools(undefined, undefined, 1, 50, 'popular');
+    // Fetch tools and sort by monthly visits for ranking
+    const tools = await getTools({ limit: 50 });
 
-    // Simulate sorting by the new field if the service doesn't do it perfectly (since service sorts by savedCount for 'popular')
-    // We want specifically 'monthlyVisits' for this page.
-    const rankedTools = [...tools].sort((a, b) => (b.monthlyVisits || 0) - (a.monthlyVisits || 0));
+    // Sort by monthlyVisits for this page
+    const rankedTools = [...tools].sort((a, b) => ((b as any).monthlyVisits || 0) - ((a as any).monthlyVisits || 0));
 
     // Get the current Date for the header (e.g., "Top AI Tools - December 2025")
     const date = new Date();

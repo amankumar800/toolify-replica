@@ -1,115 +1,282 @@
-import { cache } from 'react';
-import { Tool, Category, CategoryGroup } from '@/lib/types/tool';
-import mockDb from '@/data/mock-db.json';
-import { generateMockTools, enrichCategoriesWithCounts } from '@/lib/utils/mock-generator';
+/**
+ * Tools service layer for business logic orchestration.
+ * Provides functions for managing tools with validation and error handling.
+ *
+ * @module tools.service
+ */
 
-// Cache the heavy generation so it only happens once per server lifecycle
-const getDatabase = cache(() => {
-    const rawTools = mockDb.tools as Tool[];
-    const rawGroups = mockDb.categoryGroups as CategoryGroup[];
-
-    // Generate 1000+ tools for realistic stress testing
-    const tools = generateMockTools(rawTools, 50); // 20 * 50 = 1000 tools
-
-    // Compute real-time counts
-    const categoryGroups = enrichCategoriesWithCounts(rawGroups, tools);
-
-    return {
-        tools,
-        categoryGroups
-    };
-});
+import { createAdminClient } from '@/lib/supabase/admin';
+import { createToolsRepository } from '@/lib/db/repositories/tools.repository';
+import {
+  mapToolRowToTool,
+  mapToolWithCategories,
+  mapToolToInsert,
+  mapToolToUpdate,
+} from '@/lib/db/mappers/tool.mapper';
+import { ValidationError } from '@/lib/db/errors';
+import type { Tool, PricingType } from '@/lib/types/tool';
 
 /**
- * Fetches tools with optional filtering, pagination, and sorting.
- * Caches the result using React.cache for request-scoped deduplication.
- * 
- * @param query - Search term for tool name or description
- * @param categorySlug - Slug of the category to filter by
- * @param page - Page number (1-based)
- * @param limit - Number of items per page
- * @param sort - Sorting method ('newest' | 'popular')
+ * Options for filtering and paginating tools.
  */
-export const getTools = cache(async (
-    query?: string,
-    categorySlug?: string,
-    page: number = 1,
-    limit: number = 20,
-    sort?: 'newest' | 'popular'
-): Promise<{ tools: Tool[]; total: number }> => {
-    const db = getDatabase();
+export interface GetToolsOptions {
+  /** Filter by category slug */
+  category?: string;
+  /** Filter by pricing type */
+  pricing?: string;
+  /** Search query for name/description */
+  search?: string;
+  /** Maximum number of results */
+  limit?: number;
+  /** Number of results to skip */
+  offset?: number;
+}
 
-    // Simulate network latency (reduced for better UX during dev)
-    await new Promise(resolve => setTimeout(resolve, 100));
+/**
+ * Input data for creating a new tool.
+ */
+export interface CreateToolInput {
+  /** Tool name (required) */
+  name: string;
+  /** URL-friendly slug (required) */
+  slug: string;
+  /** Website URL (required) */
+  websiteUrl: string;
+  /** Full description */
+  description?: string;
+  /** Short description for cards */
+  shortDescription?: string;
+  /** Image URL */
+  image?: string;
+  /** Pricing model */
+  pricing?: PricingType;
+  /** Tags for categorization */
+  tags?: string[];
+  /** Category IDs to link */
+  categoryIds?: string[];
+}
 
-    let filtered = db.tools;
+/**
+ * Creates a tools repository instance with admin client.
+ * Uses admin client to bypass RLS for all operations.
+ */
+function getToolsRepository() {
+  const supabase = createAdminClient();
+  return createToolsRepository(supabase);
+}
 
-    if (categorySlug) {
-        filtered = filtered.filter(t => t.categories.some(c =>
-            c.toLowerCase().replace(/\s+/g, '-') === categorySlug
-        ));
+
+/**
+ * Fetches tools with optional filtering, pagination, and search.
+ *
+ * @param options - Filtering and pagination options
+ * @returns Array of tools matching the criteria
+ *
+ * @example
+ * ```ts
+ * // Get all tools
+ * const tools = await getTools();
+ *
+ * // Get tools by category with pagination
+ * const tools = await getTools({ category: 'ai-chatbots', limit: 10, offset: 0 });
+ *
+ * // Search tools
+ * const tools = await getTools({ search: 'chatgpt', limit: 20 });
+ * ```
+ */
+export async function getTools(options?: GetToolsOptions): Promise<Tool[]> {
+  const repo = getToolsRepository();
+
+  // If searching, use the search method
+  if (options?.search) {
+    const rows = await repo.search(options.search, options?.limit);
+    return rows.map(mapToolRowToTool);
+  }
+
+  // If filtering by category, use findByCategory
+  if (options?.category) {
+    const rows = await repo.findByCategory(options.category, options?.limit);
+
+    // Apply pricing filter if specified
+    let tools = rows.map(mapToolRowToTool);
+    if (options?.pricing) {
+      tools = tools.filter((t) => t.pricing === options.pricing);
     }
 
-    if (query) {
-        const q = query.toLowerCase();
-        filtered = filtered.filter(t =>
-            t.name.toLowerCase().includes(q) ||
-            t.description.toLowerCase().includes(q) ||
-            t.tags.some(tag => tag.toLowerCase().includes(q))
-        );
+    return tools;
+  }
+
+  // Otherwise, get all tools with categories
+  const rows = await repo.findWithCategories({
+    limit: options?.limit,
+    offset: options?.offset,
+    orderBy: 'created_at',
+    ascending: false,
+  });
+
+  let tools = rows.map(mapToolWithCategories);
+
+  // Apply pricing filter if specified
+  if (options?.pricing) {
+    tools = tools.filter((t) => t.pricing === options.pricing);
+  }
+
+  return tools;
+}
+
+/**
+ * Fetches a single tool by its slug.
+ *
+ * @param slug - URL-friendly identifier
+ * @returns The tool or null if not found
+ *
+ * @example
+ * ```ts
+ * const tool = await getToolBySlug('chatgpt');
+ * if (tool) {
+ *   console.log(tool.name); // 'ChatGPT'
+ * }
+ * ```
+ */
+export async function getToolBySlug(slug: string): Promise<Tool | null> {
+  const repo = getToolsRepository();
+  const row = await repo.findBySlug(slug);
+
+  if (!row) {
+    return null;
+  }
+
+  return mapToolRowToTool(row);
+}
+
+/**
+ * Fetches featured tools.
+ *
+ * @param limit - Maximum number of featured tools to return (default: 10)
+ * @returns Array of featured tools
+ *
+ * @example
+ * ```ts
+ * const featured = await getFeaturedTools(5);
+ * ```
+ */
+export async function getFeaturedTools(limit: number = 10): Promise<Tool[]> {
+  const repo = getToolsRepository();
+  const rows = await repo.findFeatured(limit);
+  return rows.map(mapToolRowToTool);
+}
+
+
+/**
+ * Creates a new tool with validation.
+ *
+ * @param data - Tool creation data
+ * @returns The created tool
+ * @throws {ValidationError} If required fields are missing
+ *
+ * @example
+ * ```ts
+ * const tool = await createTool({
+ *   name: 'ChatGPT',
+ *   slug: 'chatgpt',
+ *   websiteUrl: 'https://chat.openai.com',
+ *   pricing: 'Freemium',
+ *   categoryIds: ['category-uuid-1'],
+ * });
+ * ```
+ */
+export async function createTool(data: CreateToolInput): Promise<Tool> {
+  // Validate required fields
+  if (!data.name || data.name.trim() === '') {
+    throw new ValidationError('name', 'Name is required');
+  }
+
+  if (!data.slug || data.slug.trim() === '') {
+    throw new ValidationError('slug', 'Slug is required');
+  }
+
+  if (!data.websiteUrl || data.websiteUrl.trim() === '') {
+    throw new ValidationError('websiteUrl', 'Website URL is required');
+  }
+
+  const repo = getToolsRepository();
+
+  // Map input to database insert format
+  const insertData = mapToolToInsert({
+    name: data.name,
+    slug: data.slug,
+    websiteUrl: data.websiteUrl,
+    description: data.description ?? '',
+    shortDescription: data.shortDescription ?? '',
+    image: data.image ?? '',
+    pricing: data.pricing ?? 'Freemium',
+    tags: data.tags ?? [],
+    savedCount: 0,
+    reviewCount: 0,
+    reviewScore: 0,
+    verified: false,
+    isNew: true,
+    isFeatured: false,
+  });
+
+  // Create the tool
+  const row = await repo.create(insertData);
+
+  // Link to categories if provided
+  if (data.categoryIds && data.categoryIds.length > 0) {
+    for (const categoryId of data.categoryIds) {
+      await repo.linkToCategory(row.id, categoryId);
     }
+  }
 
-    // Sorting Logic
-    if (sort === 'newest') {
-        filtered.sort((a, b) => {
-            const dateA = a.dateAdded ? new Date(a.dateAdded).getTime() : 0;
-            const dateB = b.dateAdded ? new Date(b.dateAdded).getTime() : 0;
-            return dateB - dateA; // Descending
-        });
-    } else if (sort === 'popular') {
-        filtered.sort((a, b) => b.savedCount - a.savedCount); // Descending
-    }
+  return mapToolRowToTool(row);
+}
 
-    const start = (page - 1) * limit;
-    const end = start + limit;
+/**
+ * Updates an existing tool.
+ *
+ * @param id - Tool ID
+ * @param updates - Partial tool data to update
+ * @returns The updated tool
+ *
+ * @example
+ * ```ts
+ * const updated = await updateTool('tool-uuid', {
+ *   name: 'ChatGPT Plus',
+ *   pricing: 'Paid',
+ * });
+ * ```
+ */
+export async function updateTool(
+  id: string,
+  updates: Partial<Omit<Tool, 'id' | 'dateAdded' | 'categories'>>
+): Promise<Tool> {
+  const repo = getToolsRepository();
 
-    return {
-        tools: filtered.slice(start, end),
-        total: filtered.length
-    };
-});
+  // Map updates to database format
+  const dbUpdates = mapToolToUpdate(updates);
 
-export const getCategories = cache(async (): Promise<Category[]> => {
-    const db = getDatabase();
-    // Flatten categories from groups
-    const allCategories: Category[] = [];
-    db.categoryGroups.forEach((g: CategoryGroup) => {
-        if (g.categories) {
-            allCategories.push(...g.categories);
-        }
-    });
-    return allCategories;
-});
+  // Update the tool
+  const row = await repo.update(id, dbUpdates);
 
-export const getToolBySlug = cache(async (slug: string): Promise<Tool | undefined> => {
-    const db = getDatabase();
-    return db.tools.find(t => t.slug === slug);
-});
+  return mapToolRowToTool(row);
+}
 
-// For Typeahead
-export const searchTools = cache(async (query: string): Promise<Tool[]> => {
-    if (!query || query.length < 2) return [];
+/**
+ * Deletes a tool and its category relationships.
+ * The tool_categories junction table records are automatically deleted
+ * via ON DELETE CASCADE constraint.
+ *
+ * @param id - Tool ID to delete
+ *
+ * @example
+ * ```ts
+ * await deleteTool('tool-uuid');
+ * ```
+ */
+export async function deleteTool(id: string): Promise<void> {
+  const repo = getToolsRepository();
 
-    const db = getDatabase();
-    const q = query.toLowerCase();
-
-    // Fast partial match for typeahead
-    return db.tools.filter(t =>
-        t.name.toLowerCase().includes(q)
-    ).slice(0, 5); // Limit 5 for dropdown
-});
-
-export const getCategoryGroups = cache(async (): Promise<CategoryGroup[]> => {
-    const db = getDatabase();
-    return db.categoryGroups;
-});
+  // Delete the tool - cascade will handle tool_categories cleanup
+  await repo.delete(id);
+}

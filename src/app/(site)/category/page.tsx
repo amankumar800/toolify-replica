@@ -7,7 +7,8 @@ import { CategoryClientWrapper } from '@/components/features/category/CategoryCl
 import { MobileCategoryNav } from '@/components/features/category/MobileCategoryNav';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ScrollToTop } from '@/components/ui/ScrollToTop';
-import { getCategoryGroups, getTools } from '@/lib/services/tools.service';
+import { getCategoryGroups } from '@/lib/services/categories.service';
+import { getTools } from '@/lib/services/tools.service';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
@@ -27,9 +28,9 @@ export const metadata: Metadata = {
 };
 
 export default async function CategoryPage() {
-    const [groups, { tools: allTools }] = await Promise.all([
+    const [groups, allTools] = await Promise.all([
         getCategoryGroups(),
-        getTools('', undefined, 1, 2000)
+        getTools({ limit: 2000 })
     ]);
 
     // Advanced JSON-LD Structured Data
