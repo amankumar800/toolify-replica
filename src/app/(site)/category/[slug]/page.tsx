@@ -19,7 +19,8 @@ export async function generateMetadata({ params }: CategoryPageProps) {
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
     const { slug } = await params;
     const { q } = await searchParams;
-    const { tools, total } = await getTools(q, slug);
+    const tools = await getTools({ search: q, category: slug });
+    const total = tools.length;
     const categoryName = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
     if (!tools.length && !q) {

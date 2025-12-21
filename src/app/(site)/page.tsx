@@ -4,17 +4,21 @@ import { FeaturedTools } from '@/components/features/FeaturedTools';
 import { Sidebar } from '@/components/features/Sidebar';
 import { Container } from '@/components/layout/Container';
 import { GridSkeleton } from '@/components/features/GridSkeleton';
+import { NewsService } from '@/lib/services/news.service';
+import { NewsSidebar } from '@/components/features/news/NewsSidebar';
 
 // Revalidate simulation (or 3600 for ISR)
 export const revalidate = 3600;
 
-export default function HomePage() {
+export default async function HomePage() {
+  const trendingNews = await NewsService.getTrendingNews();
+
   return (
     <div className="min-h-screen pb-20">
       <Hero />
 
       <Container>
-        <div className="flex">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar - Server Component - Needs to be async too? 
                Sidebar uses getCategories. If Sidebar is async, we should wrap it in Suspense too
                or let it block only the sidebar part. 
@@ -40,6 +44,16 @@ export default function HomePage() {
               <FeaturedTools />
             </Suspense>
           </main>
+
+          {/* Right Sidebar - News */}
+          <aside className="hidden xl:block w-[320px] shrink-0 space-y-8">
+            <NewsSidebar news={trendingNews} />
+
+            {/* Example Ad / Promo Placeholder */}
+            <div className="bg-muted h-[250px] rounded-xl flex items-center justify-center border border-dashed">
+              <span className="text-muted-foreground">Ad Space</span>
+            </div>
+          </aside>
         </div>
       </Container>
     </div>

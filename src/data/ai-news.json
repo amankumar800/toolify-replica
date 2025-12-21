@@ -1,0 +1,226 @@
+[
+    {
+        "id": "1",
+        "slug": "openai-released-gpt-5-preview",
+        "title": "OpenAI Released GPT-5 Preview: Everything You Need to Know",
+        "priorityScore": 9.2,
+        "sourceCount": 3,
+        "summary": "The highly anticipated GPT-5 preview is finally here, featuring enhanced reasoning capabilities, multimodal support, and 10x faster processing speeds.",
+        "content": "## A New Era of AI\n\nOpenAI has officially released the preview version of GPT-5, marking a significant milestone in the evolution of artificial intelligence. This new model brings forth a plethora of improvements that promise to revolutionize how we interact with technology.\n\n### Key Features\n\n*   **Enhanced Reasoning**: GPT-5 demonstrates a superior ability to solve complex problems and understand nuanced instructions.\n*   **Multimodal Capabilities**: Native support for text, audio, image, and video processing.\n*   **Speed**: Optimized architecture results in responses that are 10x faster than GPT-4.\n\nStay tuned as we dive deeper into the technical specifications and real-world applications of this groundbreaking model.",
+        "date": "2025-12-21T08:00:00Z",
+        "author": {
+            "name": "Sarah Connor",
+            "avatar": "/images/avatars/sarah.jpg"
+        },
+        "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000",
+        "tags": [
+            "AI Models",
+            "OpenAI",
+            "GPT-5"
+        ],
+        "source": {
+            "name": "OpenAI Blog",
+            "url": "https://openai.com/blog"
+        },
+        "stats": {
+            "views": 15420,
+            "likes": 342
+        }
+    },
+    {
+        "id": "2",
+        "slug": "google-deepmind-gemini-2-announcement",
+        "title": "Google DeepMind Announces Gemini 2.0 with Infinite Context Window",
+        "priorityScore": 8.7,
+        "sourceCount": 2,
+        "summary": "Google's answer to the AI race continues with Gemini 2.0, boasting an ostensibly infinite context window and breakthrough performance in coding tasks.",
+        "content": "Google DeepMind has unveiled **Gemini 2.0**, their latest flagship AI model. The standout feature is its \"infinite context search,\" allowing the model to process and recall information from vast datasets without a hard token limit.\n\nThis development is expected to be a game-changer for enterprise applications, legal research, and codebase management.",
+        "date": "2025-12-20T14:30:00Z",
+        "author": {
+            "name": "Demis Hassabis",
+            "avatar": "/images/avatars/demis.jpg"
+        },
+        "image": "https://images.unsplash.com/photo-1697577418970-95d99b5a55cf?auto=format&fit=crop&q=80&w=1000",
+        "tags": [
+            "Google",
+            "Gemini",
+            "DeepMind"
+        ],
+        "source": {
+            "name": "Google Blog",
+            "url": "https://blog.google/technology/ai"
+        },
+        "stats": {
+            "views": 12100,
+            "likes": 289
+        }
+    },
+    {
+        "id": "3",
+        "slug": "midjourney-v7-photorealism-update",
+        "title": "Midjourney v7 Updates: Photorealism Like Never Before",
+        "priorityScore": 7.5,
+        "sourceCount": 1,
+        "summary": "Midjourney v7 introduces hyper-realistic skin textures, better lighting engines, and precise text rendering within images.",
+        "content": "AI Art generation takes another leap forward with **Midjourney v7**. \n\nThe new update focuses heavily on fixing common AI art artifacts, such as hands and text. Early tests show indistinguishable results from real photography.",
+        "date": "2025-12-19T09:15:00Z",
+        "author": {
+            "name": "David Holz",
+            "avatar": "/images/avatars/david.jpg"
+        },
+        "image": "https://images.unsplash.com/photo-1686191128892-3b17ac999e44?auto=format&fit=crop&q=80&w=1000",
+        "tags": [
+            "Generative AI",
+            "Midjourney",
+            "Art"
+        ],
+        "source": {
+            "name": "Midjourney Discord",
+            "url": "https://discord.gg/midjourney"
+        },
+        "stats": {
+            "views": 9800,
+            "likes": 560
+        }
+    },
+    {
+        "id": "4",
+        "slug": "apple-mm1-ai-model-research",
+        "title": "Apple Publishes Research on MM1: Multimodal LLM",
+        "priorityScore": 6.8,
+        "sourceCount": 2,
+        "summary": "Apple quietly enters the LLM arena with MM1, a family of multimodal models designed for superior reasoning and visual understanding.",
+        "content": "Apple researchers have published a paper detailing **MM1**, a family of multimodal models. While Apple has been secretive about their AI plans, this paper reveals their strong capabilities in pre-training large scale multimodal systems.",
+        "date": "2025-12-18T11:00:00Z",
+        "author": {
+            "name": "Tim Cook",
+            "avatar": "/images/avatars/tim.jpg"
+        },
+        "image": "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?auto=format&fit=crop&q=80&w=1000",
+        "tags": [
+            "Apple",
+            "Research",
+            "MM1"
+        ],
+        "source": {
+            "name": "Arxiv",
+            "url": "https://arxiv.org"
+        },
+        "stats": {
+            "views": 8500,
+            "likes": 210
+        }
+    },
+    {
+        "id": "5",
+        "slug": "nvidia-blackwell-gpus-ai-training",
+        "title": "NVIDIA Blackwell GPUs Set to Accelerate AI Training by 30x",
+        "priorityScore": 8.9,
+        "sourceCount": 4,
+        "summary": "NVIDIA's new Blackwell architecture promises to reduce the cost and energy consumption of training massive LLMs significantly.",
+        "content": "Jensen Huang revealed the **Blackwell B200 GPU**, calling it the \"engine of the new industrial revolution.\" The chip is designed to handle trillion-parameter models with ease.",
+        "date": "2025-12-17T16:45:00Z",
+        "author": {
+            "name": "Jensen Huang",
+            "avatar": "/images/avatars/jensen.jpg"
+        },
+        "image": "https://images.unsplash.com/photo-1696429175928-793a3c21dddf?auto=format&fit=crop&q=80&w=1000",
+        "tags": [
+            "Hardware",
+            "NVIDIA",
+            "GPU"
+        ],
+        "source": {
+            "name": "NVIDIA Newsroom",
+            "url": "https://nvidianews.nvidia.com"
+        },
+        "stats": {
+            "views": 18900,
+            "likes": 890
+        }
+    },
+    {
+        "id": "6",
+        "slug": "anthropic-claude-3-5-sonnet-release",
+        "title": "Anthropic Releases Claude 3.5 Sonnet with Enhanced Safety Features",
+        "priorityScore": 8.5,
+        "sourceCount": 2,
+        "summary": "Claude 3.5 Sonnet brings improved reasoning, better code generation, and Anthropic's signature focus on AI safety and alignment.",
+        "content": "Anthropic has released **Claude 3.5 Sonnet**, the latest in their Claude model family. This version emphasizes constitutional AI principles while matching or exceeding competitor performance on key benchmarks.",
+        "date": "2025-12-16T10:00:00Z",
+        "author": {
+            "name": "Dario Amodei",
+            "avatar": "/images/avatars/dario.jpg"
+        },
+        "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=1000",
+        "tags": [
+            "Anthropic",
+            "Claude",
+            "AI Safety"
+        ],
+        "source": {
+            "name": "Anthropic Blog",
+            "url": "https://anthropic.com/news"
+        },
+        "stats": {
+            "views": 11200,
+            "likes": 445
+        }
+    },
+    {
+        "id": "7",
+        "slug": "meta-llama-4-open-source",
+        "title": "Meta Announces Llama 4: The Most Capable Open-Source LLM Yet",
+        "priorityScore": 9.0,
+        "sourceCount": 5,
+        "summary": "Meta continues its open-source AI push with Llama 4, featuring 400B parameters and competitive performance with closed models.",
+        "content": "Meta AI has announced **Llama 4**, their largest and most capable open-source model to date. With 400 billion parameters and training on 15 trillion tokens, it represents a major leap for the open-source AI community.",
+        "date": "2025-12-15T14:30:00Z",
+        "author": {
+            "name": "Mark Zuckerberg",
+            "avatar": "/images/avatars/mark.jpg"
+        },
+        "image": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1000",
+        "tags": [
+            "Meta",
+            "Llama",
+            "Open Source"
+        ],
+        "source": {
+            "name": "Meta AI Blog",
+            "url": "https://ai.meta.com/blog"
+        },
+        "stats": {
+            "views": 22500,
+            "likes": 1200
+        }
+    },
+    {
+        "id": "8",
+        "slug": "microsoft-copilot-enterprise-update",
+        "title": "Microsoft Copilot Gets Major Enterprise Update with Custom Agents",
+        "priorityScore": 7.2,
+        "sourceCount": 1,
+        "summary": "Microsoft expands Copilot capabilities with custom AI agents that can be trained on company-specific data and workflows.",
+        "content": "Microsoft has announced a significant update to **Copilot for Enterprise**, introducing the ability to create custom AI agents. These agents can be trained on proprietary data while maintaining strict security boundaries.",
+        "date": "2025-12-14T09:00:00Z",
+        "author": {
+            "name": "Satya Nadella",
+            "avatar": "/images/avatars/satya.jpg"
+        },
+        "image": "https://images.unsplash.com/photo-1633419461186-7d40a38105ec?auto=format&fit=crop&q=80&w=1000",
+        "tags": [
+            "Microsoft",
+            "Copilot",
+            "Enterprise"
+        ],
+        "source": {
+            "name": "Microsoft Blog",
+            "url": "https://blogs.microsoft.com/ai"
+        },
+        "stats": {
+            "views": 7800,
+            "likes": 320
+        }
+    }
+]

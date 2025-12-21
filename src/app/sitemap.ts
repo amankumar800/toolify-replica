@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
-import { getTools, getCategories } from '@/lib/services/tools.service';
+import { getTools } from '@/lib/services/tools.service';
+import { getCategories } from '@/lib/services/categories.service';
 import { freeAIToolsService } from '@/lib/services/free-ai-tools.service';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -12,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // Dynamic Tools
-    const { tools } = await getTools(undefined, undefined, 1, 1000); // Fetch all for sitemap
+    const tools = await getTools({ limit: 1000 }); // Fetch all for sitemap
     const toolRoutes = tools.map((tool) => ({
         url: `${baseUrl}/tool/${tool.slug}`,
         lastModified: new Date(),
