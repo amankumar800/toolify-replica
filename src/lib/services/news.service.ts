@@ -8,6 +8,7 @@ export interface NewsItem {
     title: string;
     priorityScore: number;
     sourceCount: number;
+    category: string;
     summary: string;
     content: string;
     date: string;
@@ -33,12 +34,18 @@ export interface NewsStats {
     lastUpdated: string;
 }
 
+export interface GetNewsOptions {
+    page?: number;
+    limit?: number;
+    filter?: TimeFilter;
+    category?: string;
+    search?: string;
+}
+
 export const NewsService = {
-    getAllNews: async (
-        page = 1,
-        limit = 10,
-        filter: TimeFilter = 'daily'
-    ): Promise<{ items: NewsItem[]; total: number }> => {
+    getAllNews: async (options: GetNewsOptions = {}): Promise<{ items: NewsItem[]; total: number; hasMore: boolean }> => {
+        const { page = 1, limit = 10, filter = 'yearly', category = '', search = '' } = options;
+
         // Simulate API delay
         await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -60,17 +67,37 @@ export const NewsService = {
                 break;
         }
 
-        // Filter by date and sort by date descending
-        const filtered = (newsData as NewsItem[])
+        let filtered = (newsData as NewsItem[])
             .filter(n => new Date(n.date) >= cutoffDate)
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+        // Apply category filter
+        if (category && category !== 'all') {
+            const categoryNormalized = category.toLowerCase().replace(/-/g, ' ');
+            filtered = filtered.filter(n =>
+                n.category?.toLowerCase() === category.toLowerCase() ||
+                n.tags.some(t => t.toLowerCase().replace(/&/g, '').replace(/\s+/g, ' ').trim() === categoryNormalized)
+            );
+        }
+
+        // Apply search filter
+        if (search) {
+            const searchLower = search.toLowerCase();
+            filtered = filtered.filter(n =>
+                n.title.toLowerCase().includes(searchLower) ||
+                n.summary.toLowerCase().includes(searchLower) ||
+                n.tags.some(t => t.toLowerCase().includes(searchLower))
+            );
+        }
+
         const startIndex = (page - 1) * limit;
         const items = filtered.slice(startIndex, startIndex + limit);
+        const hasMore = startIndex + limit < filtered.length;
 
         return {
             items,
-            total: filtered.length
+            total: filtered.length,
+            hasMore
         };
     },
 
@@ -101,8 +128,12 @@ export const NewsService = {
         let related = (newsData as NewsItem[]).filter(n => n.slug !== currentSlug);
 
         if (currentItem) {
-            // Prioritize same tags
+            // Prioritize same category, then same tags
             related = related.sort((a, b) => {
+                const aCategory = a.category === currentItem.category ? 1 : 0;
+                const bCategory = b.category === currentItem.category ? 1 : 0;
+                if (aCategory !== bCategory) return bCategory - aCategory;
+
                 const aMatches = a.tags.filter(t => currentItem.tags.includes(t)).length;
                 const bMatches = b.tags.filter(t => currentItem.tags.includes(t)).length;
                 return bMatches - aMatches;

@@ -1,0 +1,79 @@
+[
+    {
+        "id": "gemini",
+        "name": "Gemini",
+        "icon": "https://www.google.com/s2/favicons?domain=gemini.google.com&sz=64",
+        "url": "/tool/gemini",
+        "color": "#4285F4"
+    },
+    {
+        "id": "deepseek",
+        "name": "DeepSeek",
+        "icon": "https://www.google.com/s2/favicons?domain=deepseek.com&sz=64",
+        "url": "/tool/deepseek",
+        "color": "#0066FF"
+    },
+    {
+        "id": "midjourney",
+        "name": "Midjourney",
+        "icon": "https://www.google.com/s2/favicons?domain=midjourney.com&sz=64",
+        "url": "/tool/midjourney",
+        "color": "#000000"
+    },
+    {
+        "id": "poe",
+        "name": "Poe",
+        "icon": "https://www.google.com/s2/favicons?domain=poe.com&sz=64",
+        "url": "/tool/poe",
+        "color": "#5B4AE3"
+    },
+    {
+        "id": "chatgpt",
+        "name": "ChatGPT",
+        "icon": "https://www.google.com/s2/favicons?domain=chat.openai.com&sz=64",
+        "url": "/tool/chatgpt",
+        "color": "#10A37F"
+    },
+    {
+        "id": "perplexity",
+        "name": "Perplexity",
+        "icon": "https://www.google.com/s2/favicons?domain=perplexity.ai&sz=64",
+        "url": "/tool/perplexity",
+        "color": "#20808D"
+    },
+    {
+        "id": "claude",
+        "name": "Claude",
+        "icon": "https://www.google.com/s2/favicons?domain=claude.ai&sz=64",
+        "url": "/tool/claude",
+        "color": "#D97757"
+    },
+    {
+        "id": "grok",
+        "name": "Grok",
+        "icon": "https://www.google.com/s2/favicons?domain=grok.x.ai&sz=64",
+        "url": "/tool/grok",
+        "color": "#1DA1F2"
+    },
+    {
+        "id": "ai-studio",
+        "name": "AI Studio",
+        "icon": "https://www.google.com/s2/favicons?domain=aistudio.google.com&sz=64",
+        "url": "/tool/ai-studio",
+        "color": "#4285F4"
+    },
+    {
+        "id": "grammarly",
+        "name": "Grammarly",
+        "icon": "https://www.google.com/s2/favicons?domain=grammarly.com&sz=64",
+        "url": "/tool/grammarly",
+        "color": "#15C39A"
+    },
+    {
+        "id": "remove-bg",
+        "name": "remove.bg",
+        "icon": "https://www.google.com/s2/favicons?domain=remove.bg&sz=64",
+        "url": "/tool/remove-bg",
+        "color": "#0075FF"
+    }
+]

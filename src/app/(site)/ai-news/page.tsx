@@ -6,6 +6,9 @@ import { NewsSidebar } from '@/components/features/news/NewsSidebar';
 import { NewsFilters } from '@/components/features/news/NewsFilters';
 import { StatsBanner } from '@/components/features/news/StatsBanner';
 import { NewsBreadcrumbs } from '@/components/features/news/NewsBreadcrumbs';
+import { BackToTopFAB } from '@/components/features/news/BackToTopFAB';
+import { NewsletterForm } from '@/components/features/news/NewsletterForm';
+import { LoadMoreButton } from '@/components/features/news/LoadMoreButton';
 
 export const metadata: Metadata = {
     title: 'Daily AI News | Latest Artificial Intelligence Updates',
@@ -18,96 +21,132 @@ export const metadata: Metadata = {
 };
 
 export default async function NewsPage(props: {
-    searchParams?: Promise<{ filter?: string; q?: string; category?: string }>
+    searchParams?: Promise<{ filter?: string; q?: string; category?: string; page?: string }>
 }) {
     const searchParams = await props.searchParams;
-    const filter = (searchParams?.filter || 'daily') as TimeFilter;
+    const filter = (searchParams?.filter || 'weekly') as TimeFilter;
     const searchQuery = searchParams?.q || '';
+    const category = searchParams?.category || '';
+    const page = parseInt(searchParams?.page || '1', 10);
 
-    const { items: newsItems, total } = await NewsService.getAllNews(1, 20, filter);
-    const stats = await NewsService.getNewsStats();
-    const trendingNews = await NewsService.getTrendingNews();
+    // Wrap in try-catch for error handling (Fix #9)
+    let newsItems: Awaited<ReturnType<typeof NewsService.getAllNews>>['items'] = [];
+    let total = 0;
+    let hasMore = false;
+    let stats = { totalAnalyzed: 0, importantStories: 0, lastUpdated: '' };
+    let trendingNews: Awaited<ReturnType<typeof NewsService.getTrendingNews>> = [];
+    let error: string | null = null;
 
-    // Apply search filter
-    const filteredNews = searchQuery
-        ? newsItems.filter(n =>
-            n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            n.summary.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        : newsItems;
+    try {
+        const newsResult = await NewsService.getAllNews({
+            page,
+            limit: 8,
+            filter,
+            category,
+            search: searchQuery
+        });
+        newsItems = newsResult.items;
+        total = newsResult.total;
+        hasMore = newsResult.hasMore;
+
+        stats = await NewsService.getNewsStats();
+        trendingNews = await NewsService.getTrendingNews();
+    } catch (e) {
+        error = 'Failed to load news. Please try again later.';
+        console.error('NewsPage error:', e);
+    }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            {/* Breadcrumbs */}
-            <NewsBreadcrumbs />
+        <>
+            <div className="container mx-auto px-4 py-8">
+                {/* Breadcrumbs */}
+                <NewsBreadcrumbs />
 
-            {/* Header Section */}
-            <div className="mb-6">
-                <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 mb-4">
-                    Daily AI News
-                </h1>
+                {/* Header Section */}
+                <div className="mb-6">
+                    <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 mb-4">
+                        Daily AI News
+                    </h1>
 
-                {/* Stats Banner */}
-                <StatsBanner
-                    totalAnalyzed={stats.totalAnalyzed}
-                    importantStories={stats.importantStories}
-                />
-            </div>
+                    {/* Stats Banner */}
+                    <StatsBanner
+                        totalAnalyzed={stats.totalAnalyzed}
+                        importantStories={stats.importantStories}
+                    />
+                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Main Content */}
-                <div className="lg:col-span-8">
-                    {/* Filters - Wrapped in Suspense for useSearchParams */}
-                    <Suspense fallback={<div className="h-14 bg-muted/30 rounded-lg animate-pulse mb-6" />}>
-                        <NewsFilters />
-                    </Suspense>
+                {/* Error State */}
+                {error && (
+                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mb-6 text-destructive">
+                        <p className="font-medium">{error}</p>
+                    </div>
+                )}
 
-                    {/* Search Results Info */}
-                    {searchQuery && (
-                        <div className="mb-4 text-sm text-muted-foreground">
-                            Found <span className="font-medium text-foreground">{filteredNews.length}</span> results
-                            for "<span className="font-medium text-foreground">{searchQuery}</span>"
-                        </div>
-                    )}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Main Content */}
+                    <div className="lg:col-span-8">
+                        {/* Filters - Wrapped in Suspense for useSearchParams */}
+                        <Suspense fallback={<div className="h-14 bg-muted/30 rounded-lg animate-pulse mb-6" />}>
+                            <NewsFilters />
+                        </Suspense>
 
-                    {/* News Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredNews.map((item) => (
-                            <div key={item.id} className="h-full">
-                                <NewsCard news={item} />
+                        {/* Search/Filter Results Info */}
+                        {(searchQuery || category) && (
+                            <div className="mb-4 text-sm text-muted-foreground">
+                                Found <span className="font-medium text-foreground">{total}</span> results
+                                {searchQuery && <> for "<span className="font-medium text-foreground">{searchQuery}</span>"</>}
+                                {category && <> in <span className="font-medium text-foreground capitalize">{category.replace(/-/g, ' ')}</span></>}
                             </div>
-                        ))}
+                        )}
+
+                        {/* News Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {newsItems.map((item) => (
+                                <div key={item.id} className="h-full">
+                                    <NewsCard news={item} />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Empty State */}
+                        {newsItems.length === 0 && !error && (
+                            <div className="text-center py-12 text-muted-foreground">
+                                <p className="text-lg">No news found for this filter.</p>
+                                <p className="text-sm mt-2">Try adjusting your search or filter criteria.</p>
+                            </div>
+                        )}
+
+                        {/* Pagination - Load More (Fix #3) */}
+                        {hasMore && (
+                            <div className="mt-8 flex justify-center">
+                                <Suspense fallback={<div className="h-10 w-32 bg-muted/30 rounded-lg animate-pulse" />}>
+                                    <LoadMoreButton currentPage={page} />
+                                </Suspense>
+                            </div>
+                        )}
+
+                        {/* Pagination Info */}
+                        {newsItems.length > 0 && (
+                            <div className="mt-4 text-center text-sm text-muted-foreground">
+                                Showing {newsItems.length} of {total} articles
+                            </div>
+                        )}
                     </div>
 
-                    {/* Empty State */}
-                    {filteredNews.length === 0 && (
-                        <div className="text-center py-12 text-muted-foreground">
-                            <p className="text-lg">No news found for this filter.</p>
-                            <p className="text-sm mt-2">Try adjusting your search or filter criteria.</p>
-                        </div>
-                    )}
-                </div>
+                    {/* Sidebar */}
+                    <div className="lg:col-span-4 space-y-8">
+                        <NewsSidebar news={trendingNews} />
 
-                {/* Sidebar */}
-                <div className="lg:col-span-4">
-                    <NewsSidebar news={trendingNews} />
-
-                    <div className="mt-8 p-6 bg-gradient-to-br from-primary/10 to-transparent rounded-xl border border-primary/20">
-                        <h3 className="font-bold text-lg mb-2">Subscribe to Newsletter</h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            Get the latest AI news delivered to your inbox every morning.
-                        </p>
-                        <input
-                            type="email"
-                            placeholder="Enter your email"
-                            className="w-full px-3 py-2 rounded-md border bg-background mb-2 text-sm"
-                        />
-                        <button className="w-full bg-primary text-primary-foreground py-2 rounded-md font-medium text-sm hover:opacity-90 transition-opacity">
-                            Subscribe
-                        </button>
+                        {/* Newsletter Form (Fix #4) */}
+                        <Suspense fallback={<div className="h-48 bg-muted/30 rounded-xl animate-pulse" />}>
+                            <NewsletterForm />
+                        </Suspense>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {/* Back to Top Button */}
+            <BackToTopFAB />
+        </>
     );
 }

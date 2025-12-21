@@ -1,0 +1,98 @@
+[
+    {
+        "id": "chatbots",
+        "name": "Chatbots & Virtual Companions",
+        "slug": "chatbots-virtual-companions",
+        "icon": "💬",
+        "toolCount": 6355,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "office",
+        "name": "Office & Productivity",
+        "slug": "office-productivity",
+        "icon": "📎",
+        "toolCount": 22751,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "image-gen",
+        "name": "Image Generation & Editing",
+        "slug": "image-generation-editing",
+        "icon": "🎨",
+        "toolCount": 9443,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "art",
+        "name": "Art & Creative Design",
+        "slug": "art-creative-design",
+        "icon": "👨‍🎨",
+        "toolCount": 5377,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "coding",
+        "name": "Coding & Development",
+        "slug": "coding-development",
+        "icon": "💻",
+        "toolCount": 8903,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "video",
+        "name": "Video & Animation",
+        "slug": "video-animation",
+        "icon": "🎬",
+        "toolCount": 5279,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "education",
+        "name": "Education & Translation",
+        "slug": "education-translation",
+        "icon": "🎓",
+        "toolCount": 7983,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "writing",
+        "name": "Writing & Editing",
+        "slug": "writing-editing",
+        "icon": "✏️",
+        "toolCount": 16967,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "voice",
+        "name": "Voice Generation & Conversion",
+        "slug": "voice-generation-conversion",
+        "icon": "🎙️",
+        "toolCount": 5318,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "business",
+        "name": "Business Management",
+        "slug": "business-management",
+        "icon": "📈",
+        "toolCount": 4496,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "music",
+        "name": "Music & Audio",
+        "slug": "music-audio",
+        "icon": "🎵",
+        "toolCount": 1454,
+        "color": "#F3F4F6"
+    },
+    {
+        "id": "ai-detection",
+        "name": "AI Detection & Anti-Detection",
+        "slug": "ai-detection-anti-detection",
+        "icon": "🤖",
+        "toolCount": 1739,
+        "color": "#F3F4F6"
+    }
+]

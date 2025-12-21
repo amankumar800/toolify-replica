@@ -1,0 +1,162 @@
+[
+    {
+        "id": "evermemons",
+        "name": "EverMemOS",
+        "icon": "https://www.google.com/s2/favicons?domain=evermemai.com&sz=64",
+        "iconBgColor": "#E8F5E9",
+        "description": "Empowers AI with infinite memory, long-term identity, and evolving personality.",
+        "isFree": true,
+        "slug": "evermemons",
+        "websiteUrl": "https://evermemai.com"
+    },
+    {
+        "id": "bananapro",
+        "name": "BananaPro",
+        "icon": "https://www.google.com/s2/favicons?domain=bananapro.ai&sz=64",
+        "iconBgColor": "#FFF3E0",
+        "description": "AI platform for 4K image & video generation with character consistency.",
+        "isFree": false,
+        "slug": "bananapro",
+        "websiteUrl": "https://bananapro.ai"
+    },
+    {
+        "id": "blogseo",
+        "name": "BlogSEO",
+        "icon": "https://www.google.com/s2/favicons?domain=blogseo.ai&sz=64",
+        "iconBgColor": "#E3F2FD",
+        "description": "AI platform for automated SEO content creation and publishing.",
+        "isFree": false,
+        "slug": "blogseo",
+        "websiteUrl": "https://blogseo.ai"
+    },
+    {
+        "id": "crepal",
+        "name": "CrePal",
+        "icon": "https://www.google.com/s2/favicons?domain=crepal.ai&sz=64",
+        "iconBgColor": "#F3E5F5",
+        "description": "All-in-one AI video agent that helps you create viral AI videos.",
+        "isFree": false,
+        "slug": "crepal",
+        "websiteUrl": "https://crepal.ai"
+    },
+    {
+        "id": "trellis-ai-3d",
+        "name": "Trellis.2 AI 3D",
+        "icon": "https://www.google.com/s2/favicons?domain=trellis3d.ai&sz=64",
+        "iconBgColor": "#FCE4EC",
+        "description": "AI-powered online platform for generating and managing 3D models.",
+        "isFree": false,
+        "slug": "trellis-ai-3d",
+        "websiteUrl": "https://trellis3d.ai"
+    },
+    {
+        "id": "unimusic-ai",
+        "name": "UniMusic AI",
+        "icon": "https://www.google.com/s2/favicons?domain=unimusic.ai&sz=64",
+        "iconBgColor": "#E8EAF6",
+        "description": "AI music generator that creates royalty-free songs with vocals in seconds.",
+        "isFree": false,
+        "slug": "unimusic-ai",
+        "websiteUrl": "https://unimusic.ai"
+    },
+    {
+        "id": "rekam-ai",
+        "name": "Rekam AI",
+        "icon": "https://www.google.com/s2/favicons?domain=rekam.ai&sz=64",
+        "iconBgColor": "#E0F7FA",
+        "description": "All-in-one AI voice creation platform for text-to-speech, voice clone.",
+        "isFree": false,
+        "slug": "rekam-ai",
+        "websiteUrl": "https://rekam.ai"
+    },
+    {
+        "id": "proxycc",
+        "name": "ProxyCC",
+        "icon": "https://www.google.com/s2/favicons?domain=proxycc.io&sz=64",
+        "iconBgColor": "#FBE9E7",
+        "description": "Global IP proxy provider for various online tasks.",
+        "isFree": true,
+        "slug": "proxycc",
+        "websiteUrl": "https://proxycc.io"
+    },
+    {
+        "id": "floyo",
+        "name": "Floyo",
+        "icon": "https://www.google.com/s2/favicons?domain=floyo.io&sz=64",
+        "iconBgColor": "#E8F5E9",
+        "description": "Browser-based ComfyUI for easy workflow discovery, building, and running.",
+        "isFree": false,
+        "slug": "floyo",
+        "websiteUrl": "https://floyo.io"
+    },
+    {
+        "id": "aicofounder",
+        "name": "aicofounder",
+        "icon": "https://www.google.com/s2/favicons?domain=aicofounder.com&sz=64",
+        "iconBgColor": "#FFF8E1",
+        "description": "AI cofounder for structured idea validation and product building.",
+        "isFree": false,
+        "slug": "aicofounder",
+        "websiteUrl": "https://aicofounder.com"
+    },
+    {
+        "id": "sharespeak",
+        "name": "ShareSpeak",
+        "icon": "https://www.google.com/s2/favicons?domain=sharespeak.ai&sz=64",
+        "iconBgColor": "#E1F5FE",
+        "description": "AI-powered invisible teleprompter with voice-activated scrolling.",
+        "isFree": false,
+        "slug": "sharespeak",
+        "websiteUrl": "https://sharespeak.ai"
+    },
+    {
+        "id": "whiterank",
+        "name": "WhiteRank",
+        "icon": "https://www.google.com/s2/favicons?domain=whiterank.ai&sz=64",
+        "iconBgColor": "#ECEFF1",
+        "description": "AI search visibility platform for ranking higher in LLMs.",
+        "isFree": false,
+        "slug": "whiterank",
+        "websiteUrl": "https://whiterank.ai"
+    },
+    {
+        "id": "wollo-ai",
+        "name": "Wollo.ai",
+        "icon": "https://www.google.com/s2/favicons?domain=wollo.ai&sz=64",
+        "iconBgColor": "#F3E5F5",
+        "description": "AI character chat platform for creating, interacting with, and monetizing.",
+        "isFree": false,
+        "slug": "wollo-ai",
+        "websiteUrl": "https://wollo.ai"
+    },
+    {
+        "id": "timetuna",
+        "name": "TimeTuna",
+        "icon": "https://www.google.com/s2/favicons?domain=timetuna.com&sz=64",
+        "iconBgColor": "#E0E0E0",
+        "description": "Beautiful branded scheduling pages with custom video backgrounds.",
+        "isFree": false,
+        "slug": "timetuna",
+        "websiteUrl": "https://timetuna.com"
+    },
+    {
+        "id": "sliq",
+        "name": "Sliq",
+        "icon": "https://www.google.com/s2/favicons?domain=sliq.ai&sz=64",
+        "iconBgColor": "#E8F5E9",
+        "description": "AI-powered platform for fast, accurate data cleaning and preparation.",
+        "isFree": false,
+        "slug": "sliq",
+        "websiteUrl": "https://sliq.ai"
+    },
+    {
+        "id": "okara",
+        "name": "Okara",
+        "icon": "https://www.google.com/s2/favicons?domain=okara.ai&sz=64",
+        "iconBgColor": "#E1F5FE",
+        "description": "Private AI chat with 20+ open-source models, focused on data privacy.",
+        "isFree": false,
+        "slug": "okara",
+        "websiteUrl": "https://okara.ai"
+    }
+]

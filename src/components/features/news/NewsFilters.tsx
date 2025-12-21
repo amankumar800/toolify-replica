@@ -1,23 +1,32 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from "@/lib/utils";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 export function NewsFilters() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const currentFilter = searchParams.get('filter') || 'daily';
+
+    // Read from URL params
+    const currentFilter = searchParams.get('filter') || 'weekly';
+    const currentCategory = searchParams.get('category') || 'all';
     const currentSearch = searchParams.get('q') || '';
 
     const [searchTerm, setSearchTerm] = useState(currentSearch);
+
+    // Sync searchTerm with URL when it changes externally
+    useEffect(() => {
+        setSearchTerm(currentSearch);
+    }, [currentSearch]);
 
     const periods = ["Daily", "Weekly", "Monthly", "Yearly"];
 
     const handleFilterChange = (filter: string) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('filter', filter);
+        params.delete('page'); // Reset pagination
         router.push(`/ai-news?${params.toString()}`);
     };
 
@@ -29,9 +38,19 @@ export function NewsFilters() {
         } else {
             params.delete('q');
         }
+        params.delete('page'); // Reset pagination
         router.push(`/ai-news?${params.toString()}`);
     };
 
+    const handleClearSearch = () => {
+        setSearchTerm('');
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('q');
+        params.delete('page');
+        router.push(`/ai-news?${params.toString()}`);
+    };
+
+    // Fix #8: Controlled value from URL instead of defaultValue
     const handleCategoryChange = (category: string) => {
         const params = new URLSearchParams(searchParams.toString());
         if (category === 'all') {
@@ -39,6 +58,7 @@ export function NewsFilters() {
         } else {
             params.set('category', category);
         }
+        params.delete('page'); // Reset pagination
         router.push(`/ai-news?${params.toString()}`);
     };
 
@@ -64,9 +84,10 @@ export function NewsFilters() {
 
             {/* Search & Category */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
+                {/* Fix #8: Controlled select with value from URL */}
                 <select
                     className="h-9 px-3 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    defaultValue="all"
+                    value={currentCategory}
                     onChange={(e) => handleCategoryChange(e.target.value)}
                 >
                     <option value="all">All Categories</option>
@@ -90,8 +111,17 @@ export function NewsFilters() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search news..."
-                        className="h-9 pl-9 pr-3 w-full sm:w-48 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="h-9 pl-9 pr-8 w-full sm:w-48 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
+                    {searchTerm && (
+                        <button
+                            type="button"
+                            onClick={handleClearSearch}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded"
+                        >
+                            <X className="w-3 h-3 text-muted-foreground" />
+                        </button>
+                    )}
                 </form>
             </div>
         </div>

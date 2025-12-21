@@ -188,3 +188,66 @@ a:focus-visible,
   clip: auto;
   white-space: normal;
 }
+
+/* ============================================
+   Scrollbar Utilities
+   Fix for Issue #49: scrollbar-hide not defined
+   ============================================ */
+
+/* Hide scrollbar while maintaining scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, Opera */
+}
+
+/* ============================================
+   Scroll Fade Indicators
+   Fix for Issue #43: Horizontal scroll indicators
+   ============================================ */
+
+.scroll-fade-right {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+.scroll-fade-left {
+  mask-image: linear-gradient(to left, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to left, black 85%, transparent 100%);
+}
+
+.scroll-fade-both {
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+/* ============================================
+   Enhanced Focus Styles
+   Fix for Issue #7: Focus-visible with ring
+   ============================================ */
+
+.focus-ring {
+  @apply focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:outline-none;
+}
+
+/* ============================================
+   Card Hover Animation
+   Fix for Issue #13: Missing hover lift
+   ============================================ */
+
+.card-hover {
+  @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+}
+
+/* ============================================
+   Touch-Friendly Targets
+   Fix for Issue #42: Min 44px touch targets
+   ============================================ */
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
