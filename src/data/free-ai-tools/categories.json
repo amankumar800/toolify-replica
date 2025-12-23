@@ -1,23 +1,156 @@
 [
   {
     "id": "1",
-    "slug": "art-creative-design",
-    "name": "Art & Creative Design",
-    "icon": "palette",
+    "slug": "chatbots-virtual-companions",
+    "name": "Chatbots & Virtual Companions",
+    "icon": "💬",
     "toolCount": 0
   },
   {
     "id": "2",
-    "slug": "writing-content",
-    "name": "Writing & Content",
-    "icon": "pencil",
+    "slug": "office-productivity",
+    "name": "Office & Productivity",
+    "icon": "📊",
     "toolCount": 0
   },
   {
     "id": "3",
-    "slug": "productivity",
-    "name": "Productivity",
-    "icon": "zap",
+    "slug": "image-generation-editing",
+    "name": "Image Generation & Editing",
+    "icon": "🖼️",
+    "toolCount": 0
+  },
+  {
+    "id": "4",
+    "slug": "art-creative-design",
+    "name": "Art & Creative Design",
+    "icon": "🎨",
+    "toolCount": 0
+  },
+  {
+    "id": "5",
+    "slug": "coding-development",
+    "name": "Coding & Development",
+    "icon": "💻",
+    "toolCount": 0
+  },
+  {
+    "id": "6",
+    "slug": "video-animation",
+    "name": "Video & Animation",
+    "icon": "🎬",
+    "toolCount": 0
+  },
+  {
+    "id": "7",
+    "slug": "education-translation",
+    "name": "Education & Translation",
+    "icon": "📚",
+    "toolCount": 0
+  },
+  {
+    "id": "8",
+    "slug": "writing-editing",
+    "name": "Writing & Editing",
+    "icon": "✍️",
+    "toolCount": 0
+  },
+  {
+    "id": "9",
+    "slug": "voice-generation-conversion",
+    "name": "Voice Generation & Conversion",
+    "icon": "🎤",
+    "toolCount": 0
+  },
+  {
+    "id": "10",
+    "slug": "business-management",
+    "name": "Business Management",
+    "icon": "💼",
+    "toolCount": 0
+  },
+  {
+    "id": "11",
+    "slug": "music-audio",
+    "name": "Music & Audio",
+    "icon": "🎵",
+    "toolCount": 0
+  },
+  {
+    "id": "12",
+    "slug": "ai-detection-anti-detection",
+    "name": "AI Detection & Anti-Detection",
+    "icon": "🔍",
+    "toolCount": 0
+  },
+  {
+    "id": "13",
+    "slug": "marketing-advertising",
+    "name": "Marketing & Advertising",
+    "icon": "📢",
+    "toolCount": 0
+  },
+  {
+    "id": "14",
+    "slug": "research-data-analysis",
+    "name": "Research & Data Analysis",
+    "icon": "📈",
+    "toolCount": 0
+  },
+  {
+    "id": "15",
+    "slug": "social-media",
+    "name": "Social Media",
+    "icon": "📱",
+    "toolCount": 0
+  },
+  {
+    "id": "16",
+    "slug": "legal-finance",
+    "name": "Legal & Finance",
+    "icon": "⚖️",
+    "toolCount": 0
+  },
+  {
+    "id": "17",
+    "slug": "daily-life",
+    "name": "Daily Life",
+    "icon": "🏠",
+    "toolCount": 0
+  },
+  {
+    "id": "18",
+    "slug": "health-wellness",
+    "name": "Health & Wellness",
+    "icon": "❤️",
+    "toolCount": 0
+  },
+  {
+    "id": "19",
+    "slug": "image-analysis",
+    "name": "Image Analysis",
+    "icon": "👁️",
+    "toolCount": 0
+  },
+  {
+    "id": "20",
+    "slug": "interior-architectural-design",
+    "name": "Interior & Architectural Design",
+    "icon": "🏛️",
+    "toolCount": 0
+  },
+  {
+    "id": "21",
+    "slug": "business-research",
+    "name": "Business Research",
+    "icon": "🔬",
+    "toolCount": 0
+  },
+  {
+    "id": "22",
+    "slug": "other-1",
+    "name": "Other",
+    "icon": "📦",
     "toolCount": 0
   }
 ]

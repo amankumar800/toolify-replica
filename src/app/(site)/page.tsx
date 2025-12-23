@@ -140,7 +140,7 @@ export default async function HomePage() {
           {/* Right Sidebar - News */}
           <aside className="hidden xl:block w-[360px] shrink-0 space-y-8">
             {/* Issue #16: Fixed title with asterisk */}
-            <NewsSidebar news={trendingNews} title="Featured*" />
+            <NewsSidebar news={trendingNews} title="AI News*" />
 
             {/* Write About AI Future CTA - Issue #17: Added envelope icon */}
             <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-5 border border-purple-100">
