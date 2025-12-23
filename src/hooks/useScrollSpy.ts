@@ -2,32 +2,36 @@
 
 import { useState, useEffect } from 'react';
 
-export function useScrollSpy(
-    selectors: string[],
-    options?: IntersectionObserverInit
-): string {
+/**
+ * useScrollSpy
+ * Detects which section is currently active in the viewport.
+ * @param ids List of Section IDs to monitor
+ * @param offset px offset from top (header height)
+ */
+export function useScrollSpy(ids: string[], offset: number = 100) {
     const [activeId, setActiveId] = useState<string>('');
 
     useEffect(() => {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    setActiveId(entry.target.getAttribute('id') || '');
-                }
-            });
-        }, {
-            rootMargin: '-20% 0px -35% 0px', // Adjust to trigger when section is near top
-            threshold: 0,
-            ...options,
-        });
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setActiveId(entry.target.id);
+                    }
+                });
+            },
+            {
+                rootMargin: `-${offset}px 0px -50% 0px`,
+            }
+        );
 
-        selectors.forEach((selector) => {
-            const element = document.querySelector(selector);
+        ids.forEach((id) => {
+            const element = document.getElementById(id);
             if (element) observer.observe(element);
         });
 
         return () => observer.disconnect();
-    }, [selectors, options]);
+    }, [ids, offset]);
 
     return activeId;
 }
