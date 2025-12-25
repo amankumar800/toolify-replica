@@ -1,97 +1,127 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { authService } from '@/lib/services/auth.service';
+import { signInWithEmail, signUp } from '@/lib/services/auth.service';
 
-const loginSchema = z.object({
+/**
+ * Validation schema for authentication form
+ * - Email: Must be valid email format (Requirement 3.5)
+ * - Password: Minimum 6 characters (Requirement 4.5)
+ */
+const authSchema = z.object({
     email: z.string().email({ message: 'Please enter a valid email address' }),
     password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 });
 
-type LoginValues = z.infer<typeof loginSchema>;
+type AuthValues = z.infer<typeof authSchema>;
 
+/**
+ * LoginForm component for email/password authentication
+ * Supports both sign-in and sign-up modes
+ * 
+ * Requirements:
+ * - 3.3: Display user-friendly error messages on authentication failure
+ * - 4.2: Inform user to check email when email confirmation is required
+ */
 export function LoginForm() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [mode, setMode] = useState<'signin' | 'signup'>('signin');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<LoginValues>({
-        resolver: zodResolver(loginSchema),
+        reset,
+    } = useForm<AuthValues>({
+        resolver: zodResolver(authSchema),
         defaultValues: {
             email: '',
             password: '',
         },
     });
 
-    const onSubmit = async (data: LoginValues) => {
+    const onSubmit = async (data: AuthValues) => {
         setLoading(true);
         setError(null);
+        setSuccessMessage(null);
+
         try {
-            await authService.loginWithEmail(data.email, data.password);
-            // Ensure we redirect or show success - for now just alert
-            alert('Login Successful!');
-        } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Something went wrong');
+            if (mode === 'signin') {
+                const result = await signInWithEmail(data.email, data.password);
+                if (result.success) {
+                    // Redirect to callback URL or home page
+                    const callbackUrl = searchParams.get('callbackUrl') || '/';
+                    router.push(callbackUrl);
+                    router.refresh();
+                } else {
+                    // Requirement 3.3: Display user-friendly error message
+                    setError(result.error || 'Sign in failed. Please try again.');
+                }
+            } else {
+                const result = await signUp(data.email, data.password);
+                if (result.success) {
+                    if (result.requiresEmailConfirmation) {
+                        // Requirement 4.2: Inform user to check email
+                        setSuccessMessage('Please check your email to confirm your account.');
+                        reset();
+                    } else {
+                        // Auto-signed in, redirect to home
+                        router.push('/');
+                        router.refresh();
+                    }
+                } else {
+                    setError(result.error || 'Sign up failed. Please try again.');
+                }
+            }
+        } catch {
+            setError('An unexpected error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleGoogleLogin = async () => {
-        setLoading(true); // Technically global loading state, or specific button state
-        try {
-            await authService.loginWithGoogle();
-            alert('Google Login Successful!');
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    }
+    const toggleMode = () => {
+        setMode(mode === 'signin' ? 'signup' : 'signin');
+        setError(null);
+        setSuccessMessage(null);
+    };
+
+    const isSignIn = mode === 'signin';
 
     return (
         <div className="grid gap-6">
             <div className="grid gap-2 text-center">
-                <h1 className="text-3xl font-bold">Welcome back</h1>
+                <h1 className="text-3xl font-bold">
+                    {isSignIn ? 'Welcome back' : 'Create an account'}
+                </h1>
                 <p className="text-balance text-muted-foreground">
-                    Enter your email below to login to your account
+                    {isSignIn
+                        ? 'Enter your email below to sign in to your account'
+                        : 'Enter your email below to create your account'}
                 </p>
             </div>
 
-            <div className="grid gap-4">
-                {/* Google Login Button */}
-                <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={loading}>
-                    {!loading ? (
-                        <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                            <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-                        </svg>
-                    ) : (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Continue with Google
-                </Button>
-
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
-                            Or continue with
-                        </span>
-                    </div>
+            {/* Success Message */}
+            {successMessage && (
+                <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-md text-green-800">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                    <p className="text-sm">{successMessage}</p>
                 </div>
+            )}
 
+            <div className="grid gap-4">
                 {/* Email Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
                     <div className="grid gap-2">
@@ -111,12 +141,14 @@ export function LoginForm() {
                     <div className="grid gap-2">
                         <div className="flex items-center">
                             <Label htmlFor="password">Password</Label>
-                            <a
-                                href="#"
-                                className="ml-auto inline-block text-sm underline"
-                            >
-                                Forgot your password?
-                            </a>
+                            {isSignIn && (
+                                <a
+                                    href="#"
+                                    className="ml-auto inline-block text-sm underline text-muted-foreground hover:text-foreground"
+                                >
+                                    Forgot your password?
+                                </a>
+                            )}
                         </div>
                         <Input
                             id="password"
@@ -129,19 +161,40 @@ export function LoginForm() {
                         )}
                     </div>
 
-                    {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+                    {error && (
+                        <p className="text-sm text-red-500 text-center">{error}</p>
+                    )}
 
                     <Button type="submit" className="w-full" disabled={loading}>
                         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Sign In
+                        {isSignIn ? 'Sign In' : 'Sign Up'}
                     </Button>
                 </form>
 
                 <div className="mt-4 text-center text-sm">
-                    Don&apos;t have an account?{" "}
-                    <a href="#" className="underline">
-                        Sign up
-                    </a>
+                    {isSignIn ? (
+                        <>
+                            Don&apos;t have an account?{' '}
+                            <button
+                                type="button"
+                                onClick={toggleMode}
+                                className="underline hover:text-primary"
+                            >
+                                Sign up
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            Already have an account?{' '}
+                            <button
+                                type="button"
+                                onClick={toggleMode}
+                                className="underline hover:text-primary"
+                            >
+                                Sign in
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

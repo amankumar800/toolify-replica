@@ -24,26 +24,24 @@
 
 ---
 
-### ❌ 2. Fix Authentication Conflict
+### ✅ 2. Fix Authentication Conflict (COMPLETED)
 **Priority**: P0 - SECURITY RISK  
-**Files**: `src/lib/auth.ts`, `src/middleware.ts`, `supabase/migrations/*_rls_policies.sql`  
-**Issue**: Using next-auth but RLS policies expect Supabase Auth JWT
+**Status**: ✅ COMPLETED - Migrated to Supabase Auth
+**Files**: `src/middleware.ts`, `src/lib/services/auth.service.ts`, `supabase/migrations/*_rls_policies.sql`  
+**Resolution**: Migrated from next-auth to Supabase Auth with email/password authentication
 
-**Action Items**:
-- [ ] **Decision**: Choose ONE auth system
-  - [ ] Option A: Migrate to Supabase Auth (recommended)
-  - [ ] Option B: Keep next-auth and remove RLS policies
-- [ ] If Supabase Auth:
-  - [ ] Remove next-auth dependencies
-  - [ ] Update `src/lib/auth.ts` to use Supabase Auth
-  - [ ] Update middleware to use `src/lib/supabase/middleware.ts`
-  - [ ] Test user_favorites RLS policies
-- [ ] If next-auth:
-  - [ ] Remove RLS policies from migrations
-  - [ ] Implement authorization in application code
-  - [ ] Add user_id column linked to next-auth
+**Completed Items**:
+- [x] **Decision**: Migrated to Supabase Auth (Option A)
+- [x] Removed next-auth dependencies from package.json
+- [x] Deleted `src/lib/auth.ts` and `src/app/api/auth/[...nextauth]/route.ts`
+- [x] Updated `src/middleware.ts` to use Supabase Auth session management
+- [x] Implemented auth service with signInWithEmail, signUp, signOut, getUser
+- [x] Updated RLS policies to use `auth.jwt()->>email`
+- [x] Updated Auth Provider Context to use Supabase onAuthStateChange
+- [x] Updated Header and LoginForm components for Supabase Auth
+- [x] Created auth callback route for email verification
 
-**Estimated Time**: 4-6 hours
+**Completion Date**: December 25, 2024
 
 ---
 
@@ -259,19 +257,20 @@ async search(query: string, limit?: number): Promise<ToolRow[]> {
 **Issue**: Any logged-in user can access admin panel
 
 **Action Items**:
-- [ ] Add `role` field to user table/session
-- [ ] Update middleware:
+- [ ] Add `role` field to Supabase Auth user metadata
+- [ ] Update middleware to check user role from Supabase Auth:
 ```typescript
 export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin')) {
-    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+    const supabase = createServerClient(...)
+    const { data: { user } } = await supabase.auth.getUser()
     
-    if (!token) {
+    if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
     
-    // Check role
-    if (token.role !== 'admin') {
+    // Check role from user metadata
+    if (user.user_metadata?.role !== 'admin') {
       return NextResponse.redirect(new URL('/unauthorized', request.url))
     }
   }
@@ -279,7 +278,7 @@ export async function middleware(request: NextRequest) {
 }
 ```
 - [ ] Create admin user management system
-- [ ] Add role to JWT token
+- [ ] Add role to user metadata during registration
 - [ ] Test authorization flows
 
 **Estimated Time**: 4-5 hours

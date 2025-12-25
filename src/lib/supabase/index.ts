@@ -41,6 +41,9 @@ export type {
   UserFavoriteUpdate,
 } from './types'
 
+// Re-export middleware types
+export type { UpdateSessionResult } from './middleware'
+
 // Note: Don't re-export clients here to avoid bundling issues.
 // Import directly from the specific file based on your context:
 // - '@/lib/supabase/client' for Client Components

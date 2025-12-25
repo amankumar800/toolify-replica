@@ -8,12 +8,11 @@ import { SearchBar } from '@/components/features/SearchBar';
 import { MobileNav } from './MobileNav';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useSession, signIn, signOut } from 'next-auth/react';
-import Image from 'next/image';
+import { useAuth } from '@/components/providers/AuthProviderContext';
 
 export function Header() {
     const pathname = usePathname();
-    const { data: session, status } = useSession();
+    const { user, loading, signOut } = useAuth();
 
     const navLinks = [
         { href: '/free-ai-tools', label: 'Free AI Tools' },
@@ -65,23 +64,16 @@ export function Header() {
                     </button>
 
                     {/* Auth UI */}
-                    {status === 'loading' ? (
+                    {loading ? (
                         <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-                    ) : session ? (
+                    ) : user ? (
                         <div className="flex items-center gap-2">
-                            {session.user?.image ? (
-                                <Image
-                                    src={session.user.image}
-                                    alt={session.user.name || 'User'}
-                                    width={32}
-                                    height={32}
-                                    className="rounded-full border border-gray-200"
-                                />
-                            ) : (
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
-                                    {session.user?.name?.[0] || 'U'}
-                                </div>
-                            )}
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                {user.email?.[0]?.toUpperCase() || 'U'}
+                            </div>
+                            <span className="hidden lg:inline text-sm text-[var(--muted-foreground)]">
+                                {user.email}
+                            </span>
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -92,13 +84,11 @@ export function Header() {
                             </Button>
                         </div>
                     ) : (
-                        <Button
-                            className="hidden md:inline-flex"
-                            size="sm"
-                            onClick={() => signIn('google')}
-                        >
-                            Sign In
-                        </Button>
+                        <Link href="/login">
+                            <Button className="hidden md:inline-flex" size="sm">
+                                Sign In
+                            </Button>
+                        </Link>
                     )}
 
                     {/* Mobile Menu */}
