@@ -10,8 +10,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Toolify.ai Replica",
-    default: "Toolify.ai Replica - Best AI Tools Directory",
+    template: "%s | AI Tools Book",
+    default: "AI Tools Book - Best AI Tools Directory",
   },
   description: "Discover the best AI tools for your workflow.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),

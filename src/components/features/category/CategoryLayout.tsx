@@ -9,7 +9,7 @@ interface CategoryLayoutProps {
 /**
  * CategoryLayout
  * Wraps the Category Page content in a wide container (max-w-[1440px])
- * to match Toolify's expansive design on large screens.
+ * to match AI Tools Book's expansive design on large screens.
  */
 export function CategoryLayout({ children, className }: CategoryLayoutProps) {
     return (

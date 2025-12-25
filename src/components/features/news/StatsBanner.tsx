@@ -12,7 +12,7 @@ export function StatsBanner({ totalAnalyzed, importantStories }: StatsBannerProp
                 <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <p className="text-sm text-foreground/80">
-                <strong className="text-foreground">Toolify AI</strong> analyzed{' '}
+                <strong className="text-foreground">AI Tools Book</strong> analyzed{' '}
                 <span className="font-bold text-primary">{totalAnalyzed}</span> articles
                 in the past 24 hours and found{' '}
                 <span className="font-bold text-primary">{importantStories}</span> important

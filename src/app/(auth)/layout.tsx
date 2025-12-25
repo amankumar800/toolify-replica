@@ -5,7 +5,7 @@ export default function AuthLayout({
 }: {
     children: React.ReactNode;
 }) {
-    // Toolify login page is often simple, centered on a clean background.
+    // AI Tools Book login page is often simple, centered on a clean background.
     // We can add a subtle gradient or pattern here.
     return (
         <div className="w-full min-h-screen lg:grid lg:grid-cols-2">

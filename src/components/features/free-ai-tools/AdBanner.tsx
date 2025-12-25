@@ -23,13 +23,13 @@ export function AdBanner({ className }: AdBannerProps) {
         'focus-visible:outline-2 focus-visible:outline-[var(--primary)] focus-visible:outline-offset-2',
         className
       )}
-      onClick={() => window.open('https://crepal.ai?utm_source=toolify', '_blank', 'noopener,noreferrer')}
+      onClick={() => window.open('https://crepal.ai?utm_source=aitoolsbook', '_blank', 'noopener,noreferrer')}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          window.open('https://crepal.ai?utm_source=toolify', '_blank', 'noopener,noreferrer');
+          window.open('https://crepal.ai?utm_source=aitoolsbook', '_blank', 'noopener,noreferrer');
         }
       }}
       aria-label="Sponsored: CrePal AI - Get Started Now"

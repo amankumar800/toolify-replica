@@ -27,7 +27,7 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}>
-                    Toolify.ai Replica
+                    AI Tools Book
                 </div>
             ),
             { ...size }
@@ -66,7 +66,7 @@ export default async function Image(props: { params: Promise<{ slug: string }> }
                     fontSize: 24,
                     fontWeight: 'bold'
                 }}>
-                    View on Toolify Replica
+                    View on AI Tools Book
                 </div>
             </div>
         ),

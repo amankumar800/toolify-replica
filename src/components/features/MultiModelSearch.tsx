@@ -21,7 +21,7 @@ type ModelTab = {
 };
 
 const TABS: ModelTab[] = [
-    { id: 'toolify', label: 'Toolify', icon: Database, placeholder: 'Search 10,000+ AI Tools...', color: 'text-blue-600' },
+    { id: 'aitoolsbook', label: 'AI Tools Book', icon: Database, placeholder: 'Search 10,000+ AI Tools...', color: 'text-blue-600' },
     { id: 'chatgpt', label: 'ChatGPT', icon: MessageSquare, placeholder: 'Ask ChatGPT anything...', color: 'text-green-600' },
     { id: 'perplexity', label: 'Perplexity', icon: Globe, placeholder: 'Ask Perplexity...', color: 'text-teal-600' },
     { id: 'claude', label: 'Claude', icon: Sparkles, placeholder: 'Ask Claude...', color: 'text-orange-600' },
@@ -29,7 +29,7 @@ const TABS: ModelTab[] = [
 ];
 
 export function MultiModelSearch({ className }: { className?: string }) {
-    const [activeTab, setActiveTab] = useState('toolify');
+    const [activeTab, setActiveTab] = useState('aitoolsbook');
     const activeModel = TABS.find(t => t.id === activeTab) || TABS[0];
 
     return (
@@ -80,7 +80,7 @@ export function MultiModelSearch({ className }: { className?: string }) {
 
             {/* Helper Text */}
             <div className="mt-4 text-center text-sm text-[var(--muted-foreground)] opacity-80">
-                {activeTab === 'toolify' && (
+                {activeTab === 'aitoolsbook' && (
                     <span className="flex items-center justify-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                         27,558 AIs and 459 categories updated daily

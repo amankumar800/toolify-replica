@@ -71,7 +71,7 @@ export type FilterTabId = typeof FILTER_TAB_IDS[number];
 // ============================================
 
 export const SEO_DEFAULTS = {
-    title: 'Best AI Tools Directory & AI Tools List - Toolify',
+    title: 'Best AI Tools Directory & AI Tools List - AI Tools Book',
     description: 'Discover the best AI tools and websites. 27,000+ AI tools across 450+ categories, updated daily.',
     ogImage: '/og-image.png',
 };

@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
     title: 'Login',
-    description: 'Login to your Toolify Replica account',
+    description: 'Login to your AI Tools Book account',
     alternates: {
         canonical: '/login', // Good SEO practice
     },

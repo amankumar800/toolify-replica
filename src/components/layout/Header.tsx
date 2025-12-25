@@ -29,7 +29,7 @@ export function Header() {
                 {/* Logo */}
                 <div className="flex items-center gap-2">
                     <Link href="/" className="font-bold text-xl tracking-tight text-[var(--primary)]">
-                        Toolify.ai
+                        AI Tools Book
                     </Link>
                 </div>
 

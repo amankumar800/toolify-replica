@@ -4,7 +4,7 @@ import { getTools } from '@/lib/services/tools.service';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Top AI Website & AI Tools Analysis', // Exact match for Toolify title
+    title: 'Top AI Website & AI Tools Analysis',
     description: 'Discover the most popular and trending AI tools ranked by monthly traffic and growth.',
 };
 

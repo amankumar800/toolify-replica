@@ -14,7 +14,7 @@ export function MobileCategoryNav({ groups }: MobileCategoryNavProps) {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     // Flatten logic: We need to show ALL categories or just Groups?
-    // Toolify mobile shows categories horizontally.
+    // AI Tools Book mobile shows categories horizontally.
     const allCategories = React.useMemo(() => {
         return groups.flatMap(g => g.categories);
     }, [groups]);

@@ -12,7 +12,7 @@ export default function AdminLayout({
             <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
                 <div className="p-6 border-b border-gray-100">
                     <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                        Toolify Admin
+                        AI Tools Book Admin
                     </h1>
                 </div>
 

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: 'Daily AI News | Latest Artificial Intelligence Updates',
     description: 'Stay updated with the latest AI news, breakthroughs, and research papers. Comprehensive coverage of ChatGPT, Gemini, Midjourney, and more.',
     openGraph: {
-        title: 'Daily AI News - Toolify.ai',
+        title: 'Daily AI News - AI Tools Book',
         description: 'Latest AI News & Updates',
         type: 'website',
     }

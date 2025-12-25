@@ -25,7 +25,7 @@ export async function generateMetadata(
     }
 
     return {
-        title: `${news.title} | Toolify AI News`,
+        title: `${news.title} | AI Tools Book News`,
         description: news.summary,
         openGraph: {
             title: news.title,

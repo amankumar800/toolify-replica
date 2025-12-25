@@ -12,16 +12,16 @@ import { getTools } from '@/lib/services/tools.service';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-    title: 'AI Tool Categories | Toolify Replica',
+    title: 'AI Tool Categories | AI Tools Book',
     description: 'Browse all AI tools by category. Find the best AI software for Text, Image, Audio, Video, and more.',
     alternates: {
-        canonical: 'https://toolify.ai/category',
+        canonical: 'https://aitoolsbook.com/category',
     },
     openGraph: {
-        title: 'AI Tool Categories | Toolify Replica',
+        title: 'AI Tool Categories | AI Tools Book',
         description: 'Browse all AI tools by category.',
-        url: 'https://toolify.ai/category',
-        siteName: 'Toolify Replica',
+        url: 'https://aitoolsbook.com/category',
+        siteName: 'AI Tools Book',
         locale: 'en_US',
         type: 'website',
     },
@@ -44,13 +44,13 @@ export default async function CategoryPage() {
                         '@type': 'ListItem',
                         'position': 1,
                         'name': 'Home',
-                        'item': 'https://toolify.ai'
+                        'item': 'https://aitoolsbook.com'
                     },
                     {
                         '@type': 'ListItem',
                         'position': 2,
                         'name': 'Categories',
-                        'item': 'https://toolify.ai/category'
+                        'item': 'https://aitoolsbook.com/category'
                     }
                 ]
             },
@@ -58,7 +58,7 @@ export default async function CategoryPage() {
                 '@type': 'CollectionPage',
                 'name': 'AI Tool Categories',
                 'description': 'Comprehensive directory of AI tools categorized by function.',
-                'url': 'https://toolify.ai/category',
+                'url': 'https://aitoolsbook.com/category',
                 'about': {
                     '@type': 'Thing',
                     'name': 'Artificial Intelligence Software'

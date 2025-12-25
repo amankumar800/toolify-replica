@@ -25,19 +25,19 @@ interface FreeAIToolListItemProps {
 
 /**
  * Adds UTM parameter to external URL
- * Per Requirement 14.2: External links include utm_source=toolify parameter
+ * Per Requirement 14.2: External links include utm_source=aitoolsbook parameter
  */
 export function addUtmParameter(url: string): string {
   if (!url) return url;
-  
+
   try {
     const urlObj = new URL(url);
-    urlObj.searchParams.set('utm_source', 'toolify');
+    urlObj.searchParams.set('utm_source', 'aitoolsbook');
     return urlObj.toString();
   } catch {
     // If URL parsing fails, append manually
     const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}utm_source=toolify`;
+    return `${url}${separator}utm_source=aitoolsbook`;
   }
 }
 
@@ -49,15 +49,15 @@ export function truncateDescription(description: string, maxLength: number = MAX
   if (!description || description.length <= maxLength) {
     return description;
   }
-  
+
   // Find the last space before maxLength to avoid cutting words
   const truncated = description.substring(0, maxLength);
   const lastSpaceIndex = truncated.lastIndexOf(' ');
-  
+
   if (lastSpaceIndex > maxLength * 0.8) {
     return truncated.substring(0, lastSpaceIndex) + '...';
   }
-  
+
   return truncated + '...';
 }
 
@@ -68,25 +68,25 @@ export function truncateDescription(description: string, maxLength: number = MAX
  */
 export function formatToolDescription(tool: Partial<Tool>): string {
   const parts: string[] = [];
-  
+
   if (tool.freeTierDetails) {
     parts.push(tool.freeTierDetails);
   }
-  
+
   if (tool.description) {
     // Avoid duplicating freeTierDetails if already in description
     if (!tool.freeTierDetails || !tool.description.includes(tool.freeTierDetails)) {
       parts.push(tool.description);
     }
   }
-  
+
   if (tool.pricing) {
     // Avoid duplicating pricing if already in description
     if (!tool.description?.includes(tool.pricing)) {
       parts.push(tool.pricing);
     }
   }
-  
+
   return parts.join(' - ');
 }
 
@@ -163,24 +163,24 @@ function ExternalLinkIcon({ className }: { className?: string }) {
  * - Rendered as `<li>` element within `<ul>` list
  * - Tool name as internal link to /tool/[slug]
  * - External link icon opening in new tab with rel="noopener noreferrer"
- * - External URL includes utm_source=toolify parameter
+ * - External URL includes utm_source=aitoolsbook parameter
  * - Description with free tier details and pricing
  * - Truncate descriptions > 200 characters with expand/collapse
  * - Fallback states for missing/incomplete data (Requirement 5.5)
  */
 export function FreeAIToolListItem({ tool, className }: FreeAIToolListItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // Per Requirement 5.5: Handle missing/incomplete tool data gracefully
   if (!isValidToolData(tool)) {
     return null; // Don't render invalid tools
   }
-  
+
   const toolName = getSafeToolName(tool);
   const fullDescription = getSafeToolDescription(tool);
   const shouldTruncate = fullDescription.length > MAX_DESCRIPTION_LENGTH;
   const displayDescription = isExpanded ? fullDescription : truncateDescription(fullDescription);
-  
+
   // Per Requirement 5.6: Hide external link icon when no external URL
   const externalUrl = tool.externalUrl ? addUtmParameter(tool.externalUrl) : null;
 
@@ -205,7 +205,7 @@ export function FreeAIToolListItem({ tool, className }: FreeAIToolListItemProps)
           >
             {toolName}
           </Link>
-          
+
           {/* External Link Icon - Per Requirement 5.6: Hide if no external URL */}
           {externalUrl && (
             <a
@@ -223,12 +223,12 @@ export function FreeAIToolListItem({ tool, className }: FreeAIToolListItemProps)
             </a>
           )}
         </div>
-        
+
         {/* Description with Free Tier and Pricing */}
         {displayDescription && (
           <div className="text-sm text-[var(--muted-foreground)] leading-relaxed">
             <span>{displayDescription}</span>
-            
+
             {/* Expand/Collapse Button - Per Requirement 5.7 */}
             {shouldTruncate && (
               <button

@@ -15,7 +15,7 @@ export function Hero() {
                     Discover the Best <span className="text-[var(--primary)]">AI Tools</span> for Your Workflow
                 </h1>
                 <p className="text-lg md:text-xl text-[var(--muted-foreground)] mb-10 max-w-2xl">
-                    Toolify.ai Replica is the largest directory of AI tools, updated daily with the latest innovations in artificial intelligence.
+                    AI Tools Book is the largest directory of AI tools, updated daily with the latest innovations in artificial intelligence.
                 </p>
 
                 <MultiModelSearch className="mb-12" />

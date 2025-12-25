@@ -6,8 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Best Free AI Tools for Image Generation &amp; Editing in 2025 - Toolify',
-  description: 'Discover the best free AI tools for Image Generation &amp; Editing. Our curated list helps you find the perfect solution to boost your productivity. Explore now on Toolify!',
+  title: 'Best Free AI Tools for Image Generation & Editing in 2025 - AI Tools Book',
+  description: 'Discover the best free AI tools for Image Generation & Editing. Our curated list helps you find the perfect solution to boost your productivity. Explore now on AI Tools Book!',
 };
 
 export default function ImageGenerationEditingPage() {
@@ -24,35 +24,35 @@ export default function ImageGenerationEditingPage() {
       <h3 className="font-bold mb-4">Free AI Headshot Generator</h3>
       <h3 className="font-bold mb-4">Free AI Watermark Remover</h3>
       <h3 className="font-bold mb-4">Free AI Clothing Removal</h3>
-      
+
       {/* Content */}
       <p className="mb-4">FEATURED ON
-                
-    
-        
-            
-        
-    
-
-    
-        
-            
-                
-            
-        
-    
 
 
 
-    
-        
-            
-        
-    
 
-    
-        </p>
-      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </p>
+
       {/* Links */}
       <nav className="mt-8">
         <Link href="/tool/freepik-ai-image-generator" className="block text-blue-600 hover:underline mb-2">Freepik AI Image Generator</Link>

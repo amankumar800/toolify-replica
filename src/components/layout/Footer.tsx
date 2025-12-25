@@ -8,7 +8,7 @@ export function Footer() {
             <Container>
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8">
                     <div className="col-span-1 md:col-span-2">
-                        <h3 className="font-bold text-lg mb-4">Toolify.ai Replica</h3>
+                        <h3 className="font-bold text-lg mb-4">AI Tools Book</h3>
                         <p className="text-sm text-[var(--muted-foreground)] mb-6 max-w-sm">
                             Discover the best AI tools for your workflow. We curate and review the latest artificial intelligence software to help you stay ahead.
                         </p>
@@ -60,7 +60,7 @@ export function Footer() {
 
                 <div className="mt-16 pt-8 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-[var(--muted-foreground)]">
                     <div>
-                        &copy; {new Date().getFullYear()} Toolify Replica. All rights reserved.
+                        &copy; {new Date().getFullYear()} AI Tools Book. All rights reserved.
                     </div>
                     <div className="flex gap-6">
                         <a href="#" className="hover:text-[var(--primary)]">Privacy</a>

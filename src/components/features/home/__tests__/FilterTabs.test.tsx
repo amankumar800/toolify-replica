@@ -91,17 +91,6 @@ describe('FilterTabs', () => {
     });
 
     /**
-     * Issue #34: External link has proper rel attributes
-     */
-    it('Twitter link has noopener noreferrer', () => {
-        render(<FilterTabs />);
-
-        const twitterLink = screen.getByRole('link', { name: /@toolify/i });
-        expect(twitterLink).toHaveAttribute('rel', 'noopener noreferrer');
-        expect(twitterLink).toHaveAttribute('target', '_blank');
-    });
-
-    /**
      * Default tabs are rendered
      */
     it('renders all default tabs', () => {

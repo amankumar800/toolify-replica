@@ -51,7 +51,7 @@ export function NewsSidebar({ news, title = "Trending AI News" }: NewsSidebarPro
                             <div className="text-xs text-muted-foreground flex items-center gap-2">
                                 <span className="font-medium">{item.priorityScore.toFixed(1)}</span>
                                 <span>•</span>
-                                <span>{item.source?.name || "Toolify News"}</span>
+                                <span>{item.source?.name || "AI Tools Book News"}</span>
                                 {item.stats && <span>• {item.stats.views.toLocaleString()} reads</span>}
                             </div>
                         </div>

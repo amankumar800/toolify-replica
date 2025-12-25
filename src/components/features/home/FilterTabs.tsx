@@ -9,7 +9,7 @@ import { FilterTab } from '@/lib/types/home.types';
 import { FILTER_TAB_IDS } from '@/lib/constants/home.constants';
 
 /**
- * Default filter tabs matching Toolify.ai exactly
+ * Default filter tabs matching AI Tools Book exactly
  */
 const defaultTabs: FilterTab[] = [
     { id: 'today', label: 'Today' },
@@ -201,19 +201,6 @@ export function FilterTabs({
                     </button>
                 );
             })}
-
-            {/* Twitter/X Link */}
-            <Link
-                href="https://twitter.com/toolify"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap flex-shrink-0 bg-white text-gray-700 border border-gray-200 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-                <span>@toolify</span>
-            </Link>
         </div>
     );
 }

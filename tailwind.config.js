@@ -13,7 +13,7 @@ module.exports = {
                 ring: "var(--ring)",
                 background: "var(--background)",
                 foreground: "var(--foreground)",
-                // Toolify Replica Custom Tokens
+                // AI Tools Book Custom Tokens
                 toolify: {
                     white: "#FFFFFF",
                     bg: "#F8F9FB",

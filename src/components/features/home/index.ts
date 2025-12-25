@@ -1,7 +1,7 @@
 /**
  * Home page components - barrel export
  * 
- * Components for the homepage replicating Toolify.ai
+ * Components for the homepage replicating AI Tools Book
  */
 
 // Main sections

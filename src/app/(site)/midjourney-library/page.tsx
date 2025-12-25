@@ -7,7 +7,7 @@ import { Metadata } from 'next';
 import { MidjourneyLibraryClient } from './MidjourneyLibraryClient';
 
 export const metadata: Metadata = {
-    title: 'The Ultimate Midjourney SREF, Prompt, and Style Library (2025) | Toolify',
+    title: 'The Ultimate Midjourney SREF, Prompt, and Style Library (2025) | AI Tools Book',
     description: 'Explore thousands of Midjourney styles, SREF codes, and high-quality prompts. The most comprehensive collection of aesthetic styles for your next AI art creation.',
     openGraph: {
         title: 'The Ultimate Midjourney SREF, Prompt, and Style Library (2025)',

@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: SEO_DEFAULTS.title,
       description: SEO_DEFAULTS.description,
       type: 'website',
-      url: 'https://toolify.ai',
+      url: 'https://aitoolsbook.com/',
       images: [{ url: SEO_DEFAULTS.ogImage }],
     },
     twitter: {
@@ -57,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Homepage - Toolify.ai replica
+ * Homepage - AI Tools Book
  * 
  * All 52 critique issues addressed throughout this page and its components.
  */

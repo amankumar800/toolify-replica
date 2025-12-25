@@ -21,23 +21,23 @@ export const revalidate = 86400;
 
 // Generate metadata for SEO - Requirements 2.9, 8.1, 8.3, 8.4, 21.3
 export async function generateMetadata(): Promise<Metadata> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://toolify.ai';
-  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aitoolsbook.com';
+
   return {
-    title: 'Find the Best Free AI Tools - Toolify',
+    title: 'Find the Best Free AI Tools - AI Tools Book',
     description: 'Discover the best free AI tools across 22 categories. Compare free tiers, features, and pricing to find the perfect AI tool for your needs without breaking the bank.',
     keywords: ['free AI tools', 'AI tools directory', 'free AI software', 'AI chatbots', 'AI image generation', 'AI writing tools'],
     openGraph: {
-      title: 'Find the Best Free AI Tools - Toolify',
+      title: 'Find the Best Free AI Tools - AI Tools Book',
       description: 'Discover the best free AI tools across 22 categories. Compare free tiers, features, and pricing to find the perfect AI tool for your needs.',
       url: `${baseUrl}/free-ai-tools`,
-      siteName: 'Toolify',
+      siteName: 'AI Tools Book',
       type: 'website',
       locale: 'en_US',
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Find the Best Free AI Tools - Toolify',
+      title: 'Find the Best Free AI Tools - AI Tools Book',
       description: 'Discover the best free AI tools across 22 categories.',
     },
     alternates: {
@@ -57,10 +57,10 @@ function HeroSection() {
         Find the Best Free AI Tools
       </h1>
       <p className="text-lg text-[var(--muted-foreground)] mb-6 max-w-2xl">
-        Discover powerful AI tools that won&apos;t cost you a dime. We&apos;ve curated the best free AI tools 
+        Discover powerful AI tools that won&apos;t cost you a dime. We&apos;ve curated the best free AI tools
         across 22 categories to help you work smarter, create faster, and achieve more.
       </p>
-      
+
       {/* CTA Buttons - Requirements 2.3, 12.1 */}
       <div className="flex flex-wrap gap-4">
         <Link
@@ -198,8 +198,8 @@ function FAQSection({ faqItems }: { faqItems: { question: string; answer: string
  * Generates structured data for SEO - Requirement 8.5
  */
 function JsonLdScript({ categoriesCount, toolsCount }: { categoriesCount: number; toolsCount: number }) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://toolify.ai';
-  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aitoolsbook.com';
+
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',

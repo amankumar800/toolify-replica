@@ -33,20 +33,20 @@ export async function generateStaticParams() {
 }
 
 // Generate metadata for SEO - Requirements 4.7, 8.2, 8.3, 8.4, 21.3
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://toolify.ai';
-  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aitoolsbook.com';
+
   try {
     const category = await freeAIToolsService.getCategoryBySlug(slug);
-    
-    const title = `Best Free AI Tools for ${category.name} in 2025 - Toolify`;
+
+    const title = `Best Free AI Tools for ${category.name} in 2025 - AI Tools Book`;
     const description = `Discover the best free AI tools for ${category.name}. ${category.description}`;
-    
+
     return {
       title,
       description,
@@ -60,7 +60,7 @@ export async function generateMetadata({
         title,
         description,
         url: `${baseUrl}/free-ai-tools/${slug}`,
-        siteName: 'Toolify',
+        siteName: 'AI Tools Book',
         type: 'website',
         locale: 'en_US',
       },
@@ -75,7 +75,7 @@ export async function generateMetadata({
     };
   } catch {
     return {
-      title: 'Category Not Found - Toolify',
+      title: 'Category Not Found - AI Tools Book',
       description: 'The requested category could not be found.',
     };
   }
@@ -86,22 +86,22 @@ export async function generateMetadata({
  * JSON-LD Structured Data Component for Category Page
  * Generates CollectionPage structured data for SEO - Requirement 8.5
  */
-function JsonLdScript({ 
-  category, 
-  baseUrl 
-}: { 
-  category: { 
-    name: string; 
-    slug: string; 
-    description: string; 
+function JsonLdScript({
+  category,
+  baseUrl
+}: {
+  category: {
+    name: string;
+    slug: string;
+    description: string;
     toolCount: number;
     subcategories: Array<{ name: string; tools: Array<{ name: string; slug: string }> }>;
-  }; 
+  };
   baseUrl: string;
 }) {
   // Flatten all tools for the ItemList
   const allTools = category.subcategories.flatMap(sub => sub.tools);
-  
+
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -182,16 +182,16 @@ function EmptyCategoryState({ categoryName }: { categoryName: string }) {
             <path d="m21 21-4.3-4.3" />
           </svg>
         </div>
-        
+
         {/* Empty state message - Requirement 18.3 */}
         <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">
           No tools available yet
         </h3>
         <p className="text-[var(--muted-foreground)] mb-6">
-          We&apos;re still gathering free AI tools for {categoryName}. 
+          We&apos;re still gathering free AI tools for {categoryName}.
           Check back soon or explore other categories.
         </p>
-        
+
         {/* Helpful links */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a
@@ -216,39 +216,39 @@ function EmptyCategoryState({ categoryName }: { categoryName: string }) {
  * Subcategory Section Component
  * Displays tools grouped by subcategory with H3 headings - Requirements 4.2, 4.3
  */
-function SubcategorySection({ 
-  subcategory 
-}: { 
-  subcategory: { 
-    id: string; 
-    name: string; 
-    toolCount: number; 
-    tools: Array<{ 
-      id: string; 
-      name: string; 
-      slug: string; 
-      externalUrl: string | null; 
-      description: string; 
-      freeTierDetails: string | null; 
-      pricing: string | null; 
+function SubcategorySection({
+  subcategory
+}: {
+  subcategory: {
+    id: string;
+    name: string;
+    toolCount: number;
+    tools: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      externalUrl: string | null;
+      description: string;
+      freeTierDetails: string | null;
+      pricing: string | null;
       categoryIds: string[];
     }>;
   };
 }) {
   const sectionId = getSubcategorySectionId(subcategory);
-  
+
   // Filter out invalid tools - Requirement 5.5
-  const validTools = subcategory.tools.filter(tool => 
+  const validTools = subcategory.tools.filter(tool =>
     tool && typeof tool.id === 'string' && typeof tool.slug === 'string'
   );
-  
+
   return (
     <section id={sectionId} className="mb-8 scroll-mt-24">
       {/* H3 heading prefixed with "Free AI" - Requirement 4.2 */}
       <h3 className="text-xl font-semibold text-[var(--foreground)] mb-4">
         {subcategory.name}
       </h3>
-      
+
       {/* Tool list items (not cards) - Requirement 4.3 */}
       {validTools.length > 0 ? (
         <ul className="divide-y divide-[var(--border)]" role="list">
@@ -275,18 +275,18 @@ function SubcategorySection({
  * Three-column layout: Sidebar | Content | On This Page Nav
  * Requirements: 4.1, 4.4, 4.5, 4.6, 21.5
  */
-export default async function CategoryPage({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
+export default async function CategoryPage({
+  params
+}: {
+  params: Promise<{ slug: string }>
 }) {
   const { slug } = await params;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://toolify.ai';
-  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aitoolsbook.com';
+
   // Fetch category data and categories list
   let category;
   let categories;
-  
+
   try {
     [category, categories] = await Promise.all([
       freeAIToolsService.getCategoryBySlug(slug),

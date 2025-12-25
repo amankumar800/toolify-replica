@@ -91,12 +91,12 @@ describe('FreeAIToolListItem - Property Tests', () => {
       fc.assert(
         fc.property(toolArbitrary, (tool) => {
           const formatted = formatToolDescription(tool);
-          
+
           // If freeTierDetails exists, it should be in the output
           if (tool.freeTierDetails && tool.freeTierDetails.length > 0) {
             expect(formatted).toContain(tool.freeTierDetails);
           }
-          
+
           return true;
         }),
         { numRuns: 100 }
@@ -107,12 +107,12 @@ describe('FreeAIToolListItem - Property Tests', () => {
       fc.assert(
         fc.property(toolArbitrary, (tool) => {
           const formatted = formatToolDescription(tool);
-          
+
           // If pricing exists and is not already in description, it should be in output
           if (tool.pricing && tool.pricing.length > 0 && !tool.description?.includes(tool.pricing)) {
             expect(formatted).toContain(tool.pricing);
           }
-          
+
           return true;
         }),
         { numRuns: 100 }
@@ -123,14 +123,14 @@ describe('FreeAIToolListItem - Property Tests', () => {
       fc.assert(
         fc.property(toolArbitrary, (tool) => {
           const formatted = formatToolDescription(tool);
-          
+
           // If description exists and freeTierDetails is not duplicated in it
           if (tool.description && tool.description.length > 0) {
             if (!tool.freeTierDetails || !tool.description.includes(tool.freeTierDetails)) {
               expect(formatted).toContain(tool.description);
             }
           }
-          
+
           return true;
         }),
         { numRuns: 100 }
@@ -158,12 +158,12 @@ describe('FreeAIToolListItem - Property Tests', () => {
               freeTierDetails: 'free tier info',
               pricing: 'From $10/month',
             };
-            
+
             const formatted = formatToolDescription(cleanTool);
-            
+
             // Should contain separator between parts
             expect(formatted).toContain(' - ');
-            
+
             return true;
           }
         ),
@@ -185,11 +185,11 @@ describe('FreeAIToolListItem - Property Tests', () => {
       fc.assert(
         fc.property(shortDescriptionArbitrary, (description) => {
           const truncated = truncateDescription(description, 200);
-          
+
           // Should be unchanged (no ellipsis added)
           expect(truncated).toBe(description);
           expect(truncated).not.toContain('...');
-          
+
           return true;
         }),
         { numRuns: 100 }
@@ -200,13 +200,13 @@ describe('FreeAIToolListItem - Property Tests', () => {
       fc.assert(
         fc.property(longDescriptionArbitrary, (description) => {
           const truncated = truncateDescription(description, 200);
-          
+
           // Should end with ellipsis
           expect(truncated).toMatch(/\.\.\.$/);
-          
+
           // Should be shorter than or equal to maxLength + ellipsis
           expect(truncated.length).toBeLessThanOrEqual(203); // 200 + "..."
-          
+
           return true;
         }),
         { numRuns: 100 }
@@ -217,13 +217,13 @@ describe('FreeAIToolListItem - Property Tests', () => {
       fc.assert(
         fc.property(longDescriptionArbitrary, (description) => {
           const truncated = truncateDescription(description, 200);
-          
+
           // Remove ellipsis to get the prefix
           const prefix = truncated.replace(/\.\.\.$/, '');
-          
+
           // The prefix should be a substring of the original starting at index 0
           expect(description.startsWith(prefix)).toBe(true);
-          
+
           return true;
         }),
         { numRuns: 100 }
@@ -237,18 +237,18 @@ describe('FreeAIToolListItem - Property Tests', () => {
           (description) => {
             const truncated = truncateDescription(description, 200);
             const prefix = truncated.replace(/\.\.\.$/, '');
-            
+
             // If there was a space in the truncation zone, it should end at a word boundary
             // (not in the middle of a word)
             const lastChar = prefix[prefix.length - 1];
-            
+
             // Either ends with space, or the next char in original is space/end
             const nextCharInOriginal = description[prefix.length];
-            const endsAtWordBoundary = 
-              lastChar === ' ' || 
-              nextCharInOriginal === ' ' || 
+            const endsAtWordBoundary =
+              lastChar === ' ' ||
+              nextCharInOriginal === ' ' ||
               nextCharInOriginal === undefined;
-            
+
             // This is a soft check - word boundary is preferred but not always possible
             return true;
           }
@@ -263,22 +263,22 @@ describe('FreeAIToolListItem - Property Tests', () => {
    * **Validates: Requirements 14.2**
    * 
    * For any rendered external tool link, the URL SHALL contain the query
-   * parameter `utm_source=toolify`.
+   * parameter `utm_source=aitoolsbook`.
    */
   describe('Property 7: External Link UTM Parameter', () => {
-    it('addUtmParameter adds utm_source=toolify to URLs without query params', () => {
+    it('addUtmParameter adds utm_source=aitoolsbook to URLs without query params', () => {
       fc.assert(
         fc.property(
           fc.webUrl().filter((url) => !url.includes('?')),
           (url) => {
             const result = addUtmParameter(url);
-            
-            // Should contain utm_source=toolify
-            expect(result).toContain('utm_source=toolify');
-            
+
+            // Should contain utm_source=aitoolsbook
+            expect(result).toContain('utm_source=aitoolsbook');
+
             // Should use ? as separator for first param
-            expect(result).toContain('?utm_source=toolify');
-            
+            expect(result).toContain('?utm_source=aitoolsbook');
+
             return true;
           }
         ),
@@ -286,7 +286,7 @@ describe('FreeAIToolListItem - Property Tests', () => {
       );
     });
 
-    it('addUtmParameter adds utm_source=toolify to URLs with existing query params', () => {
+    it('addUtmParameter adds utm_source=aitoolsbook to URLs with existing query params', () => {
       fc.assert(
         fc.property(
           fc.tuple(
@@ -297,13 +297,13 @@ describe('FreeAIToolListItem - Property Tests', () => {
           ([baseUrl, paramName, paramValue]) => {
             const urlWithParam = `${baseUrl}?${paramName}=${paramValue}`;
             const result = addUtmParameter(urlWithParam);
-            
-            // Should contain utm_source=toolify
-            expect(result).toContain('utm_source=toolify');
-            
+
+            // Should contain utm_source=aitoolsbook
+            expect(result).toContain('utm_source=aitoolsbook');
+
             // Should preserve original param
             expect(result).toContain(`${paramName}=${paramValue}`);
-            
+
             return true;
           }
         ),
@@ -316,22 +316,22 @@ describe('FreeAIToolListItem - Property Tests', () => {
         fc.property(
           fc.tuple(
             fc.webUrl().filter((url) => !url.includes('?')),
-            // Generate source values that won't be substrings of 'toolify'
-            fc.string({ minLength: 1, maxLength: 20 }).filter((s) => 
-              /^[a-z]+$/.test(s) && !s.startsWith('t') && s !== 'toolify'
+            // Generate source values that won't be substrings of 'aitoolsbook'
+            fc.string({ minLength: 1, maxLength: 20 }).filter((s) =>
+              /^[a-z]+$/.test(s) && !s.startsWith('a') && s !== 'aitoolsbook'
             )
           ),
           ([baseUrl, existingSource]) => {
             const urlWithUtm = `${baseUrl}?utm_source=${existingSource}`;
             const result = addUtmParameter(urlWithUtm);
-            
-            // Should contain utm_source=toolify (overwritten)
-            expect(result).toContain('utm_source=toolify');
-            
-            // Parse the URL to verify the utm_source value is exactly 'toolify'
+
+            // Should contain utm_source=aitoolsbook (overwritten)
+            expect(result).toContain('utm_source=aitoolsbook');
+
+            // Parse the URL to verify the utm_source value is exactly 'aitoolsbook'
             const parsedUrl = new URL(result);
-            expect(parsedUrl.searchParams.get('utm_source')).toBe('toolify');
-            
+            expect(parsedUrl.searchParams.get('utm_source')).toBe('aitoolsbook');
+
             return true;
           }
         ),
@@ -376,7 +376,7 @@ describe('FreeAIToolListItem - Property Tests', () => {
     it('slugs > 100 characters fail validation', () => {
       fc.assert(
         fc.property(
-          fc.string({ minLength: 101, maxLength: 200 }).map((s) => 
+          fc.string({ minLength: 101, maxLength: 200 }).map((s) =>
             s.toLowerCase().replace(/[^a-z0-9-]/g, 'a')
           ),
           (slug) => {

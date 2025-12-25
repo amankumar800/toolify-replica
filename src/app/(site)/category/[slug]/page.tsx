@@ -11,7 +11,7 @@ interface CategoryPageProps {
 export async function generateMetadata({ params }: CategoryPageProps) {
     const { slug } = await params;
     return {
-        title: `${slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} AI Tools - Toolify.ai`,
+        title: `${slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} AI Tools - AI Tools Book`,
         description: `Browse the best ${slug.replace(/-/g, ' ')} AI tools.`,
     };
 }
