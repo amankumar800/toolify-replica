@@ -68,11 +68,11 @@ export function CategoryMainList({ groups, allTools }: CategoryMainListProps) {
                 if (visibleCategories.length === 0) return null;
 
                 return (
-                    <React.Fragment key={group.id}>
+                    <React.Fragment key={`${group.id}-${index}`}>
                         <div className="space-y-12 animate-in fade-in duration-500 slide-in-from-bottom-4">
-                            {visibleCategories.map(({ category, tools }) => (
+                            {visibleCategories.map(({ category, tools }, catIndex) => (
                                 <CategorySection
-                                    key={category.id}
+                                    key={`${category.id}-${catIndex}`}
                                     category={{ ...category, toolCount: tools.length }}
                                     tools={tools}
                                 />
