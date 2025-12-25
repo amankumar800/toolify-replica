@@ -45,20 +45,20 @@ export function CategorySidebar({ groups }: CategorySidebarProps) {
 
     return (
         <nav className="flex flex-col gap-8 pb-32" aria-label="Category Navigation">
-            {groups.map((group) => (
-                <div key={group.id} className="flex flex-col gap-2">
+            {groups.map((group, groupIndex) => (
+                <div key={`${group.id}-${groupIndex}`} className="flex flex-col gap-2">
                     <h3 className="px-3 text-xs font-semibold tracking-wider text-toolify-gray-400 uppercase mb-1 flex items-center gap-2">
                         {group.name}
                     </h3>
 
                     <div className="flex flex-col gap-0.5">
-                        {group.categories.map((category) => {
+                        {group.categories.map((category, catIndex) => {
                             const Icon = getCategoryIcon(category.slug);
                             const isActive = activeSectionId === category.slug;
 
                             return (
                                 <a
-                                    key={category.id}
+                                    key={`${category.id}-${catIndex}`}
                                     href={`#${category.slug}`}
                                     onClick={(e) => handleCategoryClick(e, category.slug)}
                                     className={cn(
