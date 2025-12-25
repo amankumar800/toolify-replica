@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, Sparkles, MessageSquare, Globe, Zap, Database } from 'lucide-react';
 
 import { clsx } from 'clsx';
@@ -18,19 +19,77 @@ type ModelTab = {
     icon: React.ElementType;
     placeholder: string;
     color: string;
+    searchUrl: string;
+    isExternal: boolean;
 };
 
 const TABS: ModelTab[] = [
-    { id: 'aitoolsbook', label: 'AI Tools Book', icon: Database, placeholder: 'Search 10,000+ AI Tools...', color: 'text-blue-600' },
-    { id: 'chatgpt', label: 'ChatGPT', icon: MessageSquare, placeholder: 'Ask ChatGPT anything...', color: 'text-green-600' },
-    { id: 'perplexity', label: 'Perplexity', icon: Globe, placeholder: 'Ask Perplexity...', color: 'text-teal-600' },
-    { id: 'claude', label: 'Claude', icon: Sparkles, placeholder: 'Ask Claude...', color: 'text-orange-600' },
-    { id: 'google', label: 'Google', icon: Zap, placeholder: 'Ask Google Gemini...', color: 'text-blue-500' },
+    {
+        id: 'aitoolsbook',
+        label: 'AI Tools Book',
+        icon: Database,
+        placeholder: 'Search 10,000+ AI Tools...',
+        color: 'text-blue-600',
+        searchUrl: '/?q=',
+        isExternal: false
+    },
+    {
+        id: 'chatgpt',
+        label: 'ChatGPT',
+        icon: MessageSquare,
+        placeholder: 'Ask ChatGPT anything...',
+        color: 'text-green-600',
+        searchUrl: 'https://chat.openai.com/?q=',
+        isExternal: true
+    },
+    {
+        id: 'perplexity',
+        label: 'Perplexity',
+        icon: Globe,
+        placeholder: 'Ask Perplexity...',
+        color: 'text-teal-600',
+        searchUrl: 'https://www.perplexity.ai/search?q=',
+        isExternal: true
+    },
+    {
+        id: 'claude',
+        label: 'Claude',
+        icon: Sparkles,
+        placeholder: 'Ask Claude...',
+        color: 'text-orange-600',
+        searchUrl: 'https://claude.ai/new?q=',
+        isExternal: true
+    },
+    {
+        id: 'google',
+        label: 'Google',
+        icon: Zap,
+        placeholder: 'Ask Google Gemini...',
+        color: 'text-blue-500',
+        searchUrl: 'https://gemini.google.com/app?text=',
+        isExternal: true
+    },
 ];
 
 export function MultiModelSearch({ className }: { className?: string }) {
     const [activeTab, setActiveTab] = useState('aitoolsbook');
+    const [query, setQuery] = useState('');
+    const router = useRouter();
     const activeModel = TABS.find(t => t.id === activeTab) || TABS[0];
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!query.trim()) return;
+
+        const encodedQuery = encodeURIComponent(query.trim());
+        const url = activeModel.searchUrl + encodedQuery;
+
+        if (activeModel.isExternal) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } else {
+            router.push(url);
+        }
+    };
 
     return (
         <div className={cn("w-full max-w-4xl mx-auto", className)}>
@@ -58,7 +117,7 @@ export function MultiModelSearch({ className }: { className?: string }) {
             </div>
 
             {/* Search Input */}
-            <div className="relative group max-w-2xl mx-auto">
+            <form onSubmit={handleSearch} className="relative group max-w-2xl mx-auto">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl opacity-20 group-hover:opacity-40 blur transition duration-500" />
                 <div className="relative flex items-center bg-white rounded-2xl shadow-xl overflow-hidden p-2">
                     <div className="pl-4 pr-3 text-gray-400">
@@ -66,17 +125,25 @@ export function MultiModelSearch({ className }: { className?: string }) {
                     </div>
                     <input
                         type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
                         className="w-full py-3 px-2 text-lg text-gray-900 placeholder:text-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none"
                         placeholder={activeModel.placeholder}
                     />
-                    <button className="hidden sm:flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-xl font-medium transition-colors">
+                    <button
+                        type="submit"
+                        className="hidden sm:flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-xl font-medium transition-colors"
+                    >
                         Search
                     </button>
-                    <button className="sm:hidden p-3 bg-gray-900 text-white rounded-xl">
+                    <button
+                        type="submit"
+                        className="sm:hidden p-3 bg-gray-900 text-white rounded-xl"
+                    >
                         <Search className="w-5 h-5" />
                     </button>
                 </div>
-            </div>
+            </form>
 
             {/* Helper Text */}
             <div className="mt-4 text-center text-sm text-[var(--muted-foreground)] opacity-80">
@@ -86,7 +153,13 @@ export function MultiModelSearch({ className }: { className?: string }) {
                         27,558 AIs and 459 categories updated daily
                     </span>
                 )}
+                {activeModel.isExternal && (
+                    <span className="flex items-center justify-center gap-2">
+                        <span className="text-xs">Opens in new tab →</span>
+                    </span>
+                )}
             </div>
         </div>
     );
 }
+
