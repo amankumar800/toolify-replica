@@ -61,11 +61,11 @@ export function MobileCategoryNav({ groups }: MobileCategoryNavProps) {
                 ref={scrollContainerRef}
                 className="flex overflow-x-auto no-scrollbar py-3 px-4 gap-2 scroll-smooth"
             >
-                {allCategories.map((cat) => {
+                {allCategories.map((cat, index) => {
                     const isActive = activeSectionId === cat.slug;
                     return (
                         <button
-                            key={cat.id}
+                            key={`${cat.id}-${index}`}
                             id={`nav-chip-${cat.slug}`}
                             onClick={(e) => handleClick(e, cat.slug)}
                             className={cn(
