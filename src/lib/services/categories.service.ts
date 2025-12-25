@@ -166,12 +166,28 @@ export async function getCategoryGroups(): Promise<CategoryGroup[]> {
   const categories = categoriesWithCounts.map(mapCategoryWithToolCount);
 
   // Group categories by their group_id in metadata
+  // Use a Set to track which categories have been assigned to prevent duplicates
+  const assignedCategoryIds = new Set<string>();
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (groups as any[]).map((group) => {
     const groupCategories = categories.filter((cat) => {
+      // Skip if this category has already been assigned to a group
+      if (assignedCategoryIds.has(cat.id)) {
+        return false;
+      }
+
       // Categories are linked to groups via metadata.group_id
-      // This is a simplified approach - in production, you might have a junction table
-      return true; // For now, include all categories in each group
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const catMetadata = (cat as any).metadata;
+      const belongsToGroup = catMetadata?.group_id === group.id;
+
+      if (belongsToGroup) {
+        assignedCategoryIds.add(cat.id);
+        return true;
+      }
+
+      return false;
     });
 
     return {
