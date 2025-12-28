@@ -53,8 +53,16 @@ export interface FeaturedToolsRepository
   extends BaseRepository<FeaturedToolRow, FeaturedToolInsert, FeaturedToolUpdate> {
   /** Find all featured tools with their tool data, ordered by display_order */
   findAllWithTools(): Promise<FeaturedToolWithTool[]>;
+  /** Find active featured tools (where start_date <= NOW() AND end_date >= NOW()) */
+  findActive(placementType?: string): Promise<FeaturedToolWithTool[]>;
+  /** Find active sponsored tools for a specific placement */
+  findActiveSponsored(placementType: string): Promise<FeaturedToolWithTool[]>;
   /** Reorder featured tools by updating display_order for each tool ID */
   reorder(toolIds: string[]): Promise<void>;
+  /** Increment impression count for a featured tool */
+  incrementImpressions(featuredToolId: string): Promise<void>;
+  /** Increment click count for a featured tool */
+  incrementClicks(featuredToolId: string): Promise<void>;
 }
 
 /**
@@ -124,6 +132,89 @@ export function createFeaturedToolsRepository(
         .filter((item): item is FeaturedToolWithTool => item !== null);
     },
 
+    async findActive(placementType?: string): Promise<FeaturedToolWithTool[]> {
+      const now = new Date().toISOString();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .select(`
+          *,
+          tools (*)
+        `)
+        .or(`start_date.is.null,start_date.lte.${now}`)
+        .or(`end_date.is.null,end_date.gte.${now}`)
+        .order('display_order', { ascending: true });
+
+      if (placementType) {
+        query = query.eq('placement_type', placementType);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw wrapError(error, 'findActive');
+      }
+
+      // Transform the nested structure
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((data ?? []) as any[])
+        .map((row: Record<string, unknown>) => {
+          const tool = row.tools as ToolRow | null;
+          if (!tool) {
+            return null;
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { tools: _, ...featuredToolRow } = row;
+          return {
+            ...featuredToolRow,
+            tool,
+          } as FeaturedToolWithTool;
+        })
+        .filter((item): item is FeaturedToolWithTool => item !== null);
+    },
+
+    async findActiveSponsored(placementType: string): Promise<FeaturedToolWithTool[]> {
+      const now = new Date().toISOString();
+
+      const { data, error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .select(`
+          *,
+          tools (*)
+        `)
+        .eq('placement_type', placementType)
+        .eq('is_sponsored', true)
+        .or(`start_date.is.null,start_date.lte.${now}`)
+        .or(`end_date.is.null,end_date.gte.${now}`)
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        throw wrapError(error, 'findActiveSponsored');
+      }
+
+      // Transform the nested structure
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((data ?? []) as any[])
+        .map((row: Record<string, unknown>) => {
+          const tool = row.tools as ToolRow | null;
+          if (!tool) {
+            return null;
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { tools: _, ...featuredToolRow } = row;
+          return {
+            ...featuredToolRow,
+            tool,
+          } as FeaturedToolWithTool;
+        })
+        .filter((item): item is FeaturedToolWithTool => item !== null);
+    },
+
     async reorder(toolIds: string[]): Promise<void> {
       // Update display_order for each featured tool based on position in array
       const updates = toolIds.map((toolId, index) => ({
@@ -141,6 +232,62 @@ export function createFeaturedToolsRepository(
         if (error) {
           throw wrapError(error, 'reorder');
         }
+      }
+    },
+
+    async incrementImpressions(featuredToolId: string): Promise<void> {
+      // Use RPC or raw SQL for atomic increment
+      // For now, we'll do a read-then-write (not ideal for high concurrency)
+      const { data: current, error: readError } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .select('impression_count')
+        .eq('id', featuredToolId)
+        .single();
+
+      if (readError) {
+        throw wrapError(readError, 'incrementImpressions');
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newCount = ((current as any)?.impression_count ?? 0) + 1;
+
+      const { error: updateError } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .update({ impression_count: newCount })
+        .eq('id', featuredToolId);
+
+      if (updateError) {
+        throw wrapError(updateError, 'incrementImpressions');
+      }
+    },
+
+    async incrementClicks(featuredToolId: string): Promise<void> {
+      // Use RPC or raw SQL for atomic increment
+      // For now, we'll do a read-then-write (not ideal for high concurrency)
+      const { data: current, error: readError } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .select('click_count')
+        .eq('id', featuredToolId)
+        .single();
+
+      if (readError) {
+        throw wrapError(readError, 'incrementClicks');
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newCount = ((current as any)?.click_count ?? 0) + 1;
+
+      const { error: updateError } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .update({ click_count: newCount })
+        .eq('id', featuredToolId);
+
+      if (updateError) {
+        throw wrapError(updateError, 'incrementClicks');
       }
     },
   };

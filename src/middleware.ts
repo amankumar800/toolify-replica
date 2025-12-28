@@ -18,6 +18,7 @@ function isProtectedRoute(pathname: string): boolean {
  * Middleware that handles:
  * 1. Supabase Auth session refresh on every request
  * 2. Protected route redirection for unauthenticated users
+ * 3. Role-based access control for admin routes
  * 
  * Requirements:
  * - 2.1: Refresh Supabase_Auth session using cookies on every request
@@ -25,6 +26,7 @@ function isProtectedRoute(pathname: string): boolean {
  * - 2.3: Redirect unauthenticated users from /admin routes to /login
  * - 2.4: Use getUser() to validate sessions securely
  * - 2.5: Clear invalid cookies if session refresh fails
+ * - 2.6: Enforce RBAC - only admin users can access /admin routes
  */
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -38,12 +40,20 @@ export async function middleware(request: NextRequest) {
     console.debug('[Middleware] Session refresh error:', error);
   }
 
-  // 2. Protected route redirection (Requirement 2.3)
-  if (isProtectedRoute(pathname) && !user) {
-    const loginUrl = new URL('/login', request.url);
-    // Include the original URL as callback for post-login redirect
-    loginUrl.searchParams.set('callbackUrl', request.url);
-    return NextResponse.redirect(loginUrl);
+  // 2. Protected route check
+  if (isProtectedRoute(pathname)) {
+    // 2a. Redirect unauthenticated users to login (Requirement 2.3)
+    if (!user) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // 2b. RBAC check - only admins can access admin routes (Requirement 2.6)
+    const userRole = user.user_metadata?.role;
+    if (userRole !== 'admin') {
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    }
   }
 
   // Return response with updated cookies

@@ -21,7 +21,20 @@ export const CATEGORY_DEFAULTS = {
   icon: '',
   toolCount: 0,
   displayOrder: 0,
+  metadata: {} as Record<string, unknown>,
 } as const;
+
+/**
+ * Extended Category type with group relationship.
+ * Used when category needs to reference its parent group.
+ */
+export interface CategoryWithGroup extends Category {
+  groupId?: string;
+  displayOrder: number;
+  metadata: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 /**
  * Maps a database category row (snake_case) to an application Category type (camelCase).
@@ -45,6 +58,36 @@ export function mapCategoryRowToCategory(row: CategoryRow): Category {
     description: row.description ?? CATEGORY_DEFAULTS.description,
     count: row.tool_count ?? CATEGORY_DEFAULTS.toolCount,
     toolCount: row.tool_count ?? CATEGORY_DEFAULTS.toolCount,
+  };
+}
+
+/**
+ * Maps a database category row to an extended Category type with group relationship.
+ * Includes all fields including group_id, display_order, and metadata.
+ *
+ * @param row - Database row with snake_case columns
+ * @returns Extended Category object with group relationship
+ *
+ * @example
+ * ```ts
+ * const row = await categoriesRepo.findBySlug('ai-chatbots');
+ * const category = mapCategoryRowToCategoryWithGroup(row);
+ * console.log(category.groupId); // UUID of parent group
+ * ```
+ */
+export function mapCategoryRowToCategoryWithGroup(row: CategoryRow): CategoryWithGroup {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description ?? CATEGORY_DEFAULTS.description,
+    count: row.tool_count ?? CATEGORY_DEFAULTS.toolCount,
+    toolCount: row.tool_count ?? CATEGORY_DEFAULTS.toolCount,
+    groupId: row.group_id ?? undefined,
+    displayOrder: row.display_order ?? CATEGORY_DEFAULTS.displayOrder,
+    metadata: (row.metadata as Record<string, unknown>) ?? CATEGORY_DEFAULTS.metadata,
+    createdAt: row.created_at ?? undefined,
+    updatedAt: row.updated_at ?? undefined,
   };
 }
 
@@ -74,6 +117,39 @@ export function mapCategoryWithToolCount(row: CategoryWithToolCount): Category {
 }
 
 /**
+ * Maps a database category row with computed tool count to extended Category type.
+ * Includes group relationship and computed tool count.
+ *
+ * @param row - Database row with computed tool count
+ * @returns Extended Category object with group and computed count
+ */
+export function mapCategoryWithToolCountAndGroup(row: CategoryWithToolCount): CategoryWithGroup {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description ?? CATEGORY_DEFAULTS.description,
+    count: row.computed_tool_count ?? CATEGORY_DEFAULTS.toolCount,
+    toolCount: row.computed_tool_count ?? CATEGORY_DEFAULTS.toolCount,
+    groupId: row.group_id ?? undefined,
+    displayOrder: row.display_order ?? CATEGORY_DEFAULTS.displayOrder,
+    metadata: (row.metadata as Record<string, unknown>) ?? CATEGORY_DEFAULTS.metadata,
+    createdAt: row.created_at ?? undefined,
+    updatedAt: row.updated_at ?? undefined,
+  };
+}
+
+/**
+ * Input type for creating a category with group relationship.
+ */
+export interface CategoryInput extends Omit<Category, 'id' | 'count'> {
+  groupId?: string;
+  displayOrder?: number;
+  icon?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
  * Maps an application Category object (camelCase) to a database insert type (snake_case).
  * Used when creating or updating categories in the database.
  *
@@ -87,14 +163,16 @@ export function mapCategoryWithToolCount(row: CategoryWithToolCount): Category {
  * await categoriesRepo.create(insert);
  * ```
  */
-export function mapCategoryToInsert(
-  category: Omit<Category, 'id' | 'count'>
-): CategoryInsert {
+export function mapCategoryToInsert(category: CategoryInput): CategoryInsert {
   return {
     name: category.name,
     slug: category.slug,
     description: category.description || null,
+    icon: category.icon || null,
     tool_count: category.toolCount ?? null,
+    display_order: category.displayOrder ?? null,
+    group_id: category.groupId ?? null,
+    metadata: (category.metadata as CategoryInsert['metadata']) ?? null,
   };
 }
 
@@ -113,14 +191,18 @@ export function mapCategoryToInsert(
  * ```
  */
 export function mapCategoryToUpdate(
-  updates: Partial<Omit<Category, 'id' | 'count'>>
+  updates: Partial<CategoryInput>
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
   if (updates.name !== undefined) result.name = updates.name;
   if (updates.slug !== undefined) result.slug = updates.slug;
   if (updates.description !== undefined) result.description = updates.description || null;
+  if (updates.icon !== undefined) result.icon = updates.icon || null;
   if (updates.toolCount !== undefined) result.tool_count = updates.toolCount;
+  if (updates.displayOrder !== undefined) result.display_order = updates.displayOrder;
+  if (updates.groupId !== undefined) result.group_id = updates.groupId || null;
+  if (updates.metadata !== undefined) result.metadata = updates.metadata;
 
   return result;
 }

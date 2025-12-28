@@ -21,19 +21,29 @@
 // Tool mappers
 export {
   mapToolRowToTool,
+  mapToolRowToToolWithWorkflow,
   mapToolWithCategories,
   mapToolToInsert,
+  mapToolWithWorkflowToInsert,
   mapToolToUpdate,
+  mapToolWorkflowToUpdate,
   TOOL_DEFAULTS,
+  type ToolWithWorkflow,
+  type ToolWithWorkflowInput,
+  type ToolWorkflowUpdateInput,
 } from './tool.mapper';
 
 // Category mappers
 export {
   mapCategoryRowToCategory,
+  mapCategoryRowToCategoryWithGroup,
   mapCategoryWithToolCount,
+  mapCategoryWithToolCountAndGroup,
   mapCategoryToInsert,
   mapCategoryToUpdate,
   CATEGORY_DEFAULTS,
+  type CategoryWithGroup,
+  type CategoryInput,
 } from './category.mapper';
 
 // Subcategory mappers
@@ -45,4 +55,5 @@ export {
   SUBCATEGORY_DEFAULTS,
   type Subcategory,
   type SubcategoryWithToolsApp,
+  type SubcategoryInput,
 } from './subcategory.mapper';

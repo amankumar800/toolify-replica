@@ -44,6 +44,25 @@ export interface CategoryWithToolCount extends CategoryRow {
   computed_tool_count: number;
 }
 
+/**
+ * Category with its parent group information.
+ */
+export interface CategoryWithGroup extends CategoryRow {
+  group: {
+    id: string;
+    name: string;
+    icon_name: string | null;
+    display_order: number | null;
+  } | null;
+}
+
+/**
+ * Category with both group and tool count.
+ */
+export interface CategoryWithGroupAndToolCount extends CategoryWithGroup {
+  computed_tool_count: number;
+}
+
 
 /**
  * Categories repository interface extending base repository.
@@ -56,6 +75,12 @@ export interface CategoriesRepository
   findWithToolCount(): Promise<CategoryWithToolCount[]>;
   /** Find categories belonging to a specific group */
   findByGroup(groupId: string): Promise<CategoryRow[]>;
+  /** Find a category with its group information */
+  findWithGroup(categoryId: string): Promise<CategoryWithGroup | null>;
+  /** Find all categories with their group information */
+  findAllWithGroups(): Promise<CategoryWithGroup[]>;
+  /** Find all categories with group info and tool counts */
+  findAllWithGroupsAndToolCount(): Promise<CategoryWithGroupAndToolCount[]>;
 }
 
 /**
@@ -129,24 +154,142 @@ export function createCategoriesRepository(
     },
 
     async findByGroup(groupId: string): Promise<CategoryRow[]> {
-      // Note: This assumes there's a group_id column or a junction table
-      // Based on the schema, categories don't have a direct group_id
-      // This would need a category_group_categories junction table
-      // For now, return empty array as the relationship isn't defined in schema
       const { data, error } = await supabase
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .from(tableName as any)
         .select('*')
+        .eq('group_id', groupId)
         .order('display_order', { ascending: true });
 
       if (error) {
         throw wrapError(error, 'findByGroup');
       }
 
-      // Filter by metadata.group_id if present
-      return ((data ?? []) as unknown as CategoryRow[]).filter((cat) => {
-        const metadata = cat.metadata as Record<string, unknown> | null;
-        return metadata?.group_id === groupId;
+      return (data ?? []) as unknown as CategoryRow[];
+    },
+
+    async findWithGroup(categoryId: string): Promise<CategoryWithGroup | null> {
+      const { data, error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .select(`
+          *,
+          category_groups (
+            id,
+            name,
+            icon_name,
+            display_order
+          )
+        `)
+        .eq('id', categoryId)
+        .maybeSingle();
+
+      if (error) {
+        throw wrapError(error, 'findWithGroup');
+      }
+
+      if (!data) {
+        return null;
+      }
+
+      // Transform the nested structure
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const row = data as any as Record<string, unknown>;
+      const group = row.category_groups as {
+        id: string;
+        name: string;
+        icon_name: string | null;
+        display_order: number | null;
+      } | null;
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { category_groups: _, ...categoryRow } = row;
+      return {
+        ...categoryRow,
+        group,
+      } as CategoryWithGroup;
+    },
+
+    async findAllWithGroups(): Promise<CategoryWithGroup[]> {
+      const { data, error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .select(`
+          *,
+          category_groups (
+            id,
+            name,
+            icon_name,
+            display_order
+          )
+        `)
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        throw wrapError(error, 'findAllWithGroups');
+      }
+
+      // Transform the nested structure
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((data ?? []) as any[]).map((row: Record<string, unknown>) => {
+        const group = row.category_groups as {
+          id: string;
+          name: string;
+          icon_name: string | null;
+          display_order: number | null;
+        } | null;
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { category_groups: _, ...categoryRow } = row;
+        return {
+          ...categoryRow,
+          group,
+        } as CategoryWithGroup;
+      });
+    },
+
+    async findAllWithGroupsAndToolCount(): Promise<CategoryWithGroupAndToolCount[]> {
+      const { data, error } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from(tableName as any)
+        .select(`
+          *,
+          category_groups (
+            id,
+            name,
+            icon_name,
+            display_order
+          ),
+          tool_categories (
+            tool_id
+          )
+        `)
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        throw wrapError(error, 'findAllWithGroupsAndToolCount');
+      }
+
+      // Transform the nested structure
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((data ?? []) as any[]).map((row: Record<string, unknown>) => {
+        const group = row.category_groups as {
+          id: string;
+          name: string;
+          icon_name: string | null;
+          display_order: number | null;
+        } | null;
+
+        const toolCategories = row.tool_categories as Array<{ tool_id: string }> | null;
+        const computedToolCount = toolCategories?.length ?? 0;
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { category_groups: _g, tool_categories: _tc, ...categoryRow } = row;
+        return {
+          ...categoryRow,
+          group,
+          computed_tool_count: computedToolCount,
+        } as CategoryWithGroupAndToolCount;
       });
     },
   };

@@ -1,17 +1,25 @@
 /**
  * Property-based tests for database triggers
  *
- * Tests Property 15 from the design document:
- * - Property 15: Updated_at trigger updates timestamp
+ * **Feature: database-schema-redesign, Property 7: Trigger Behavior**
+ * **Validates: Requirements 12.4**
  *
- * **Validates: Requirements 8.2**
+ * *For any* table with an updated_at trigger, updating a row SHALL automatically
+ * set updated_at to the current timestamp.
+ *
+ * Tables with updated_at triggers:
+ * - tools
+ * - categories
+ * - category_groups
+ * - subcategories
+ * - midjourney_prompts
+ * - ai_news
  *
  * To run these tests, you need to set SUPABASE_SERVICE_ROLE_KEY in your environment.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as fc from 'fast-check';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { createBaseRepository, type BaseRepository } from '../repositories/base.repository';
 import type { Database } from '@/lib/supabase/types';
 
 // Test configuration
@@ -19,30 +27,6 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const shouldSkip = !SUPABASE_URL || !SUPABASE_SERVICE_KEY;
-
-// Tool row type for testing
-interface ToolRow {
-  [key: string]: unknown;
-  id: string;
-  name: string;
-  slug: string;
-  website_url: string;
-  created_at: string | null;
-  updated_at: string | null;
-}
-
-interface ToolInsert {
-  [key: string]: unknown;
-  name: string;
-  slug: string;
-  website_url: string;
-}
-
-interface ToolUpdate {
-  [key: string]: unknown;
-  name?: string;
-  description?: string | null;
-}
 
 // Helper to generate unique slugs
 function generateUniqueSlug(base: string): string {
@@ -54,167 +38,514 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-describe.skipIf(shouldSkip)('Database Triggers Property Tests', { timeout: 120000 }, () => {
+describe.skipIf(shouldSkip)('Property 7: Trigger Behavior', { timeout: 180000 }, () => {
   let supabase: SupabaseClient<Database>;
-  let toolsRepo: BaseRepository<ToolRow, ToolInsert, ToolUpdate>;
+
+  // Track test data for cleanup
   const testToolIds: string[] = [];
+  const testCategoryIds: string[] = [];
+  const testCategoryGroupIds: string[] = [];
+  const testSubcategoryIds: string[] = [];
+  const testMidjourneyPromptIds: string[] = [];
+  const testAiNewsIds: string[] = [];
 
   beforeAll(() => {
     supabase = createClient<Database>(SUPABASE_URL!, SUPABASE_SERVICE_KEY!, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
-    toolsRepo = createBaseRepository<ToolRow, ToolInsert, ToolUpdate>(supabase, 'tools');
   });
 
   afterAll(async () => {
-    // Clean up test data
+    // Clean up test data in reverse order of dependencies
+    if (testSubcategoryIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from as any)('subcategories').delete().in('id', testSubcategoryIds);
+    }
     if (testToolIds.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase.from as any)('tools').delete().in('id', testToolIds);
+    }
+    if (testCategoryIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from as any)('categories').delete().in('id', testCategoryIds);
+    }
+    if (testCategoryGroupIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from as any)('category_groups').delete().in('id', testCategoryGroupIds);
+    }
+    if (testMidjourneyPromptIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from as any)('midjourney_prompts').delete().in('id', testMidjourneyPromptIds);
+    }
+    if (testAiNewsIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from as any)('ai_news').delete().in('id', testAiNewsIds);
     }
   });
 
 
   /**
-   * **Feature: supabase-migration, Property 15: Updated_at trigger updates timestamp**
-   * **Validates: Requirements 8.2**
-   *
-   * *For any* record update, the updated_at timestamp after the update SHALL be
-   * greater than or equal to the updated_at timestamp before the update.
+   * Tools table updated_at trigger tests
    */
-  describe('Property 15: Updated_at trigger updates timestamp', () => {
+  describe('Tools Table Trigger', () => {
     // Arbitrary for generating valid tool names
     const toolNameArb = fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9 ]{2,49}$/);
 
-    // Arbitrary for generating optional descriptions
-    const descriptionArb = fc.option(fc.string({ minLength: 1, maxLength: 200 }), { nil: null });
-
-    it('should update updated_at timestamp when record is modified (property test with 100 runs)', async () => {
+    it('should update updated_at timestamp when tool is modified (property test)', async () => {
       await fc.assert(
-        fc.asyncProperty(
-          toolNameArb,
-          toolNameArb,
-          descriptionArb,
-          async (originalName, newName, newDescription) => {
-            // Skip if names are the same (no actual update)
-            fc.pre(originalName !== newName);
+        fc.asyncProperty(toolNameArb, toolNameArb, async (originalName, newName) => {
+          // Skip if names are the same (no actual update)
+          fc.pre(originalName !== newName);
 
-            // Generate unique slug for this test run
-            const slug = generateUniqueSlug(originalName.toLowerCase().replace(/\s+/g, '-').slice(0, 20));
+          const slug = generateUniqueSlug(originalName.toLowerCase().replace(/\s+/g, '-').slice(0, 20));
 
-            // Create initial record
-            const insertData: ToolInsert = {
+          // Create initial record
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: created, error: createError } = await (supabase.from as any)('tools')
+            .insert({
               name: originalName,
               slug,
               website_url: 'https://example.com',
-            };
+            })
+            .select('id, updated_at')
+            .single();
 
-            const created = await toolsRepo.create(insertData);
-            testToolIds.push(created.id);
+          expect(createError).toBeNull();
+          testToolIds.push(created.id);
 
-            // Store the original updated_at timestamp
-            const originalUpdatedAt = created.updated_at;
-            expect(originalUpdatedAt).toBeDefined();
+          const originalUpdatedAt = created.updated_at;
+          expect(originalUpdatedAt).toBeDefined();
 
-            // Wait a small amount to ensure timestamp difference is detectable
-            await sleep(10);
+          await sleep(10);
 
-            // Update the record
-            const updateData: ToolUpdate = {
-              name: newName,
-              description: newDescription,
-            };
-            const updated = await toolsRepo.update(created.id, updateData);
+          // Update the record
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: updated, error: updateError } = await (supabase.from as any)('tools')
+            .update({ name: newName })
+            .eq('id', created.id)
+            .select('updated_at')
+            .single();
 
-            // Property: updated_at should be greater than or equal to the original
-            expect(updated.updated_at).toBeDefined();
-            const originalTime = new Date(originalUpdatedAt!).getTime();
-            const updatedTime = new Date(updated.updated_at!).getTime();
+          expect(updateError).toBeNull();
 
-            expect(updatedTime).toBeGreaterThanOrEqual(originalTime);
-          }
-        ),
-        // Using 20 runs to balance coverage with test execution time (network calls)
+          // Property: updated_at should be greater than or equal to the original
+          const originalTime = new Date(originalUpdatedAt).getTime();
+          const updatedTime = new Date(updated.updated_at).getTime();
+          expect(updatedTime).toBeGreaterThanOrEqual(originalTime);
+
+          return true;
+        }),
         { numRuns: 20 }
       );
-    }, 180000); // Extended timeout for network operations
+    }, 180000);
 
-    it('should set updated_at on initial creation', async () => {
-      const slug = generateUniqueSlug('creation-timestamp-test');
-      const insertData: ToolInsert = {
-        name: 'Creation Timestamp Test Tool',
-        slug,
-        website_url: 'https://example.com',
-      };
+    it('should set updated_at on initial tool creation', async () => {
+      const slug = generateUniqueSlug('tool-creation-test');
 
-      const created = await toolsRepo.create(insertData);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: created, error } = await (supabase.from as any)('tools')
+        .insert({
+          name: 'Tool Creation Test',
+          slug,
+          website_url: 'https://example.com',
+        })
+        .select('id, created_at, updated_at')
+        .single();
+
+      expect(error).toBeNull();
       testToolIds.push(created.id);
 
-      // Property: created_at and updated_at should be set on creation
       expect(created.created_at).toBeDefined();
       expect(created.updated_at).toBeDefined();
 
       // They should be equal or very close on initial creation
-      const createdTime = new Date(created.created_at!).getTime();
-      const updatedTime = new Date(created.updated_at!).getTime();
-
-      // Allow for small time difference (within 1 second)
+      const createdTime = new Date(created.created_at).getTime();
+      const updatedTime = new Date(created.updated_at).getTime();
       expect(Math.abs(updatedTime - createdTime)).toBeLessThan(1000);
     });
+  });
 
-    it('should update updated_at on each subsequent update', async () => {
-      const slug = generateUniqueSlug('multiple-updates-test');
-      const insertData: ToolInsert = {
-        name: 'Multiple Updates Test Tool',
-        slug,
-        website_url: 'https://example.com',
-      };
+  /**
+   * Categories table updated_at trigger tests
+   */
+  describe('Categories Table Trigger', () => {
+    const categoryNameArb = fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9 ]{2,29}$/);
 
-      const created = await toolsRepo.create(insertData);
-      testToolIds.push(created.id);
+    it('should update updated_at timestamp when category is modified (property test)', async () => {
+      await fc.assert(
+        fc.asyncProperty(categoryNameArb, categoryNameArb, async (originalName, newName) => {
+          fc.pre(originalName !== newName);
 
-      let previousUpdatedAt = created.updated_at!;
+          const slug = generateUniqueSlug(originalName.toLowerCase().replace(/\s+/g, '-').slice(0, 20));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: created, error: createError } = await (supabase.from as any)('categories')
+            .insert({
+              name: originalName,
+              slug,
+            })
+            .select('id, updated_at')
+            .single();
+
+          expect(createError).toBeNull();
+          testCategoryIds.push(created.id);
+
+          const originalUpdatedAt = created.updated_at;
+          await sleep(10);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: updated, error: updateError } = await (supabase.from as any)('categories')
+            .update({ name: newName })
+            .eq('id', created.id)
+            .select('updated_at')
+            .single();
+
+          expect(updateError).toBeNull();
+
+          const originalTime = new Date(originalUpdatedAt).getTime();
+          const updatedTime = new Date(updated.updated_at).getTime();
+          expect(updatedTime).toBeGreaterThanOrEqual(originalTime);
+
+          return true;
+        }),
+        { numRuns: 20 }
+      );
+    }, 180000);
+
+    it('should not change created_at when category is updated', async () => {
+      const slug = generateUniqueSlug('cat-created-at-test');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: created, error: createError } = await (supabase.from as any)('categories')
+        .insert({
+          name: 'Category Created At Test',
+          slug,
+        })
+        .select('id, created_at')
+        .single();
+
+      expect(createError).toBeNull();
+      testCategoryIds.push(created.id);
+
+      const originalCreatedAt = created.created_at;
+      await sleep(10);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: updated, error: updateError } = await (supabase.from as any)('categories')
+        .update({ name: 'Updated Category Name' })
+        .eq('id', created.id)
+        .select('created_at')
+        .single();
+
+      expect(updateError).toBeNull();
+      expect(updated.created_at).toBe(originalCreatedAt);
+    });
+  });
+
+
+  /**
+   * Category Groups table updated_at trigger tests
+   */
+  describe('Category Groups Table Trigger', () => {
+    const groupNameArb = fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9 ]{2,29}$/);
+
+    it('should update updated_at timestamp when category_group is modified (property test)', async () => {
+      await fc.assert(
+        fc.asyncProperty(groupNameArb, groupNameArb, async (originalName, newName) => {
+          fc.pre(originalName !== newName);
+
+          const uniqueName = `${originalName} ${Date.now()}`;
+          const newUniqueName = `${newName} ${Date.now() + 1}`;
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: created, error: createError } = await (supabase.from as any)('category_groups')
+            .insert({
+              name: uniqueName,
+            })
+            .select('id, updated_at')
+            .single();
+
+          expect(createError).toBeNull();
+          testCategoryGroupIds.push(created.id);
+
+          const originalUpdatedAt = created.updated_at;
+          await sleep(10);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: updated, error: updateError } = await (supabase.from as any)('category_groups')
+            .update({ name: newUniqueName })
+            .eq('id', created.id)
+            .select('updated_at')
+            .single();
+
+          expect(updateError).toBeNull();
+
+          const originalTime = new Date(originalUpdatedAt).getTime();
+          const updatedTime = new Date(updated.updated_at).getTime();
+          expect(updatedTime).toBeGreaterThanOrEqual(originalTime);
+
+          return true;
+        }),
+        { numRuns: 20 }
+      );
+    }, 180000);
+  });
+
+  /**
+   * Subcategories table updated_at trigger tests
+   */
+  describe('Subcategories Table Trigger', () => {
+    const subcategoryNameArb = fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9 ]{2,29}$/);
+
+    it('should update updated_at timestamp when subcategory is modified (property test)', async () => {
+      // First create a parent category
+      const categorySlug = generateUniqueSlug('parent-cat');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: category, error: catError } = await (supabase.from as any)('categories')
+        .insert({
+          name: 'Parent Category for Subcategory Test',
+          slug: categorySlug,
+        })
+        .select('id')
+        .single();
+
+      expect(catError).toBeNull();
+      testCategoryIds.push(category.id);
+
+      await fc.assert(
+        fc.asyncProperty(subcategoryNameArb, subcategoryNameArb, async (originalName, newName) => {
+          fc.pre(originalName !== newName);
+
+          const slug = generateUniqueSlug(originalName.toLowerCase().replace(/\s+/g, '-').slice(0, 20));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: created, error: createError } = await (supabase.from as any)('subcategories')
+            .insert({
+              category_id: category.id,
+              name: originalName,
+              slug,
+            })
+            .select('id, updated_at')
+            .single();
+
+          expect(createError).toBeNull();
+          testSubcategoryIds.push(created.id);
+
+          const originalUpdatedAt = created.updated_at;
+          await sleep(10);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: updated, error: updateError } = await (supabase.from as any)('subcategories')
+            .update({ name: newName })
+            .eq('id', created.id)
+            .select('updated_at')
+            .single();
+
+          expect(updateError).toBeNull();
+
+          const originalTime = new Date(originalUpdatedAt).getTime();
+          const updatedTime = new Date(updated.updated_at).getTime();
+          expect(updatedTime).toBeGreaterThanOrEqual(originalTime);
+
+          return true;
+        }),
+        { numRuns: 20 }
+      );
+    }, 180000);
+  });
+
+
+  /**
+   * Midjourney Prompts table updated_at trigger tests
+   */
+  describe('Midjourney Prompts Table Trigger', () => {
+    const titleArb = fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9 ]{2,49}$/);
+
+    it('should update updated_at timestamp when midjourney_prompt is modified (property test)', async () => {
+      await fc.assert(
+        fc.asyncProperty(titleArb, titleArb, async (originalTitle, newTitle) => {
+          fc.pre(originalTitle !== newTitle);
+
+          const slug = generateUniqueSlug(originalTitle.toLowerCase().replace(/\s+/g, '-').slice(0, 20));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: created, error: createError } = await (supabase.from as any)('midjourney_prompts')
+            .insert({
+              title: originalTitle,
+              slug,
+              type: 'sref',
+            })
+            .select('id, updated_at')
+            .single();
+
+          expect(createError).toBeNull();
+          testMidjourneyPromptIds.push(created.id);
+
+          const originalUpdatedAt = created.updated_at;
+          await sleep(10);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: updated, error: updateError } = await (supabase.from as any)('midjourney_prompts')
+            .update({ title: newTitle })
+            .eq('id', created.id)
+            .select('updated_at')
+            .single();
+
+          expect(updateError).toBeNull();
+
+          const originalTime = new Date(originalUpdatedAt).getTime();
+          const updatedTime = new Date(updated.updated_at).getTime();
+          expect(updatedTime).toBeGreaterThanOrEqual(originalTime);
+
+          return true;
+        }),
+        { numRuns: 20 }
+      );
+    }, 180000);
+
+    it('should set updated_at on initial midjourney_prompt creation', async () => {
+      const slug = generateUniqueSlug('mj-creation-test');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: created, error } = await (supabase.from as any)('midjourney_prompts')
+        .insert({
+          title: 'Midjourney Creation Test',
+          slug,
+          type: 'prompt',
+        })
+        .select('id, created_at, updated_at')
+        .single();
+
+      expect(error).toBeNull();
+      testMidjourneyPromptIds.push(created.id);
+
+      expect(created.created_at).toBeDefined();
+      expect(created.updated_at).toBeDefined();
+
+      const createdTime = new Date(created.created_at).getTime();
+      const updatedTime = new Date(created.updated_at).getTime();
+      expect(Math.abs(updatedTime - createdTime)).toBeLessThan(1000);
+    });
+  });
+
+  /**
+   * AI News table updated_at trigger tests
+   */
+  describe('AI News Table Trigger', () => {
+    const titleArb = fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9 ]{2,49}$/);
+
+    it('should update updated_at timestamp when ai_news is modified (property test)', async () => {
+      await fc.assert(
+        fc.asyncProperty(titleArb, titleArb, async (originalTitle, newTitle) => {
+          fc.pre(originalTitle !== newTitle);
+
+          const slug = generateUniqueSlug(originalTitle.toLowerCase().replace(/\s+/g, '-').slice(0, 20));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: created, error: createError } = await (supabase.from as any)('ai_news')
+            .insert({
+              title: originalTitle,
+              slug,
+            })
+            .select('id, updated_at')
+            .single();
+
+          expect(createError).toBeNull();
+          testAiNewsIds.push(created.id);
+
+          const originalUpdatedAt = created.updated_at;
+          await sleep(10);
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: updated, error: updateError } = await (supabase.from as any)('ai_news')
+            .update({ title: newTitle })
+            .eq('id', created.id)
+            .select('updated_at')
+            .single();
+
+          expect(updateError).toBeNull();
+
+          const originalTime = new Date(originalUpdatedAt).getTime();
+          const updatedTime = new Date(updated.updated_at).getTime();
+          expect(updatedTime).toBeGreaterThanOrEqual(originalTime);
+
+          return true;
+        }),
+        { numRuns: 20 }
+      );
+    }, 180000);
+
+    it('should not change created_at when ai_news is updated', async () => {
+      const slug = generateUniqueSlug('news-created-at-test');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: created, error: createError } = await (supabase.from as any)('ai_news')
+        .insert({
+          title: 'AI News Created At Test',
+          slug,
+        })
+        .select('id, created_at')
+        .single();
+
+      expect(createError).toBeNull();
+      testAiNewsIds.push(created.id);
+
+      const originalCreatedAt = created.created_at;
+      await sleep(10);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: updated, error: updateError } = await (supabase.from as any)('ai_news')
+        .update({ title: 'Updated AI News Title' })
+        .eq('id', created.id)
+        .select('created_at')
+        .single();
+
+      expect(updateError).toBeNull();
+      expect(updated.created_at).toBe(originalCreatedAt);
+    });
+  });
+
+  /**
+   * Combined property test for all tables with updated_at triggers
+   */
+  describe('Combined Trigger Property Tests', () => {
+    it('should update updated_at on each subsequent update for any table', async () => {
+      // Test tools table with multiple updates
+      const toolSlug = generateUniqueSlug('multi-update-tool');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: tool, error: toolError } = await (supabase.from as any)('tools')
+        .insert({
+          name: 'Multi Update Tool',
+          slug: toolSlug,
+          website_url: 'https://example.com',
+        })
+        .select('id, updated_at')
+        .single();
+
+      expect(toolError).toBeNull();
+      testToolIds.push(tool.id);
+
+      let previousUpdatedAt = tool.updated_at;
 
       // Perform multiple updates and verify timestamp increases each time
       for (let i = 1; i <= 3; i++) {
-        await sleep(10); // Ensure timestamp difference
+        await sleep(10);
 
-        const updated = await toolsRepo.update(created.id, {
-          name: `Updated Name ${i}`,
-        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: updated, error: updateError } = await (supabase.from as any)('tools')
+          .update({ name: `Updated Name ${i}` })
+          .eq('id', tool.id)
+          .select('updated_at')
+          .single();
 
-        // Property: Each update should have a newer or equal updated_at
+        expect(updateError).toBeNull();
+
         const previousTime = new Date(previousUpdatedAt).getTime();
-        const currentTime = new Date(updated.updated_at!).getTime();
-
+        const currentTime = new Date(updated.updated_at).getTime();
         expect(currentTime).toBeGreaterThanOrEqual(previousTime);
 
-        previousUpdatedAt = updated.updated_at!;
+        previousUpdatedAt = updated.updated_at;
       }
-    });
-
-    it('should not change created_at when record is updated', async () => {
-      const slug = generateUniqueSlug('created-at-preserved-test');
-      const insertData: ToolInsert = {
-        name: 'Created At Preserved Test Tool',
-        slug,
-        website_url: 'https://example.com',
-      };
-
-      const created = await toolsRepo.create(insertData);
-      testToolIds.push(created.id);
-
-      const originalCreatedAt = created.created_at;
-
-      await sleep(10);
-
-      // Update the record
-      const updated = await toolsRepo.update(created.id, {
-        name: 'Updated Name',
-      });
-
-      // Property: created_at should remain unchanged after update
-      expect(updated.created_at).toBe(originalCreatedAt);
     });
   });
 });
