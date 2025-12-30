@@ -1,24 +1,32 @@
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, PenTool, Image as ImageIcon, LogOut, Search } from 'lucide-react';
+import { getAdminFromRequest } from '@/lib/services/admin-auth.service';
 
+/**
+ * Admin Layout Component
+ * 
+ * Server component that provides the layout for all admin pages.
+ * Uses the dedicated admin authentication system (not Supabase Auth).
+ * 
+ * Requirements:
+ * - 9.1: Uses Admin_Session instead of Supabase Auth
+ * - 9.2: Displays admin email from Admin_Session
+ * - 9.3: No dependencies on Supabase Auth
+ * - 9.4: Includes logout button calling /api/admin/logout
+ * - 9.5: Redirects to /admin/login if session invalid
+ */
 export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    // Server-side role verification (defense in depth)
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // Get admin from session cookie (Req 9.1, 9.3)
+    const admin = await getAdminFromRequest();
 
-    if (!user) {
-        redirect('/login?callbackUrl=/admin');
-    }
-
-    // Check role from user metadata
-    if (user.user_metadata?.role !== 'admin') {
-        redirect('/unauthorized');
+    // Redirect to login if no valid session (Req 9.5)
+    if (!admin) {
+        redirect('/admin/login');
     }
 
     return (
@@ -29,7 +37,8 @@ export default async function AdminLayout({
                     <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                         AI Tools Book Admin
                     </h1>
-                    <p className="text-xs text-gray-500 mt-1">{user.email}</p>
+                    {/* Display admin email from session (Req 9.2) */}
+                    <p className="text-xs text-gray-500 mt-1">{admin.email}</p>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1">
@@ -49,14 +58,17 @@ export default async function AdminLayout({
                     </Link>
                 </nav>
 
+                {/* Logout button calling /api/admin/logout (Req 9.4) */}
                 <div className="p-4 border-t border-gray-100">
-                    <Link
-                        href="/api/auth/signout"
-                        className="flex items-center gap-3 px-4 py-3 w-full text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                    >
-                        <LogOut className="w-5 h-5" />
-                        <span className="font-medium">Sign Out</span>
-                    </Link>
+                    <form action="/api/admin/logout" method="POST">
+                        <button
+                            type="submit"
+                            className="flex items-center gap-3 px-4 py-3 w-full text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        >
+                            <LogOut className="w-5 h-5" />
+                            <span className="font-medium">Sign Out</span>
+                        </button>
+                    </form>
                 </div>
             </aside>
 
@@ -75,7 +87,7 @@ export default async function AdminLayout({
                     <div className="flex items-center gap-4">
                         <span className="text-sm text-gray-500">Admin</span>
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-                            {user.email?.[0].toUpperCase()}
+                            {admin.email?.[0].toUpperCase()}
                         </div>
                     </div>
                 </div>

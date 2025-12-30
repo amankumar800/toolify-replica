@@ -96,3 +96,14 @@ export {
   type AINewsUpdate,
   type AINewsListOptions,
 } from './ai-news.repository';
+
+// Admins repository
+export {
+  createAdminsRepository,
+  isAccountLocked,
+  LOCKOUT_DURATION_MS,
+  MAX_FAILED_ATTEMPTS,
+  type AdminsRepository,
+  type AdminRecord,
+  type AdminInsert,
+} from './admins.repository';

@@ -30,6 +30,9 @@ export const TABLES = {
   // New feature tables
   MIDJOURNEY_PROMPTS: 'midjourney_prompts',
   AI_NEWS: 'ai_news',
+  
+  // Admin authentication
+  ADMINS: 'admins',
 } as const;
 
 export type TableName = (typeof TABLES)[keyof typeof TABLES];
