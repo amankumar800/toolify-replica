@@ -107,3 +107,14 @@ export {
   type AdminRecord,
   type AdminInsert,
 } from './admins.repository';
+
+// Category Groups repository
+export {
+  createCategoryGroupsRepository,
+  type CategoryGroupsRepository,
+  type CategoryGroupRow,
+  type CategoryGroupInsert,
+  type CategoryGroupUpdate,
+  type CategoryGroupWithCategoryCount,
+  type CategoryInfo,
+} from './category-groups.repository';

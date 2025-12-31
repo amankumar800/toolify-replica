@@ -1,21 +1,29 @@
+/**
+ * New Tool Page
+ *
+ * Server component that renders the tool creation form.
+ *
+ * Requirements: 3.8, 21.1-21.5
+ */
+
 import { ToolForm } from '@/components/admin/ToolForm';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { getAllCategories } from '@/lib/services/tools.service';
 
-export default function NewToolPage() {
-    return (
-        <div className="max-w-2xl mx-auto space-y-6">
-            <div className="flex items-center gap-4 mb-8">
-                <Button variant="ghost" asChild className="pl-0 hover:bg-transparent hover:text-blue-600">
-                    <Link href="/admin/tools">
-                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                    </Link>
-                </Button>
-                <h1 className="text-2xl font-bold">Add New Tool</h1>
-            </div>
+export default async function NewToolPage() {
+  // Fetch categories for multi-select
+  const categories = await getAllCategories();
 
-            <ToolForm />
-        </div>
-    );
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold text-gray-900">Add New Tool</h2>
+        <p className="text-gray-500 mt-1">Create a new AI tool listing</p>
+      </div>
+
+      <ToolForm
+        categories={categories}
+        isNew={true}
+      />
+    </div>
+  );
 }

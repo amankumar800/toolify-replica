@@ -257,3 +257,39 @@ a:focus-visible,
   min-height: 44px;
   min-width: 44px;
 }
+
+
+/* ============================================
+   Toast Notification Animations
+   For admin panel toast notifications
+   ============================================ */
+
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.toast-slide-in {
+  animation: toast-slide-in 0.3s ease-out forwards;
+}
+
+.toast-slide-out {
+  animation: toast-slide-out 0.3s ease-in forwards;
+}

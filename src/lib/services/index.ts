@@ -32,11 +32,13 @@ export {
   getTools,
   getToolBySlug,
   getFeaturedTools,
-  createTool,
-  updateTool,
+  createToolPublic as createTool,
+  updateToolPublic as updateTool,
   deleteTool,
   type GetToolsOptions,
   type CreateToolInput,
+  type GetToolBySlugOptions,
+  type Tool,
 } from './tools.service';
 
 // Categories service exports
