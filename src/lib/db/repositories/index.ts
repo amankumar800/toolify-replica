@@ -20,6 +20,9 @@ export {
   type ToolInsert,
   type ToolUpdate,
   type ToolWithCategories,
+  type ToolSubmission,
+  type ToolSearchResult,
+  type FullTextSearchOptions,
 } from './tools.repository';
 
 // Categories repository
@@ -30,6 +33,8 @@ export {
   type CategoryInsert,
   type CategoryUpdate,
   type CategoryWithToolCount,
+  type CategoryWithGroup,
+  type CategoryWithGroupAndToolCount,
 } from './categories.repository';
 
 // Subcategories repository
@@ -60,3 +65,56 @@ export {
   type FeaturedToolUpdate,
   type FeaturedToolWithTool,
 } from './featured-tools.repository';
+
+// User favorites repository
+export {
+  createUserFavoritesRepository,
+  type UserFavoritesRepository,
+  type UserFavoriteRow,
+  type UserFavoriteInsert,
+  type UserFavoriteUpdate,
+  MAX_SHORTCUTS_PER_USER,
+} from './user-favorites.repository';
+
+// Midjourney prompts repository
+export {
+  createMidjourneyPromptsRepository,
+  type MidjourneyPromptsRepository,
+  type MidjourneyPromptRow,
+  type MidjourneyPromptInsert,
+  type MidjourneyPromptUpdate,
+  type MidjourneyPromptSortBy,
+  type MidjourneyPromptListOptions,
+} from './midjourney-prompts.repository';
+
+// AI News repository
+export {
+  createAINewsRepository,
+  type AINewsRepository,
+  type AINewsRow,
+  type AINewsInsert,
+  type AINewsUpdate,
+  type AINewsListOptions,
+} from './ai-news.repository';
+
+// Admins repository
+export {
+  createAdminsRepository,
+  isAccountLocked,
+  LOCKOUT_DURATION_MS,
+  MAX_FAILED_ATTEMPTS,
+  type AdminsRepository,
+  type AdminRecord,
+  type AdminInsert,
+} from './admins.repository';
+
+// Category Groups repository
+export {
+  createCategoryGroupsRepository,
+  type CategoryGroupsRepository,
+  type CategoryGroupRow,
+  type CategoryGroupInsert,
+  type CategoryGroupUpdate,
+  type CategoryGroupWithCategoryCount,
+  type CategoryInfo,
+} from './category-groups.repository';

@@ -32,11 +32,13 @@ export {
   getTools,
   getToolBySlug,
   getFeaturedTools,
-  createTool,
-  updateTool,
+  createToolPublic as createTool,
+  updateToolPublic as updateTool,
   deleteTool,
   type GetToolsOptions,
   type CreateToolInput,
+  type GetToolBySlugOptions,
+  type Tool,
 } from './tools.service';
 
 // Categories service exports
@@ -50,3 +52,14 @@ export {
   type Subcategory,
   type FAQ,
 } from './categories.service';
+
+// Admin dashboard service exports
+export {
+  getToolsCount,
+  getCategoriesCount,
+  getAiNewsCount,
+  getRecentTools,
+  getDashboardStats,
+  type DashboardStats,
+  type RecentTool,
+} from './admin-dashboard.service';

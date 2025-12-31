@@ -1,49 +1,240 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
+import { verifyToken } from '@/lib/utils/jwt';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/supabase/types';
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Cookie name for admin session */
+const ADMIN_COOKIE_NAME = 'admin_session';
+
+/** Admin login page path */
+const ADMIN_LOGIN_PATH = '/admin/login';
+
+/** Admin dashboard path */
+const ADMIN_DASHBOARD_PATH = '/admin/dashboard';
 
 /**
- * Protected route patterns that require authentication
+ * Protected route patterns that require Supabase authentication
+ * Note: Admin routes are handled separately with dedicated admin auth
  */
-const PROTECTED_ROUTES = ['/admin'];
+const SUPABASE_PROTECTED_ROUTES: string[] = [];
+
+// ============================================================================
+// Admin Auth Helpers
+// ============================================================================
 
 /**
- * Check if a pathname matches any protected route pattern
+ * Get admin session from request cookie and verify JWT.
+ * Does NOT check is_active status - that requires a database call.
+ * 
+ * @param request - Next.js request object
+ * @returns Admin payload if valid session, null otherwise
  */
-function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some(route => pathname.startsWith(route));
+async function getAdminSessionFromCookie(
+  request: NextRequest
+): Promise<{ sub: string; email: string } | null> {
+  const cookie = request.cookies.get(ADMIN_COOKIE_NAME);
+  
+  if (!cookie?.value) {
+    return null;
+  }
+
+  const payload = await verifyToken(cookie.value);
+  
+  if (!payload) {
+    return null;
+  }
+
+  return {
+    sub: payload.sub,
+    email: payload.email,
+  };
 }
 
 /**
- * Middleware that handles:
- * 1. Supabase Auth session refresh on every request
- * 2. Protected route redirection for unauthenticated users
+ * Check if an admin account is active in the database.
+ * Uses service role client to bypass RLS.
  * 
- * Requirements:
+ * @param adminId - Admin UUID to check
+ * @returns true if admin exists and is_active is true, false otherwise
+ */
+async function checkAdminIsActive(adminId: string): Promise<boolean> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error('[Admin Auth] Missing Supabase credentials');
+      return false;
+    }
+
+    const supabase = createClient<Database>(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    const { data, error } = await supabase
+      .from('admins')
+      .select('is_active')
+      .eq('id', adminId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[Admin Auth] Database error checking is_active:', error.message);
+      return false;
+    }
+
+    if (!data) {
+      return false;
+    }
+
+    return data.is_active === true;
+  } catch (error) {
+    console.error('[Admin Auth] Error checking admin status:', error);
+    return false;
+  }
+}
+
+/**
+ * Log unauthorized access attempt for security monitoring.
+ * 
+ * @param request - Next.js request object
+ * @param reason - Reason for denial
+ */
+function logUnauthorizedAccess(request: NextRequest, reason: string): void {
+  const ip = request.headers.get('x-forwarded-for') || 
+             request.headers.get('x-real-ip') || 
+             'unknown';
+  const pathname = request.nextUrl.pathname;
+  
+  console.warn(`[Admin Auth] Unauthorized access attempt: ${pathname} - ${reason} - IP: ${ip}`);
+}
+
+// ============================================================================
+// Route Detection
+// ============================================================================
+
+/**
+ * Check if a pathname is an admin route
+ */
+function isAdminRoute(pathname: string): boolean {
+  return pathname.startsWith('/admin');
+}
+
+/**
+ * Check if a pathname is the admin login page
+ */
+function isAdminLoginPage(pathname: string): boolean {
+  return pathname === ADMIN_LOGIN_PATH;
+}
+
+/**
+ * Check if a pathname matches any Supabase protected route pattern
+ */
+function isSupabaseProtectedRoute(pathname: string): boolean {
+  return SUPABASE_PROTECTED_ROUTES.some(route => pathname.startsWith(route));
+}
+
+// ============================================================================
+// Middleware
+// ============================================================================
+
+/**
+ * Middleware that handles:
+ * 1. Admin route protection with dedicated admin auth (JWT + httpOnly cookies)
+ * 2. Supabase Auth session refresh for non-admin routes
+ * 3. Protected route redirection for unauthenticated users
+ * 
+ * Admin Auth Requirements:
+ * - 2.4: Redirect authenticated admins from /admin/login to /admin/dashboard
+ * - 4.1: Redirect unauthenticated users from /admin/* to /admin/login
+ * - 4.2: Allow access when valid Admin_Session exists
+ * - 4.3: Redirect to /admin/login on expired/invalid session
+ * - 4.4: Validate Admin_Session via middleware
+ * - 4.5: Deny access if is_active is false
+ * - 11.4: Log unauthorized access attempts
+ * 
+ * Supabase Auth Requirements (for non-admin routes):
  * - 2.1: Refresh Supabase_Auth session using cookies on every request
  * - 2.2: Update both request and response cookies with refreshed session
- * - 2.3: Redirect unauthenticated users from /admin routes to /login
+ * - 2.3: Redirect unauthenticated users from protected routes to /login
  * - 2.4: Use getUser() to validate sessions securely
  * - 2.5: Clear invalid cookies if session refresh fails
  */
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // 1. Refresh Supabase session and get user
-  // This handles Requirements 2.1, 2.2, 2.4, 2.5
+  // ========================================================================
+  // Admin Route Handling (Dedicated Admin Auth)
+  // ========================================================================
+  if (isAdminRoute(pathname)) {
+    // Handle admin login page
+    if (isAdminLoginPage(pathname)) {
+      // Check if already authenticated - redirect to dashboard (Req 2.4)
+      const adminSession = await getAdminSessionFromCookie(request);
+      
+      if (adminSession) {
+        // Verify admin is still active before redirecting
+        const isActive = await checkAdminIsActive(adminSession.sub);
+        
+        if (isActive) {
+          return NextResponse.redirect(new URL(ADMIN_DASHBOARD_PATH, request.url));
+        }
+        // If not active, allow access to login page (they need to re-authenticate)
+      }
+      
+      // No valid session or inactive - allow access to login page
+      return NextResponse.next();
+    }
+
+    // Protected admin routes (everything except /admin/login)
+    const adminSession = await getAdminSessionFromCookie(request);
+
+    // No session - redirect to login (Req 4.1)
+    if (!adminSession) {
+      logUnauthorizedAccess(request, 'No admin session');
+      return NextResponse.redirect(new URL(ADMIN_LOGIN_PATH, request.url));
+    }
+
+    // Check if admin account is active (Req 4.5)
+    const isActive = await checkAdminIsActive(adminSession.sub);
+
+    if (!isActive) {
+      logUnauthorizedAccess(request, 'Admin account inactive or not found');
+      return NextResponse.redirect(new URL(ADMIN_LOGIN_PATH, request.url));
+    }
+
+    // Valid session and active account - allow access (Req 4.2)
+    return NextResponse.next();
+  }
+
+  // ========================================================================
+  // Non-Admin Route Handling (Supabase Auth)
+  // ========================================================================
+  
+  // Refresh Supabase session and get user
   const { response, user, error } = await updateSession(request);
 
-  // Log session refresh errors for debugging (optional)
+  // Log session refresh errors for debugging
   if (error) {
     console.debug('[Middleware] Session refresh error:', error);
   }
 
-  // 2. Protected route redirection (Requirement 2.3)
-  if (isProtectedRoute(pathname) && !user) {
-    const loginUrl = new URL('/login', request.url);
-    // Include the original URL as callback for post-login redirect
-    loginUrl.searchParams.set('callbackUrl', request.url);
-    return NextResponse.redirect(loginUrl);
+  // Protected route check for Supabase auth
+  if (isSupabaseProtectedRoute(pathname)) {
+    // Redirect unauthenticated users to login
+    if (!user) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', request.url);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   // Return response with updated cookies

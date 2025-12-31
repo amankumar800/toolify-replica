@@ -1,11 +1,13 @@
 /**
  * Property-based tests for database constraints
- * 
- * **Feature: supabase-migration, Property 18: Check constraints enforce valid ranges**
- * **Validates: Requirements 15.3**
- * 
+ *
+ * **Feature: database-schema-redesign, Property 3: CHECK Constraint Enforcement**
+ * **Validates: Requirements 1.2, 1.6, 6.2, 9.2**
+ *
+ * *For any* column with a CHECK constraint, inserting or updating with invalid values
+ * SHALL be rejected, and valid values SHALL be accepted.
+ *
  * To run these tests, you need to set SUPABASE_SERVICE_ROLE_KEY in your environment.
- * Get it from: https://supabase.com/dashboard/project/sxepzgwkbsynilkronsj/settings/api
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as fc from 'fast-check';
@@ -20,6 +22,8 @@ const shouldSkip = !SUPABASE_URL || !SUPABASE_SERVICE_KEY;
 describe.skipIf(shouldSkip)('Database Check Constraints', { timeout: 120000 }, () => {
   let supabase: SupabaseClient;
   const testToolIds: string[] = [];
+  const testFeaturedToolIds: string[] = [];
+  const testMidjourneyPromptIds: string[] = [];
 
   beforeAll(() => {
     supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!, {
@@ -32,15 +36,21 @@ describe.skipIf(shouldSkip)('Database Check Constraints', { timeout: 120000 }, (
     if (testToolIds.length > 0) {
       await supabase.from('tools').delete().in('id', testToolIds);
     }
+    if (testFeaturedToolIds.length > 0) {
+      await supabase.from('featured_tools').delete().in('id', testFeaturedToolIds);
+    }
+    if (testMidjourneyPromptIds.length > 0) {
+      await supabase.from('midjourney_prompts').delete().in('id', testMidjourneyPromptIds);
+    }
   });
 
   /**
-   * **Feature: supabase-migration, Property 18: Check constraints enforce valid ranges**
-   * **Validates: Requirements 15.3**
-   * 
+   * **Feature: database-schema-redesign, Property 3: CHECK Constraint Enforcement**
+   * **Validates: Requirements 1.2, 1.6, 6.2, 9.2**
+   *
    * *For any* tool insert or update, review_score values outside [0, 5] SHALL be rejected by the database.
    */
-  describe('Property 18: Check constraints enforce valid ranges', () => {
+  describe('Property 3: CHECK Constraint Enforcement', () => {
     it('should reject review_score values below 0', async () => {
       await fc.assert(
         fc.asyncProperty(
@@ -205,6 +215,183 @@ describe.skipIf(shouldSkip)('Database Check Constraints', { timeout: 120000 }, (
             }
           }
         ),
+        { numRuns: 10 }
+      );
+    });
+
+    // Requirement 1.6: Status CHECK constraint
+    it('should reject invalid status values (Req 1.6)', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.string({ minLength: 1, maxLength: 50 }).filter(
+            (s) => !['draft', 'pending', 'published', 'rejected'].includes(s)
+          ),
+          async (invalidStatus) => {
+            const { error } = await supabase.from('tools').insert({
+              name: 'Test Tool',
+              slug: `test-tool-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              website_url: 'https://example.com',
+              status: invalidStatus,
+            });
+
+            expect(error).not.toBeNull();
+            expect(error?.message).toMatch(/check|violates/i);
+          }
+        ),
+        { numRuns: 10 }
+      );
+    });
+
+    it('should accept valid status values (Req 1.6)', async () => {
+      const validStatusValues = ['draft', 'pending', 'published', 'rejected'];
+
+      await fc.assert(
+        fc.asyncProperty(fc.constantFrom(...validStatusValues), async (validStatus) => {
+          const slug = `test-tool-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+          const { data, error } = await supabase
+            .from('tools')
+            .insert({
+              name: 'Test Tool',
+              slug,
+              website_url: 'https://example.com',
+              status: validStatus,
+            })
+            .select('id');
+
+          expect(error).toBeNull();
+          expect(data).not.toBeNull();
+
+          // Track for cleanup
+          if (data && data[0]) {
+            testToolIds.push(data[0].id);
+          }
+        }),
+        { numRuns: 10 }
+      );
+    });
+
+    // Requirement 6.2: Placement type CHECK constraint
+    it('should reject invalid placement_type values (Req 6.2)', async () => {
+      // First create a tool to reference
+      const toolSlug = `test-tool-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const { data: toolData } = await supabase
+        .from('tools')
+        .insert({
+          name: 'Test Tool for Featured',
+          slug: toolSlug,
+          website_url: 'https://example.com',
+        })
+        .select('id')
+        .single();
+
+      if (toolData) {
+        testToolIds.push(toolData.id);
+
+        await fc.assert(
+          fc.asyncProperty(
+            fc.string({ minLength: 1, maxLength: 50 }).filter(
+              (s) => !['homepage', 'category', 'search'].includes(s)
+            ),
+            async (invalidPlacement) => {
+              const { error } = await supabase.from('featured_tools').insert({
+                tool_id: toolData.id,
+                placement_type: invalidPlacement,
+              });
+
+              expect(error).not.toBeNull();
+              expect(error?.message).toMatch(/check|violates/i);
+            }
+          ),
+          { numRuns: 10 }
+        );
+      }
+    });
+
+    it('should accept valid placement_type values (Req 6.2)', async () => {
+      // First create a tool to reference
+      const toolSlug = `test-tool-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const { data: toolData } = await supabase
+        .from('tools')
+        .insert({
+          name: 'Test Tool for Featured',
+          slug: toolSlug,
+          website_url: 'https://example.com',
+        })
+        .select('id')
+        .single();
+
+      if (toolData) {
+        testToolIds.push(toolData.id);
+        const validPlacementValues = ['homepage', 'category', 'search'];
+
+        await fc.assert(
+          fc.asyncProperty(fc.constantFrom(...validPlacementValues), async (validPlacement) => {
+            const { data, error } = await supabase
+              .from('featured_tools')
+              .insert({
+                tool_id: toolData.id,
+                placement_type: validPlacement,
+              })
+              .select('id');
+
+            expect(error).toBeNull();
+            expect(data).not.toBeNull();
+
+            // Track for cleanup
+            if (data && data[0]) {
+              testFeaturedToolIds.push(data[0].id);
+            }
+          }),
+          { numRuns: 3 } // Reduced runs since we're using the same tool
+        );
+      }
+    });
+
+    // Requirement 9.2: Midjourney prompts type CHECK constraint
+    it('should reject invalid midjourney_prompts type values (Req 9.2)', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.string({ minLength: 1, maxLength: 50 }).filter((s) => !['sref', 'prompt'].includes(s)),
+          async (invalidType) => {
+            const { error } = await supabase.from('midjourney_prompts').insert({
+              title: 'Test Prompt',
+              slug: `test-prompt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              type: invalidType,
+            });
+
+            expect(error).not.toBeNull();
+            expect(error?.message).toMatch(/check|violates/i);
+          }
+        ),
+        { numRuns: 10 }
+      );
+    });
+
+    it('should accept valid midjourney_prompts type values (Req 9.2)', async () => {
+      const validTypeValues = ['sref', 'prompt'];
+
+      await fc.assert(
+        fc.asyncProperty(fc.constantFrom(...validTypeValues), async (validType) => {
+          const slug = `test-prompt-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+          const { data, error } = await supabase
+            .from('midjourney_prompts')
+            .insert({
+              title: 'Test Prompt',
+              slug,
+              type: validType,
+            })
+            .select('id');
+
+          expect(error).toBeNull();
+          expect(data).not.toBeNull();
+
+          // Track for cleanup
+          if (data && data[0]) {
+            testMidjourneyPromptIds.push(data[0].id);
+          }
+        }),
         { numRuns: 10 }
       );
     });

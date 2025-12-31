@@ -12,12 +12,16 @@ import {
   mapToolRowToTool,
   mapToolWithCategories,
   mapToolToInsert,
+  mapToolRowToToolWithWorkflow,
+  mapToolWithWorkflowToInsert,
+  mapToolWorkflowToUpdate,
   TOOL_DEFAULTS,
 } from '../tool.mapper';
 import type { ToolRow, ToolWithCategories } from '../../repositories/tools.repository';
 
 /**
  * Helper to generate a valid ToolRow with snake_case columns
+ * Updated for new schema with submission workflow fields
  */
 function createToolRow(overrides: Partial<ToolRow> = {}): ToolRow {
   return {
@@ -28,7 +32,6 @@ function createToolRow(overrides: Partial<ToolRow> = {}): ToolRow {
     short_description: 'Short desc',
     image_url: 'https://example.com/image.png',
     website_url: 'https://example.com',
-    external_url: null,
     pricing: 'Free',
     tags: ['ai', 'test'],
     saved_count: 100,
@@ -39,18 +42,25 @@ function createToolRow(overrides: Partial<ToolRow> = {}): ToolRow {
     is_featured: true,
     monthly_visits: 10000,
     change_percentage: 5.5,
-    free_tier_details: null,
     metadata: null,
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-02T00:00:00Z',
+    // Submission workflow fields (new schema)
+    status: 'published',
+    submitter_email: null,
+    submitter_name: null,
+    reviewed_by: null,
+    reviewed_at: null,
+    rejection_reason: null,
+    search_vector: null,
     ...overrides,
   };
 }
 
 describe('Tool Mapper Property Tests', () => {
   /**
-   * **Feature: supabase-migration, Property 12: Mapper snake_case to camelCase transformation**
-   * **Validates: Requirements 4.1, 4.5**
+   * **Feature: database-schema-redesign, Property 12: Mapper snake_case to camelCase transformation**
+   * **Validates: Requirements 1.1-1.8**
    *
    * *For any* database row with snake_case columns, the mapper SHALL produce an object
    * with equivalent camelCase properties where the values are preserved.
@@ -211,8 +221,8 @@ describe('Tool Mapper Property Tests', () => {
 
 
   /**
-   * **Feature: supabase-migration, Property 13: Mapper applies defaults for null values**
-   * **Validates: Requirements 4.2**
+   * **Feature: database-schema-redesign, Property 13: Mapper applies defaults for null values**
+   * **Validates: Requirements 1.1-1.8**
    *
    * *For any* database row with null values in optional fields, the mapper SHALL produce
    * an object with the specified default values.
@@ -309,7 +319,6 @@ describe('Tool Mapper Property Tests', () => {
               short_description: null,
               image_url: null,
               website_url: websiteUrl,
-              external_url: null,
               pricing: null, // Will default to 'Freemium'
               tags: null,
               saved_count: null,
@@ -320,10 +329,17 @@ describe('Tool Mapper Property Tests', () => {
               is_featured: null,
               monthly_visits: null,
               change_percentage: null,
-              free_tier_details: null,
               metadata: null,
               created_at: null,
               updated_at: null,
+              // Submission workflow fields
+              status: null,
+              submitter_email: null,
+              submitter_name: null,
+              reviewed_by: null,
+              reviewed_at: null,
+              rejection_reason: null,
+              search_vector: null,
             };
 
             const tool = mapToolRowToTool(row);
@@ -365,8 +381,8 @@ describe('Tool Mapper Property Tests', () => {
   });
 
   /**
-   * **Feature: supabase-migration, Property 14: Mapper round-trip preserves data**
-   * **Validates: Requirements 4.4**
+   * **Feature: database-schema-redesign, Property 14: Mapper round-trip preserves data**
+   * **Validates: Requirements 1.1-1.8**
    *
    * *For any* valid Tool object, mapToolToInsert followed by mapToolRowToTool
    * (after DB insert) SHALL produce an object with equivalent data to the original
@@ -468,7 +484,6 @@ describe('Tool Mapper Property Tests', () => {
               short_description: insertData.short_description ?? null,
               image_url: insertData.image_url ?? null,
               website_url: insertData.website_url,
-              external_url: insertData.external_url ?? null,
               pricing: insertData.pricing ?? null,
               tags: insertData.tags ?? null,
               saved_count: insertData.saved_count ?? null,
@@ -479,10 +494,17 @@ describe('Tool Mapper Property Tests', () => {
               is_featured: insertData.is_featured ?? null,
               monthly_visits: insertData.monthly_visits ?? null,
               change_percentage: insertData.change_percentage ?? null,
-              free_tier_details: insertData.free_tier_details ?? null,
               metadata: insertData.metadata ?? null,
               created_at: '2024-01-01T00:00:00Z',
               updated_at: '2024-01-01T00:00:00Z',
+              // Submission workflow fields (defaults from DB)
+              status: 'published',
+              submitter_email: null,
+              submitter_name: null,
+              reviewed_by: null,
+              reviewed_at: null,
+              rejection_reason: null,
+              search_vector: null,
             };
 
             // Map back to application type (snake_case -> camelCase)
@@ -555,7 +577,7 @@ describe('Tool Mapper Property Tests', () => {
   });
 
   /**
-   * Additional tests for mapToolWithCategories
+   * Tests for mapToolWithCategories
    */
   describe('mapToolWithCategories', () => {
     it('should extract category names from joined relationship', () => {
@@ -615,6 +637,149 @@ describe('Tool Mapper Property Tests', () => {
       expect(tool.pricing).toBe('Paid');
       expect(tool.reviewScore).toBe(4.8);
       expect(tool.categories).toEqual(['AI']);
+    });
+  });
+
+  /**
+   * Tests for new workflow mapper functions
+   * **Feature: database-schema-redesign**
+   * **Validates: Requirements 1.6-1.8**
+   */
+  describe('Workflow Mapper Functions', () => {
+    describe('mapToolRowToToolWithWorkflow', () => {
+      it('should include all workflow fields', () => {
+        const row = createToolRow({
+          status: 'pending',
+          submitter_email: 'user@example.com',
+          submitter_name: 'Test User',
+          reviewed_by: 'admin-uuid',
+          reviewed_at: '2024-01-15T10:00:00Z',
+          rejection_reason: null,
+          metadata: { source: 'api' },
+        });
+
+        const tool = mapToolRowToToolWithWorkflow(row);
+
+        expect(tool.status).toBe('pending');
+        expect(tool.submitterEmail).toBe('user@example.com');
+        expect(tool.submitterName).toBe('Test User');
+        expect(tool.reviewedBy).toBe('admin-uuid');
+        expect(tool.reviewedAt).toBe('2024-01-15T10:00:00Z');
+        expect(tool.rejectionReason).toBeUndefined();
+        expect(tool.metadata).toEqual({ source: 'api' });
+      });
+
+      it('should apply default status when null', () => {
+        const row = createToolRow({ status: null });
+        const tool = mapToolRowToToolWithWorkflow(row);
+        
+        expect(tool.status).toBe('published');
+      });
+
+      it('should apply default status when invalid', () => {
+        const row = createToolRow({ status: 'invalid-status' });
+        const tool = mapToolRowToToolWithWorkflow(row);
+        
+        expect(tool.status).toBe('published');
+      });
+    });
+
+    describe('mapToolWithWorkflowToInsert', () => {
+      it('should include workflow fields in insert', () => {
+        const toolInput = {
+          name: 'New Tool',
+          slug: 'new-tool',
+          websiteUrl: 'https://example.com',
+          description: 'A new tool',
+          shortDescription: 'New',
+          image: 'https://example.com/image.png',
+          pricing: 'Free' as const,
+          tags: ['ai'],
+          savedCount: 0,
+          reviewCount: 0,
+          reviewScore: 0,
+          verified: false,
+          isNew: true,
+          isFeatured: false,
+          status: 'pending' as const,
+          submitterEmail: 'user@example.com',
+          submitterName: 'Test User',
+          metadata: { source: 'form' },
+        };
+
+        const insert = mapToolWithWorkflowToInsert(toolInput);
+
+        expect(insert.status).toBe('pending');
+        expect(insert.submitter_email).toBe('user@example.com');
+        expect(insert.submitter_name).toBe('Test User');
+        expect(insert.metadata).toEqual({ source: 'form' });
+      });
+
+      it('should default status to pending when not provided', () => {
+        const toolInput = {
+          name: 'New Tool',
+          slug: 'new-tool',
+          websiteUrl: 'https://example.com',
+          description: '',
+          shortDescription: '',
+          image: '',
+          pricing: 'Free' as const,
+          tags: [],
+          savedCount: 0,
+          reviewCount: 0,
+          reviewScore: 0,
+          verified: false,
+          isNew: true,
+          isFeatured: false,
+        };
+
+        const insert = mapToolWithWorkflowToInsert(toolInput);
+
+        expect(insert.status).toBe('pending');
+      });
+    });
+
+    describe('mapToolWorkflowToUpdate', () => {
+      it('should map workflow update fields correctly', () => {
+        const updates = {
+          status: 'published' as const,
+          reviewedBy: 'admin-uuid',
+          reviewedAt: '2024-01-15T10:00:00Z',
+        };
+
+        const dbUpdates = mapToolWorkflowToUpdate(updates);
+
+        expect(dbUpdates.status).toBe('published');
+        expect(dbUpdates.reviewed_by).toBe('admin-uuid');
+        expect(dbUpdates.reviewed_at).toBe('2024-01-15T10:00:00Z');
+      });
+
+      it('should include rejection reason when rejecting', () => {
+        const updates = {
+          status: 'rejected' as const,
+          reviewedBy: 'admin-uuid',
+          reviewedAt: '2024-01-15T10:00:00Z',
+          rejectionReason: 'Does not meet quality standards',
+        };
+
+        const dbUpdates = mapToolWorkflowToUpdate(updates);
+
+        expect(dbUpdates.status).toBe('rejected');
+        expect(dbUpdates.rejection_reason).toBe('Does not meet quality standards');
+      });
+
+      it('should only include provided fields', () => {
+        const updates = {
+          status: 'published' as const,
+        };
+
+        const dbUpdates = mapToolWorkflowToUpdate(updates);
+
+        expect(dbUpdates.status).toBe('published');
+        expect(dbUpdates.reviewed_by).toBeUndefined();
+        expect(dbUpdates.reviewed_at).toBeUndefined();
+        expect(dbUpdates.rejection_reason).toBeUndefined();
+      });
     });
   });
 });

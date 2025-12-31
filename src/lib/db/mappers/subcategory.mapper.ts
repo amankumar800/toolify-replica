@@ -95,6 +95,17 @@ export function mapSubcategoryWithTools(row: SubcategoryWithTools): SubcategoryW
 }
 
 /**
+ * Input type for creating a subcategory.
+ */
+export interface SubcategoryInput {
+  categoryId: string;
+  name: string;
+  slug: string;
+  toolCount?: number;
+  displayOrder?: number;
+}
+
+/**
  * Maps an application Subcategory object (camelCase) to a database insert type (snake_case).
  * Used when creating subcategories in the database.
  *
@@ -108,9 +119,7 @@ export function mapSubcategoryWithTools(row: SubcategoryWithTools): SubcategoryW
  * await subcategoriesRepo.create(insert);
  * ```
  */
-export function mapSubcategoryToInsert(
-  subcategory: Omit<Subcategory, 'id' | 'createdAt' | 'updatedAt'>
-): SubcategoryInsert {
+export function mapSubcategoryToInsert(subcategory: SubcategoryInput): SubcategoryInsert {
   return {
     category_id: subcategory.categoryId,
     name: subcategory.name,
@@ -135,7 +144,7 @@ export function mapSubcategoryToInsert(
  * ```
  */
 export function mapSubcategoryToUpdate(
-  updates: Partial<Omit<Subcategory, 'id' | 'createdAt' | 'updatedAt'>>
+  updates: Partial<SubcategoryInput>
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
