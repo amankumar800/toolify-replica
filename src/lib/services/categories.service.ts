@@ -153,7 +153,8 @@ export async function getCategoryGroups(): Promise<CategoryGroup[]> {
     .order('display_order', { ascending: true });
 
   if (groupsError) {
-    throw groupsError;
+    console.error('Error fetching category groups:', groupsError);
+    return [];
   }
 
   if (!groups || groups.length === 0) {
@@ -161,9 +162,26 @@ export async function getCategoryGroups(): Promise<CategoryGroup[]> {
   }
 
   // Get all categories with tool counts
-  const categoriesRepo = createCategoriesRepository(supabase);
-  const categoriesWithCounts = await categoriesRepo.findWithToolCount();
-  const categories = categoriesWithCounts.map(mapCategoryWithToolCount);
+  let categories: Category[] = [];
+  try {
+    const categoriesRepo = createCategoriesRepository(supabase);
+    const categoriesWithCounts = await categoriesRepo.findWithToolCount();
+    categories = categoriesWithCounts.map(mapCategoryWithToolCount);
+  } catch (error) {
+    console.error('Error fetching categories with tool counts:', error);
+    // Fall back to getting categories without tool counts
+    try {
+      const categoriesRepo = createCategoriesRepository(supabase);
+      const basicCategories = await categoriesRepo.findAll({
+        orderBy: 'display_order',
+        ascending: true,
+      });
+      categories = basicCategories.map(mapCategoryRowToCategory);
+    } catch (fallbackError) {
+      console.error('Error fetching basic categories:', fallbackError);
+      return [];
+    }
+  }
 
   // Group categories by their group_id in metadata
   // Use a Set to track which categories have been assigned to prevent duplicates
