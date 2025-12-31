@@ -1,6 +1,7 @@
 import { Container } from '@/components/layout/Container';
 import { RankingTable } from '@/components/features/RankingTable';
 import { getTools } from '@/lib/services/tools.service';
+import type { Tool } from '@/lib/types/tool';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -10,10 +11,30 @@ export const metadata: Metadata = {
 
 export default async function RankingPage() {
     // Fetch tools and sort by monthly visits for ranking
-    const tools = await getTools({ limit: 50 });
+    const { items } = await getTools({ limit: 50 });
+
+    // Map to Tool type expected by RankingTable
+    const tools: Tool[] = items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        slug: item.slug,
+        description: item.description ?? '',
+        shortDescription: item.short_description ?? '',
+        image: item.image_url ?? '',
+        websiteUrl: item.website_url,
+        pricing: (item.pricing ?? 'Free') as Tool['pricing'],
+        categories: [], // Not included in PublicToolItem
+        tags: item.tags ?? [],
+        savedCount: 0,
+        reviewCount: item.review_count ?? 0,
+        reviewScore: item.review_score ?? 0,
+        isFeatured: item.is_featured ?? false,
+        isNew: item.is_new ?? false,
+        monthlyVisits: item.monthly_visits ?? undefined,
+    }));
 
     // Sort by monthlyVisits for this page
-    const rankedTools = [...tools].sort((a, b) => ((b as any).monthlyVisits || 0) - ((a as any).monthlyVisits || 0));
+    const rankedTools = [...tools].sort((a, b) => (b.monthlyVisits || 0) - (a.monthlyVisits || 0));
 
     // Get the current Date for the header (e.g., "Top AI Tools - December 2025")
     const date = new Date();
