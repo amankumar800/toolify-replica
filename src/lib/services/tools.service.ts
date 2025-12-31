@@ -583,7 +583,8 @@ export async function getTools(options: GetToolsOptions = {}): Promise<{
   const { data, error, count } = await query;
 
   if (error) {
-    throw new Error(`Failed to fetch tools: ${error.message}`);
+    console.error('Failed to fetch tools:', error);
+    return { items: [], total: 0, hasMore: false };
   }
 
   const items: PublicToolItem[] = (data ?? []).map((row) => ({
