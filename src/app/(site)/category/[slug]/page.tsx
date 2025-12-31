@@ -2,6 +2,7 @@
 import { Container } from '@/components/layout/Container';
 import { ToolGrid } from '@/components/features/ToolGrid';
 import { getTools } from '@/lib/services/tools.service';
+import type { Tool } from '@/lib/types/tool';
 
 interface CategoryPageProps {
     params: Promise<{ slug: string }>;
@@ -19,9 +20,27 @@ export async function generateMetadata({ params }: CategoryPageProps) {
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
     const { slug } = await params;
     const { q } = await searchParams;
-    const tools = await getTools({ search: q, category: slug });
-    const total = tools.length;
+    const { items, total } = await getTools({ search: q, category: slug });
     const categoryName = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+    // Map to Tool type expected by ToolGrid
+    const tools: Tool[] = items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        slug: item.slug,
+        description: item.description ?? '',
+        shortDescription: item.short_description ?? '',
+        image: item.image_url ?? '',
+        websiteUrl: item.website_url,
+        pricing: (item.pricing ?? 'Free') as Tool['pricing'],
+        categories: [],
+        tags: item.tags ?? [],
+        savedCount: 0,
+        reviewCount: item.review_count ?? 0,
+        reviewScore: item.review_score ?? 0,
+        isFeatured: item.is_featured ?? false,
+        isNew: item.is_new ?? false,
+    }));
 
     if (!tools.length && !q) {
         // If truly empty and not just a search result empty, maybe 404 or just show empty state
