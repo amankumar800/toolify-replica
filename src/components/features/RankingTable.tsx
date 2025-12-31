@@ -56,14 +56,20 @@ export function RankingTable({ tools }: RankingTableProps) {
                             </td>
                             <td className="p-4">
                                 <Link href={`/tool/${tool.slug}`} className="flex items-center gap-4 block">
-                                    <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0">
-                                        <Image
-                                            src={tool.image}
-                                            alt={tool.name}
-                                            fill
-                                            className="object-cover"
-                                            sizes="40px"
-                                        />
+                                    <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-100">
+                                        {tool.image ? (
+                                            <Image
+                                                src={tool.image}
+                                                alt={tool.name}
+                                                fill
+                                                className="object-cover"
+                                                sizes="40px"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-medium">
+                                                {tool.name.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <div className="font-bold text-gray-900 group-hover:text-[var(--primary)] transition-colors">
