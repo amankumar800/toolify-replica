@@ -1,0 +1,60 @@
+/**
+ * Company Pages Admin API Routes
+ *
+ * Handles fetching all company pages for the admin panel.
+ *
+ * Requirements: 1.1
+ */
+
+import { NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { TABLES } from '@/lib/db/constants/tables';
+import { getAdminFromRequest } from '@/lib/services/admin-auth.service';
+import type { CompanyPageRow } from '@/lib/supabase/types';
+
+/**
+ * GET /api/admin/company-pages
+ *
+ * Fetches all company pages for the admin panel.
+ * Requires admin authentication.
+ *
+ * Requirements: 1.1
+ */
+export async function GET() {
+  try {
+    // Check admin authentication
+    const admin = await getAdminFromRequest();
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const supabase = createAdminClient();
+
+    const { data, error } = await supabase
+      .from(TABLES.COMPANY_PAGES)
+      .select('*')
+      .order('slug', { ascending: true });
+
+    if (error) {
+      console.error('[company-pages] Supabase error:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch company pages', details: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      data: data as CompanyPageRow[],
+      total: data?.length ?? 0,
+    });
+  } catch (error) {
+    console.error('[company-pages] Error fetching company pages:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch company pages', details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
+}
