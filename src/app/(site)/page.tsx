@@ -15,7 +15,6 @@ import {
   CategoryGridSkeleton
 } from '@/components/features/home';
 import { MultiModelSearch } from '@/components/features/MultiModelSearch';
-import { Mail } from 'lucide-react';
 
 // Data imports
 import myToolsData from '@/data/my-tools.json';
@@ -141,19 +140,6 @@ export default async function HomePage() {
           <aside className="hidden xl:block w-[360px] shrink-0 space-y-8">
             {/* Issue #16: Fixed title with asterisk */}
             <NewsSidebar news={trendingNews} title="AI News*" />
-
-            {/* Write About AI Future CTA - Issue #17: Added envelope icon */}
-            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-5 border border-purple-100">
-              <Mail className="w-6 h-6 text-[var(--primary)] mb-2" aria-hidden="true" />
-              <h3 className="font-bold text-gray-900 mb-2">Write About AI&apos;s Future</h3>
-              <p className="text-sm text-gray-600 mb-4">Your Predictions, Delivered to the Future.</p>
-              <a
-                href="/letters"
-                className="inline-flex items-center text-sm font-medium text-[var(--primary)] hover:underline focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:outline-none rounded"
-              >
-                Start Writing →
-              </a>
-            </div>
           </aside>
         </div>
 
