@@ -16,6 +16,7 @@ import {
   HelpCircle,
   Users,
   Activity,
+  Share2,
   LogOut,
   Menu,
   X,
@@ -81,6 +82,12 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Admins', href: '/admin/admins', icon: Users },
       { label: 'User Activity', href: '/admin/user-activity', icon: Activity },
+    ],
+  },
+  {
+    label: 'Settings',
+    items: [
+      { label: 'Social Links', href: '/admin/social-links', icon: Share2 },
     ],
   },
 ];

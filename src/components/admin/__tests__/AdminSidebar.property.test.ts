@@ -52,6 +52,7 @@ const expectedRouteMappings: Record<string, string> = {
   'FAQs': '/admin/faqs',
   'Admins': '/admin/admins',
   'User Activity': '/admin/user-activity',
+  'Social Links': '/admin/social-links',
 };
 
 // ============================================================================
@@ -106,7 +107,7 @@ describe('Property 1: Navigation Route Mapping', () => {
   });
 
   it('should have correct navigation groups structure', () => {
-    const expectedGroups = ['Overview', 'Content', 'Taxonomy', 'Features', 'System'];
+    const expectedGroups = ['Overview', 'Content', 'Taxonomy', 'Features', 'System', 'Settings'];
     const actualGroups = navGroups.map((group) => group.label);
 
     // Property: Navigation groups should match expected structure
@@ -325,6 +326,12 @@ describe('Navigation Groups Structure', () => {
     const systemGroup = navGroups.find((g) => g.label === 'System');
     expect(systemGroup).toBeDefined();
     expect(systemGroup?.items.map((i) => i.label)).toEqual(['Admins', 'User Activity']);
+  });
+
+  it('should have correct items in Settings group', () => {
+    const settingsGroup = navGroups.find((g) => g.label === 'Settings');
+    expect(settingsGroup).toBeDefined();
+    expect(settingsGroup?.items.map((i) => i.label)).toEqual(['Social Links']);
   });
 
   it('should have icons defined for all navigation items (property test with 100 runs)', () => {
