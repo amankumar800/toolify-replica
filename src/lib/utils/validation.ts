@@ -60,3 +60,65 @@ export function validateEmail(email: string): EmailValidationResult {
 
   return { valid: true };
 }
+
+/**
+ * URL regex pattern for http:// or https:// URLs
+ * Matches URLs starting with http:// or https:// followed by valid URL characters
+ */
+const URL_REGEX = /^https?:\/\/[^\s]+$/;
+
+/**
+ * Result of URL validation
+ */
+export interface UrlValidationResult {
+  valid: boolean;
+  error?: string;
+}
+
+/**
+ * Validate URL format for social links
+ * 
+ * Accepts:
+ * - Valid URLs starting with http:// or https://
+ * - Empty strings (to allow clearing a social link)
+ * 
+ * Rejects:
+ * - All other strings (invalid URLs, non-http protocols, etc.)
+ * 
+ * @param url - URL string to validate
+ * @returns Validation result with valid flag and optional error message
+ * 
+ * @example
+ * validateSocialUrl('https://twitter.com/example');
+ * // Returns: { valid: true }
+ * 
+ * validateSocialUrl('');
+ * // Returns: { valid: true }
+ * 
+ * validateSocialUrl('invalid-url');
+ * // Returns: { valid: false, error: 'Please enter a valid URL (http:// or https://)' }
+ */
+export function validateSocialUrl(url: string): UrlValidationResult {
+  // Accept empty strings (allows clearing a social link)
+  if (url === '') {
+    return { valid: true };
+  }
+
+  // Reject non-string inputs
+  if (typeof url !== 'string') {
+    return {
+      valid: false,
+      error: 'Please enter a valid URL (http:// or https://)'
+    };
+  }
+
+  // Validate URL format (must start with http:// or https://)
+  if (!URL_REGEX.test(url)) {
+    return {
+      valid: false,
+      error: 'Please enter a valid URL (http:// or https://)'
+    };
+  }
+
+  return { valid: true };
+}
