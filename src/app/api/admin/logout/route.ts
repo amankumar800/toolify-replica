@@ -28,6 +28,7 @@ export async function POST() {
   const response = NextResponse.redirect(new URL('/admin/login', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'));
   
   // Clear the admin_session cookie (Req 7.1)
+  // Clear at current path
   response.cookies.set(COOKIE_NAME, '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -35,6 +36,18 @@ export async function POST() {
     path: COOKIE_PATH,
     maxAge: 0, // Expire immediately
   });
+
+  // Also clear at legacy /admin path for backwards compatibility
+  // This handles cookies set before the path was changed to '/'
+  if (COOKIE_PATH !== '/admin') {
+    response.cookies.set(COOKIE_NAME, '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/admin',
+      maxAge: 0, // Expire immediately
+    });
+  }
 
   return response;
 }

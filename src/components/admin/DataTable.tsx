@@ -612,14 +612,27 @@ export function DataTable<T extends { id: string }>({
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [localFilterValues, setLocalFilterValues] = useState(filterValues);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  // Track previous values to avoid unnecessary updates
+  const prevSearchQueryRef = useRef(searchQuery);
+  const prevFilterValuesRef = useRef(filterValues);
 
-  // Sync local state with props
+  // Sync local state with props only when they actually change
   useEffect(() => {
-    setLocalSearchQuery(searchQuery);
+    if (prevSearchQueryRef.current !== searchQuery) {
+      setLocalSearchQuery(searchQuery);
+      prevSearchQueryRef.current = searchQuery;
+    }
   }, [searchQuery]);
 
   useEffect(() => {
-    setLocalFilterValues(filterValues);
+    // Compare by JSON string to handle object reference changes
+    const prevJson = JSON.stringify(prevFilterValuesRef.current);
+    const currentJson = JSON.stringify(filterValues);
+    if (prevJson !== currentJson) {
+      setLocalFilterValues(filterValues);
+      prevFilterValuesRef.current = filterValues;
+    }
   }, [filterValues]);
 
   // ============================================

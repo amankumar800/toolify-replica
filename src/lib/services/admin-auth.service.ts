@@ -67,8 +67,8 @@ export const COOKIE_NAME = 'admin_session';
 /** Cookie max age in seconds (8 hours) */
 export const COOKIE_MAX_AGE = 8 * 60 * 60;
 
-/** Cookie path - only sent to admin routes */
-export const COOKIE_PATH = '/admin';
+/** Cookie path - sent to all routes (needed for both /admin and /api/admin) */
+export const COOKIE_PATH = '/';
 
 /** Generic error message for invalid credentials (prevents info leakage) */
 export const ERROR_INVALID_CREDENTIALS = 'Invalid email or password';
@@ -296,6 +296,7 @@ export async function requireAdmin(): Promise<AdminUser> {
  * Log out the current admin by clearing the session cookie.
  * 
  * This is a server action that clears the admin_session cookie.
+ * Clears cookies at both current path and legacy /admin path for backwards compatibility.
  * 
  * @example
  * // In a server action or API route
@@ -304,7 +305,12 @@ export async function requireAdmin(): Promise<AdminUser> {
  */
 export async function logoutAdmin(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  // Delete at current path
+  cookieStore.delete({ name: COOKIE_NAME, path: COOKIE_PATH });
+  // Also delete at legacy /admin path for backwards compatibility
+  if (COOKIE_PATH !== '/admin') {
+    cookieStore.delete({ name: COOKIE_NAME, path: '/admin' });
+  }
 }
 
 // ============================================================================
