@@ -3,34 +3,53 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Container } from './Container';
-import { getSocialPlatformIcon, SocialPlatform, SOCIAL_PLATFORMS } from '@/lib/utils/icon-mapping';
-import type { SocialLinksResponse } from '@/lib/supabase/types';
+import { getSocialPlatformIcon, SOCIAL_PLATFORMS } from '@/lib/utils/icon-mapping';
+import type { SocialLinksResponse, ExternalLinksResponse } from '@/lib/supabase/types';
+
+interface FooterLinksData {
+    socialLinks: SocialLinksResponse;
+    externalLinks: ExternalLinksResponse;
+}
 
 export function Footer() {
-    const [socialLinks, setSocialLinks] = useState<SocialLinksResponse>({});
+    const [linksData, setLinksData] = useState<FooterLinksData>({
+        socialLinks: {},
+        externalLinks: {}
+    });
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchSocialLinks() {
+        async function fetchLinks() {
             try {
                 const response = await fetch('/api/social-links');
                 if (response.ok) {
                     const data = await response.json();
-                    setSocialLinks(data);
+                    // Separate social media links from external links
+                    const socialLinks: SocialLinksResponse = {};
+                    const externalLinks: ExternalLinksResponse = {};
+                    
+                    if (data.twitter) socialLinks.twitter = data.twitter;
+                    if (data.linkedin) socialLinks.linkedin = data.linkedin;
+                    if (data.facebook) socialLinks.facebook = data.facebook;
+                    if (data.instagram) socialLinks.instagram = data.instagram;
+                    if (data.community) externalLinks.community = data.community;
+                    if (data.help_center) externalLinks.help_center = data.help_center;
+                    
+                    setLinksData({ socialLinks, externalLinks });
                 }
             } catch (error) {
-                console.error('Failed to fetch social links:', error);
+                console.error('Failed to fetch links:', error);
             } finally {
                 setIsLoading(false);
             }
         }
 
-        fetchSocialLinks();
+        fetchLinks();
     }, []);
 
     // Get active social links (platforms with non-empty URLs)
     const activeSocialLinks = SOCIAL_PLATFORMS.filter(
-        (platform) => socialLinks[platform] && socialLinks[platform]!.trim() !== ''
+        (platform) => linksData.socialLinks[platform] && linksData.socialLinks[platform]!.trim() !== ''
     );
 
     return (
@@ -46,7 +65,7 @@ export function Footer() {
                             <div className="flex gap-4">
                                 {activeSocialLinks.map((platform) => {
                                     const Icon = getSocialPlatformIcon(platform);
-                                    const url = socialLinks[platform];
+                                    const url = linksData.socialLinks[platform];
                                     if (!Icon || !url) return null;
                                     
                                     return (
@@ -80,18 +99,42 @@ export function Footer() {
                         <ul className="space-y-3 text-sm text-[var(--muted-foreground)]">
                             <li><Link href="/ai-news" className="hover:text-[var(--primary)] transition-colors">Blog</Link></li>
                             <li><Link href="/ai-news#newsletter" className="hover:text-[var(--primary)] transition-colors">Newsletter</Link></li>
-                            <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Community</a></li>
-                            <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Help Center</a></li>
+                            {linksData.externalLinks.community && (
+                                <li>
+                                    <a 
+                                        href={linksData.externalLinks.community} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="hover:text-[var(--primary)] transition-colors"
+                                        data-testid="footer-community-link"
+                                    >
+                                        Community
+                                    </a>
+                                </li>
+                            )}
+                            {linksData.externalLinks.help_center && (
+                                <li>
+                                    <a 
+                                        href={linksData.externalLinks.help_center} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="hover:text-[var(--primary)] transition-colors"
+                                        data-testid="footer-help-center-link"
+                                    >
+                                        Help Center
+                                    </a>
+                                </li>
+                            )}
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="font-semibold mb-4">Company</h4>
                         <ul className="space-y-3 text-sm text-[var(--muted-foreground)]">
-                            <li><a href="#" className="hover:text-[var(--primary)] transition-colors">About Us</a></li>
-                            <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Contact</a></li>
-                            <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Privacy Policy</a></li>
-                            <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Terms of Service</a></li>
+                            <li><Link href="/about" className="hover:text-[var(--primary)] transition-colors" data-testid="footer-about-link">About Us</Link></li>
+                            <li><Link href="/contact" className="hover:text-[var(--primary)] transition-colors" data-testid="footer-contact-link">Contact</Link></li>
+                            <li><Link href="/privacy" className="hover:text-[var(--primary)] transition-colors" data-testid="footer-privacy-link">Privacy Policy</Link></li>
+                            <li><Link href="/terms" className="hover:text-[var(--primary)] transition-colors" data-testid="footer-terms-link">Terms of Service</Link></li>
                         </ul>
                     </div>
                 </div>
@@ -101,8 +144,8 @@ export function Footer() {
                         &copy; {new Date().getFullYear()} AI Tools Book. All rights reserved.
                     </div>
                     <div className="flex gap-6">
-                        <a href="#" className="hover:text-[var(--primary)]">Privacy</a>
-                        <a href="#" className="hover:text-[var(--primary)]">Terms</a>
+                        <Link href="/privacy" className="hover:text-[var(--primary)]">Privacy</Link>
+                        <Link href="/terms" className="hover:text-[var(--primary)]">Terms</Link>
                         <a href="#" className="hover:text-[var(--primary)]">Cookies</a>
                     </div>
                 </div>
