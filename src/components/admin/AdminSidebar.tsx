@@ -17,6 +17,7 @@ import {
   Users,
   Activity,
   Share2,
+  FileText,
   LogOut,
   Menu,
   X,
@@ -88,6 +89,7 @@ const navGroups: NavGroup[] = [
     label: 'Settings',
     items: [
       { label: 'Social Links', href: '/admin/social-links', icon: Share2 },
+      { label: 'Company Pages', href: '/admin/company-pages', icon: FileText },
     ],
   },
 ];
