@@ -12,6 +12,9 @@ import {
   Save,
   Loader2,
   Share2,
+  Users,
+  HelpCircle,
+  ExternalLink,
 } from 'lucide-react';
 import type { SocialLinksFormData } from '@/lib/supabase/types';
 import type { LucideIcon } from 'lucide-react';
@@ -25,6 +28,8 @@ interface FormErrors {
   linkedin_url?: string;
   facebook_url?: string;
   instagram_url?: string;
+  community_url?: string;
+  help_center_url?: string;
 }
 
 interface PlatformConfig {
@@ -34,11 +39,18 @@ interface PlatformConfig {
   placeholder: string;
 }
 
+interface SectionConfig {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  platforms: PlatformConfig[];
+}
+
 // ============================================================================
 // Constants
 // ============================================================================
 
-const PLATFORMS: PlatformConfig[] = [
+const SOCIAL_MEDIA_PLATFORMS: PlatformConfig[] = [
   {
     key: 'twitter_url',
     label: 'Twitter',
@@ -65,11 +77,45 @@ const PLATFORMS: PlatformConfig[] = [
   },
 ];
 
+const EXTERNAL_LINK_PLATFORMS: PlatformConfig[] = [
+  {
+    key: 'community_url',
+    label: 'Community',
+    icon: Users,
+    placeholder: 'https://community.yoursite.com',
+  },
+  {
+    key: 'help_center_url',
+    label: 'Help Center',
+    icon: HelpCircle,
+    placeholder: 'https://help.yoursite.com',
+  },
+];
+
+const SECTIONS: SectionConfig[] = [
+  {
+    title: 'Social Media',
+    description: 'Social media profile links displayed in the website footer.',
+    icon: Share2,
+    platforms: SOCIAL_MEDIA_PLATFORMS,
+  },
+  {
+    title: 'External Links',
+    description: 'External resource links displayed in the footer Resources section.',
+    icon: ExternalLink,
+    platforms: EXTERNAL_LINK_PLATFORMS,
+  },
+];
+
+const ALL_PLATFORMS = [...SOCIAL_MEDIA_PLATFORMS, ...EXTERNAL_LINK_PLATFORMS];
+
 const INITIAL_FORM_DATA: SocialLinksFormData = {
   twitter_url: '',
   linkedin_url: '',
   facebook_url: '',
   instagram_url: '',
+  community_url: '',
+  help_center_url: '',
 };
 
 // ============================================================================
@@ -79,9 +125,9 @@ const INITIAL_FORM_DATA: SocialLinksFormData = {
 /**
  * Social Links Admin Page
  *
- * Allows administrators to view and edit social media link URLs.
+ * Allows administrators to view and edit social media link URLs and external links.
  *
- * Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7
+ * Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 5.1, 5.2, 5.3, 5.4
  */
 export default function SocialLinksPage() {
   const { addToast } = useToast();
@@ -129,12 +175,12 @@ export default function SocialLinksPage() {
   };
 
   // Validate all URLs
-  // Requirements: 1.4, 1.6, 1.7
+  // Requirements: 1.4, 1.6, 1.7, 5.3
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
     let isValid = true;
 
-    for (const platform of PLATFORMS) {
+    for (const platform of ALL_PLATFORMS) {
       const url = formData[platform.key];
       const result = validateSocialUrl(url);
       if (!result.valid) {
@@ -148,7 +194,7 @@ export default function SocialLinksPage() {
   };
 
   // Handle form submission
-  // Requirements: 1.4, 1.5
+  // Requirements: 1.4, 1.5, 5.4
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -201,7 +247,7 @@ export default function SocialLinksPage() {
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Social Links</h2>
           <p className="text-gray-500 mt-1">
-            Manage social media links displayed in the website footer
+            Manage social media and external links displayed in the website footer
           </p>
         </div>
       </div>
@@ -214,56 +260,71 @@ export default function SocialLinksPage() {
             <span className="ml-3 text-gray-500">Loading social links...</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <p className="text-sm text-gray-600 mb-6">
-              Enter the URLs for each social media platform. Leave a field empty to hide that platform from the footer.
-            </p>
-
-            {/* Platform URL Fields */}
-            {/* Requirements: 1.1, 1.2 - Display form with all four platforms with icons */}
-            <div className="space-y-4">
-              {PLATFORMS.map((platform) => {
-                const Icon = platform.icon;
-                const error = errors[platform.key];
-
-                return (
-                  <div key={platform.key} className="space-y-1">
-                    <label
-                      htmlFor={platform.key}
-                      className="flex items-center gap-2 text-sm font-medium text-gray-700"
-                    >
-                      <Icon className="w-5 h-5" />
-                      {platform.label}
-                    </label>
-                    <input
-                      type="text"
-                      id={platform.key}
-                      name={platform.key}
-                      value={formData[platform.key]}
-                      onChange={(e) => handleChange(platform.key, e.target.value)}
-                      placeholder={platform.placeholder}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        error
-                          ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                          : 'border-gray-300'
-                      }`}
-                      aria-invalid={!!error}
-                      aria-describedby={error ? `${platform.key}-error` : undefined}
-                    />
-                    {/* Requirements: 1.6 - Display validation error for invalid fields */}
-                    {error && (
-                      <p
-                        id={`${platform.key}-error`}
-                        className="text-sm text-red-600"
-                        role="alert"
-                      >
-                        {error}
-                      </p>
-                    )}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Sections */}
+            {SECTIONS.map((section, sectionIndex) => {
+              const SectionIcon = section.icon;
+              return (
+                <div key={section.title} className="space-y-4">
+                  {/* Section Header */}
+                  <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+                    <SectionIcon className="w-5 h-5 text-gray-600" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{section.title}</h3>
+                      <p className="text-sm text-gray-500">{section.description}</p>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* Platform URL Fields */}
+                  <div className="space-y-4 pl-7">
+                    {section.platforms.map((platform) => {
+                      const Icon = platform.icon;
+                      const error = errors[platform.key];
+
+                      return (
+                        <div key={platform.key} className="space-y-1">
+                          <label
+                            htmlFor={platform.key}
+                            className="flex items-center gap-2 text-sm font-medium text-gray-700"
+                          >
+                            <Icon className="w-5 h-5" />
+                            {platform.label}
+                          </label>
+                          <input
+                            type="text"
+                            id={platform.key}
+                            name={platform.key}
+                            value={formData[platform.key]}
+                            onChange={(e) => handleChange(platform.key, e.target.value)}
+                            placeholder={platform.placeholder}
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                              error
+                                ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300'
+                            }`}
+                            aria-invalid={!!error}
+                            aria-describedby={error ? `${platform.key}-error` : undefined}
+                          />
+                          {/* Requirements: 1.6, 5.3 - Display validation error for invalid fields */}
+                          {error && (
+                            <p
+                              id={`${platform.key}-error`}
+                              className="text-sm text-red-600"
+                              role="alert"
+                            >
+                              {error}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Add spacing between sections except for the last one */}
+                  {sectionIndex < SECTIONS.length - 1 && <div className="pt-4" />}
+                </div>
+              );
+            })}
 
             {/* Submit Button */}
             <div className="flex justify-end pt-4 border-t border-gray-200">

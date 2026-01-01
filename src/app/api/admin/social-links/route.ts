@@ -28,12 +28,14 @@ export async function GET() {
       );
     }
 
-    // Transform to form data format
+    // Transform to form data format (includes both social media and external links)
     const formData: SocialLinksFormData = {
       twitter_url: '',
       linkedin_url: '',
       facebook_url: '',
       instagram_url: '',
+      community_url: '',
+      help_center_url: '',
     };
 
     (data as SocialLinkRow[]).forEach((link) => {
@@ -59,16 +61,16 @@ export async function GET() {
 /**
  * PUT /api/admin/social-links
  * 
- * Updates all social links.
- * Requirements: 1.5
+ * Updates all social links (social media and external links).
+ * Requirements: 1.5, 5.4
  */
 export async function PUT(request: NextRequest) {
   try {
     const supabase = createAdminClient();
     const body: SocialLinksFormData = await request.json();
 
-    // Validate that we have the expected fields
-    const platforms = ['twitter', 'linkedin', 'facebook', 'instagram'] as const;
+    // Validate that we have the expected fields (social media + external links)
+    const platforms = ['twitter', 'linkedin', 'facebook', 'instagram', 'community', 'help_center'] as const;
     const updates: { platform: string; url: string }[] = [];
 
     for (const platform of platforms) {
@@ -115,12 +117,14 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Return updated form data
+    // Return updated form data (includes both social media and external links)
     const formData: SocialLinksFormData = {
       twitter_url: '',
       linkedin_url: '',
       facebook_url: '',
       instagram_url: '',
+      community_url: '',
+      help_center_url: '',
     };
 
     results.forEach((result) => {
