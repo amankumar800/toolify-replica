@@ -33,6 +33,9 @@ export const TABLES = {
   
   // Admin authentication
   ADMINS: 'admins',
+  
+  // Settings
+  SOCIAL_LINKS: 'social_links',
 } as const;
 
 export type TableName = (typeof TABLES)[keyof typeof TABLES];
