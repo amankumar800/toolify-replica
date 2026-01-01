@@ -35,7 +35,7 @@ export function NewsletterForm() {
     };
 
     return (
-        <div className="p-6 bg-gradient-to-br from-primary/10 to-transparent rounded-xl border border-primary/20">
+        <div id="newsletter" className="p-6 bg-gradient-to-br from-primary/10 to-transparent rounded-xl border border-primary/20 scroll-mt-24">
             <div className="flex items-center gap-2 mb-2">
                 <Mail className="w-5 h-5 text-primary" />
                 <h3 className="font-bold text-lg">Subscribe to Newsletter</h3>
