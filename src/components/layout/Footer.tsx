@@ -1,8 +1,38 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { Container } from './Container';
-import { Twitter, Linkedin, Facebook, Instagram } from 'lucide-react';
+import { getSocialPlatformIcon, SocialPlatform, SOCIAL_PLATFORMS } from '@/lib/utils/icon-mapping';
+import type { SocialLinksResponse } from '@/lib/supabase/types';
 
 export function Footer() {
+    const [socialLinks, setSocialLinks] = useState<SocialLinksResponse>({});
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchSocialLinks() {
+            try {
+                const response = await fetch('/api/social-links');
+                if (response.ok) {
+                    const data = await response.json();
+                    setSocialLinks(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch social links:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchSocialLinks();
+    }, []);
+
+    // Get active social links (platforms with non-empty URLs)
+    const activeSocialLinks = SOCIAL_PLATFORMS.filter(
+        (platform) => socialLinks[platform] && socialLinks[platform]!.trim() !== ''
+    );
+
     return (
         <footer className="border-t border-[var(--border)] bg-[var(--background)] py-12 mt-auto">
             <Container>
@@ -12,20 +42,28 @@ export function Footer() {
                         <p className="text-sm text-[var(--muted-foreground)] mb-6 max-w-sm">
                             Discover the best AI tools for your workflow. We curate and review the latest artificial intelligence software to help you stay ahead.
                         </p>
-                        <div className="flex gap-4">
-                            <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors" aria-label="Twitter">
-                                <Twitter className="w-5 h-5 text-gray-600" />
-                            </a>
-                            <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors" aria-label="LinkedIn">
-                                <Linkedin className="w-5 h-5 text-gray-600" />
-                            </a>
-                            <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors" aria-label="Facebook">
-                                <Facebook className="w-5 h-5 text-gray-600" />
-                            </a>
-                            <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors" aria-label="Instagram">
-                                <Instagram className="w-5 h-5 text-gray-600" />
-                            </a>
-                        </div>
+                        {!isLoading && activeSocialLinks.length > 0 && (
+                            <div className="flex gap-4">
+                                {activeSocialLinks.map((platform) => {
+                                    const Icon = getSocialPlatformIcon(platform);
+                                    const url = socialLinks[platform];
+                                    if (!Icon || !url) return null;
+                                    
+                                    return (
+                                        <a
+                                            key={platform}
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                                            aria-label={platform.charAt(0).toUpperCase() + platform.slice(1)}
+                                        >
+                                            <Icon className="w-5 h-5 text-gray-600" />
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     <div>
@@ -40,8 +78,8 @@ export function Footer() {
                     <div>
                         <h4 className="font-semibold mb-4">Resources</h4>
                         <ul className="space-y-3 text-sm text-[var(--muted-foreground)]">
-                            <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Blog</a></li>
-                            <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Newsletter</a></li>
+                            <li><Link href="/ai-news" className="hover:text-[var(--primary)] transition-colors">Blog</Link></li>
+                            <li><Link href="/ai-news#newsletter" className="hover:text-[var(--primary)] transition-colors">Newsletter</Link></li>
                             <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Community</a></li>
                             <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Help Center</a></li>
                         </ul>
