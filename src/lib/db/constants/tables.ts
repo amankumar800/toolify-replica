@@ -36,6 +36,7 @@ export const TABLES = {
   
   // Settings
   SOCIAL_LINKS: 'social_links',
+  COMPANY_PAGES: 'company_pages',
 } as const;
 
 export type TableName = (typeof TABLES)[keyof typeof TABLES];

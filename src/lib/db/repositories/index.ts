@@ -118,3 +118,11 @@ export {
   type CategoryGroupWithCategoryCount,
   type CategoryInfo,
 } from './category-groups.repository';
+
+// Company Pages repository
+export {
+  createCompanyPagesRepository,
+  type CompanyPagesRepository,
+  type CompanyPageInsert,
+  type CompanyPageUpdate,
+} from './company-pages.repository';
