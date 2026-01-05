@@ -26,9 +26,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // suppressHydrationWarning: Required because browser extensions and dev tools 
+  // (e.g., Antigravity) may inject classes into html/body before React hydrates.
+  // This is safe because it only affects these two elements, not their children.
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable}`}>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <body className={`${inter.variable}`} suppressHydrationWarning>
         <AuthProviderContext>
           {children}
         </AuthProviderContext>
