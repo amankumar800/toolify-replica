@@ -14,6 +14,7 @@ import { listTools, createTool, getAllCategories } from '@/lib/services/tools.se
 import { toolSchema } from '@/lib/utils/admin-validation';
 import type { ToolFilters } from '@/lib/services/admin-crud.types';
 import type { ToolStatus, ToolPricing } from '@/lib/types/admin-forms';
+import type { Json } from '@/lib/supabase/types';
 
 /**
  * GET /api/admin/tools
@@ -96,7 +97,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { category_ids, ...toolData } = validationResult.data;
+    const { category_ids, ...toolDataRaw } = validationResult.data;
+
+    // Cast metadata to Json type for Supabase compatibility
+    const toolData = {
+      ...toolDataRaw,
+      metadata: toolDataRaw.metadata as Json | undefined,
+    };
 
     // Create tool
     const tool = await createTool(toolData, category_ids);
