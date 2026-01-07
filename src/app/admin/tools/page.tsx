@@ -468,7 +468,7 @@ export default function ToolsPage() {
   // Export handler
   // Requirements: 17.1 - Export CSV button
   const handleExport = () => {
-    const result = exportToCSV(tools, {
+    const result = exportToCSV(tools as unknown as Record<string, unknown>[], {
       tableName: 'tools',
       columns: ['name', 'slug', 'status', 'pricing', 'is_featured', 'website_url'],
     });
