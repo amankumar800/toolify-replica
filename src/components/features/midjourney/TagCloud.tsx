@@ -11,10 +11,11 @@ interface TagCloudProps {
 
 export function TagCloud({ tags, activeTag, onTagClick, className }: TagCloudProps) {
     return (
-        <div className={cn("flex flex-wrap gap-2", className)}>
+        <div className={cn("flex flex-wrap gap-2", className)} role="group" aria-label="Filter by tag">
             {/* All button */}
             <button
                 onClick={() => onTagClick?.('')}
+                aria-pressed={!activeTag}
                 className={cn(
                     "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                     !activeTag
@@ -29,6 +30,7 @@ export function TagCloud({ tags, activeTag, onTagClick, className }: TagCloudPro
                 <button
                     key={tag}
                     onClick={() => onTagClick?.(tag)}
+                    aria-pressed={activeTag === tag}
                     className={cn(
                         "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 capitalize",
                         activeTag === tag
