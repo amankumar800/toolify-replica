@@ -39,7 +39,7 @@ export async function POST() {
 
   // Also clear at legacy /admin path for backwards compatibility
   // This handles cookies set before the path was changed to '/'
-  if (COOKIE_PATH !== '/admin') {
+  if ((COOKIE_PATH as string) !== '/admin') {
     response.cookies.set(COOKIE_NAME, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
