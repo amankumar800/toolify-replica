@@ -43,7 +43,6 @@ export default async function EditFeaturedToolPage({ params }: EditFeaturedToolP
     end_date: featuredTool.end_date ? new Date(featuredTool.end_date) : undefined,
     display_order: featuredTool.display_order ?? undefined,
     created_at: featuredTool.created_at ?? undefined,
-    updated_at: featuredTool.updated_at ?? undefined,
     impression_count: featuredTool.impression_count ?? 0,
     click_count: featuredTool.click_count ?? 0,
   };
