@@ -31,6 +31,7 @@ export default async function RankingPage() {
         isFeatured: item.is_featured ?? false,
         isNew: item.is_new ?? false,
         monthlyVisits: item.monthly_visits ?? undefined,
+        changePercentage: item.change_percentage ?? undefined,
     }));
 
     // Sort by monthlyVisits for this page

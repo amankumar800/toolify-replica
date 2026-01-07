@@ -532,6 +532,7 @@ export interface PublicToolItem {
   is_new: boolean | null;
   tags: string[] | null;
   monthly_visits: number | null;
+  change_percentage: number | null;
   review_score: number | null;
   review_count: number | null;
 }
@@ -600,6 +601,7 @@ export async function getTools(options: GetToolsOptions = {}): Promise<{
     is_new: row.is_new,
     tags: row.tags,
     monthly_visits: row.monthly_visits,
+    change_percentage: row.change_percentage,
     review_score: row.review_score,
     review_count: row.review_count,
   }));
