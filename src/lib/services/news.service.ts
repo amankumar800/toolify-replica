@@ -283,6 +283,9 @@ export interface PublicNewsItem {
   like_count: number | null;
   priorityScore: number;
   stats?: { views: number; likes: number };
+  image?: string | null;
+  tags: string[];
+  sourceCount?: number;
 }
 
 /**
@@ -331,7 +334,7 @@ export class NewsService {
       category: row.category ?? 'General',
       tags: row.tags ?? [],
       date: row.published_at ?? row.created_at ?? new Date().toISOString(),
-      image: row.image_url ?? null,
+      image: null, // ai_news table doesn't have image_url column
       author: {
         name: row.author_name ?? 'AI Tools Book',
         avatar: row.author_avatar ?? undefined,
@@ -450,6 +453,7 @@ export class NewsService {
       summary: row.summary,
       content: row.content,
       category: row.category,
+      tags: row.tags ?? [],
       source: row.source_name || row.source_url 
         ? { name: row.source_name ?? undefined, url: row.source_url ?? undefined } 
         : null,
@@ -528,6 +532,7 @@ export class NewsService {
       summary: row.summary,
       content: row.content,
       category: row.category,
+      tags: row.tags ?? [],
       source: row.source_name || row.source_url 
         ? { name: row.source_name ?? undefined, url: row.source_url ?? undefined } 
         : null,
@@ -574,6 +579,7 @@ export class NewsService {
       summary: row.summary,
       content: row.content,
       category: row.category,
+      tags: row.tags ?? [],
       source: row.source_name || row.source_url 
         ? { name: row.source_name ?? undefined, url: row.source_url ?? undefined } 
         : null,
