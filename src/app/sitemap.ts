@@ -13,8 +13,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // Dynamic Tools
-    const tools = await getTools({ limit: 1000 }); // Fetch all for sitemap
-    const toolRoutes = tools.map((tool) => ({
+    const toolsResult = await getTools({ limit: 1000 }); // Fetch all for sitemap
+    const toolRoutes = toolsResult.items.map((tool) => ({
         url: `${baseUrl}/tool/${tool.slug}`,
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
