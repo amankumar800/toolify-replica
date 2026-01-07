@@ -40,7 +40,8 @@ export function ToolGrid({ initialTools, category }: ToolGridProps) {
         const nextPage = page + 1;
 
         try {
-            const newTools = await filterToolsAction(category, nextPage);
+            const result = await filterToolsAction(category, nextPage);
+            const newTools = result.items as unknown as Tool[];
 
             if (newTools.length === 0) {
                 setHasMore(false);
