@@ -308,9 +308,9 @@ export async function logoutAdmin(): Promise<void> {
   // Delete at current path
   cookieStore.delete({ name: COOKIE_NAME, path: COOKIE_PATH });
   // Also delete at legacy /admin path for backwards compatibility
-  if (COOKIE_PATH !== '/admin') {
-    cookieStore.delete({ name: COOKIE_NAME, path: '/admin' });
-  }
+  // Note: COOKIE_PATH is '/' which covers all paths, but we explicitly delete
+  // at /admin as well to ensure any legacy cookies are cleared
+  cookieStore.delete({ name: COOKIE_NAME, path: '/admin' });
 }
 
 // ============================================================================
