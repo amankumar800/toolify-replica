@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createCategoriesRepository, createCategoryGroupsRepository } from '@/lib/db/repositories';
 import { categorySchema, validateFormData } from '@/lib/utils/admin-validation';
+import type { Json } from '@/lib/supabase/types';
 
 /**
  * GET /api/admin/categories
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by group_id if provided
     const filteredCategories = groupId
-      ? categories.filter((cat) => cat.group_id === groupId)
+      ? categories.filter((cat) => (cat as { group_id?: string }).group_id === groupId)
       : categories;
 
     return NextResponse.json({
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
       icon: validation.data.icon || null,
       group_id: validation.data.group_id || null,
       display_order,
-      metadata: validation.data.metadata || null,
+      metadata: (validation.data.metadata as Json) || null,
     });
 
     return NextResponse.json(category, { status: 201 });
