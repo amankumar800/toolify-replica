@@ -137,6 +137,8 @@ export function scrollToSection(id: string, offset: number = 80): void {
   if (element) {
     const top = element.getBoundingClientRect().top + window.scrollY - offset;
     window.scrollTo({ top, behavior: 'smooth' });
+  } else if (process.env.NODE_ENV === 'development') {
+    console.warn(`[OnThisPageNav] Section with id "${id}" not found. Check that the section IDs match.`);
   }
 }
 
@@ -242,10 +244,10 @@ export function OnThisPageNav({ subcategories, className }: OnThisPageNavProps) 
                       onClick={() => handleLinkClick(sectionId)}
                       className={cn(
                         'w-full text-left px-3 py-1.5 text-sm rounded-md transition-all duration-200',
-                        'hover:bg-gray-50 hover:text-[var(--foreground)]',
+                        'hover:bg-[var(--muted)] hover:text-[var(--foreground)]',
                         'focus-visible:outline-2 focus-visible:outline-[var(--primary)] focus-visible:outline-offset-2',
                         isActive
-                          ? 'text-[var(--primary)] font-medium bg-purple-50'
+                          ? 'text-[var(--primary)] font-medium bg-[var(--primary)]/10'
                           : 'text-[var(--muted-foreground)]'
                       )}
                       aria-current={isActive ? 'true' : undefined}
@@ -278,7 +280,7 @@ export function OnThisPageNav({ subcategories, className }: OnThisPageNavProps) 
             className={cn(
               'absolute bottom-full right-0 mb-2',
               'w-64 max-h-80 overflow-y-auto',
-              'bg-white rounded-lg shadow-lg border border-[var(--border)]',
+              'bg-[var(--background)] rounded-lg shadow-lg border border-[var(--border)]',
               'animate-in fade-in slide-in-from-bottom-2 duration-200'
             )}
             role="menu"
@@ -299,10 +301,10 @@ export function OnThisPageNav({ subcategories, className }: OnThisPageNavProps) 
                         onClick={() => handleLinkClick(sectionId)}
                         className={cn(
                           'w-full text-left px-3 py-2 text-sm rounded-md transition-all duration-200',
-                          'hover:bg-gray-50 hover:text-[var(--foreground)]',
+                          'hover:bg-[var(--muted)] hover:text-[var(--foreground)]',
                           'focus-visible:outline-2 focus-visible:outline-[var(--primary)] focus-visible:outline-offset-2',
                           isActive
-                            ? 'text-[var(--primary)] font-medium bg-purple-50'
+                            ? 'text-[var(--primary)] font-medium bg-[var(--primary)]/10'
                             : 'text-[var(--muted-foreground)]'
                         )}
                         role="menuitem"

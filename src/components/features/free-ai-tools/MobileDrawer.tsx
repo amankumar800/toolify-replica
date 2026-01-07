@@ -213,13 +213,13 @@ export function MobileDrawer({
         aria-modal="true"
         aria-label="Category navigation"
         className={cn(
-          'fixed top-0 left-0 z-50 h-full w-72 bg-white shadow-xl',
+          'fixed top-0 left-0 z-50 h-full w-72 bg-[var(--background)] shadow-xl',
           'transform transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Header with close button - Requirement 19.3 */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
           <h2 className="text-lg font-semibold text-[var(--foreground)]">
             Navigation
           </h2>
@@ -228,7 +228,7 @@ export function MobileDrawer({
             className={cn(
               'p-2 rounded-lg transition-colors',
               'text-[var(--muted-foreground)] hover:text-[var(--foreground)]',
-              'hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]'
+              'hover:bg-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]'
             )}
             aria-label="Close navigation menu"
           >
@@ -265,8 +265,8 @@ export function MobileDrawer({
                 'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200',
                 'focus-visible:outline-2 focus-visible:outline-[var(--primary)] focus-visible:outline-offset-2',
                 isIntroductionActive
-                  ? 'bg-purple-50 text-[var(--primary)]'
-                  : 'text-[var(--muted-foreground)] hover:bg-gray-50 hover:text-[var(--foreground)]'
+                  ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
               )}
               aria-current={isIntroductionActive ? 'page' : undefined}
             >
@@ -296,8 +296,8 @@ export function MobileDrawer({
                         'group flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all duration-200',
                         'focus-visible:outline-2 focus-visible:outline-[var(--primary)] focus-visible:outline-offset-2',
                         isActive
-                          ? 'bg-purple-50 text-[var(--primary)] font-medium'
-                          : 'text-[var(--muted-foreground)] hover:bg-gray-50 hover:text-[var(--foreground)]'
+                          ? 'bg-[var(--primary)]/10 text-[var(--primary)] font-medium'
+                          : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
                       )}
                       aria-current={isActive ? 'page' : undefined}
                     >
@@ -319,8 +319,8 @@ export function MobileDrawer({
                           className={cn(
                             'text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ml-2',
                             isActive
-                              ? 'bg-purple-100 text-[var(--primary)]'
-                              : 'bg-gray-100 text-[var(--muted-foreground)]'
+                              ? 'bg-[var(--primary)]/20 text-[var(--primary)]'
+                              : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
                           )}
                           aria-label={`${category.toolCount} tools`}
                         >

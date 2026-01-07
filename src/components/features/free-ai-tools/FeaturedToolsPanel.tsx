@@ -86,7 +86,7 @@ function FeaturedToolCard({ tool }: FeaturedToolCardProps) {
       href={`/tool/${tool.slug}`}
       className={cn(
         'group flex gap-3 p-3 rounded-lg border border-[var(--border)]',
-        'bg-white hover:bg-[var(--muted)]/50 hover:border-[var(--primary)]/30',
+        'bg-[var(--card)] hover:bg-[var(--muted)]/50 hover:border-[var(--primary)]/30',
         'transition-all duration-200 cursor-pointer',
         'focus-visible:outline-2 focus-visible:outline-[var(--primary)] focus-visible:outline-offset-2'
       )}
@@ -102,6 +102,7 @@ function FeaturedToolCard({ tool }: FeaturedToolCardProps) {
             height={48}
             className="object-cover w-full h-full"
             onError={() => setImageError(true)}
+            unoptimized
           />
         ) : (
           <div 

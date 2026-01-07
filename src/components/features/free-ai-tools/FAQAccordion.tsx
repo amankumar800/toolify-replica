@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useId } from 'react';
+import React, { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import type { FAQItem } from '@/lib/types/free-ai-tools';
 
@@ -63,7 +63,7 @@ function AccordionItem({ item, isExpanded, onToggle, itemId }: AccordionItemProp
         className={cn(
           'w-full flex items-center justify-between px-4 py-4 text-left',
           'text-[var(--foreground)] font-medium',
-          'hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-inset',
+          'hover:bg-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-inset',
           'transition-colors duration-200'
         )}
         onClick={onToggle}
@@ -132,9 +132,6 @@ function AccordionItem({ item, isExpanded, onToggle, itemId }: AccordionItemProp
 export function FAQAccordion({ items, className }: FAQAccordionProps) {
   // Track which item is currently expanded (null = none expanded)
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  
-  // Generate unique base ID for ARIA attributes
-  const baseId = useId();
 
   /**
    * Toggle accordion item
@@ -152,7 +149,7 @@ export function FAQAccordion({ items, className }: FAQAccordionProps) {
   return (
     <div
       className={cn(
-        'border border-[var(--border)] rounded-lg bg-white',
+        'border border-[var(--border)] rounded-lg bg-[var(--card)]',
         className
       )}
       role="region"
@@ -160,11 +157,11 @@ export function FAQAccordion({ items, className }: FAQAccordionProps) {
     >
       {items.map((item, index) => (
         <AccordionItem
-          key={`${baseId}-${index}`}
+          key={item.id}
           item={item}
           isExpanded={expandedIndex === index}
           onToggle={() => handleToggle(index)}
-          itemId={`${baseId}-${index}`}
+          itemId={item.id}
         />
       ))}
     </div>

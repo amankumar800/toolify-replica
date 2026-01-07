@@ -33,7 +33,7 @@ export function SearchToolsButton({ className }: SearchToolsButtonProps) {
     <button
       type="button"
       onClick={handleClick}
-      className={className || "inline-flex items-center px-6 py-3 bg-gray-100 text-[var(--foreground)] rounded-lg font-medium hover:bg-gray-200 transition-colors"}
+      className={className || "inline-flex items-center px-6 py-3 bg-[var(--muted)] text-[var(--foreground)] rounded-lg font-medium hover:bg-[var(--muted)]/80 transition-colors"}
     >
       <svg
         className="w-5 h-5 mr-2"

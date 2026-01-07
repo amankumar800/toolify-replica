@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { AdBanner } from './AdBanner';
@@ -126,8 +125,8 @@ export function CategorySidebar({
               'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200',
               'focus-visible:outline-2 focus-visible:outline-[var(--primary)] focus-visible:outline-offset-2',
               isIntroductionActive
-                ? 'bg-purple-50 text-[var(--primary)]'
-                : 'text-[var(--muted-foreground)] hover:bg-gray-50 hover:text-[var(--foreground)]'
+                ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
+                : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
             )}
             aria-current={isIntroductionActive ? 'page' : undefined}
           >
@@ -156,8 +155,8 @@ export function CategorySidebar({
                       'group flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all duration-200',
                       'focus-visible:outline-2 focus-visible:outline-[var(--primary)] focus-visible:outline-offset-2',
                       isActive
-                        ? 'bg-purple-50 text-[var(--primary)] font-medium'
-                        : 'text-[var(--muted-foreground)] hover:bg-gray-50 hover:text-[var(--foreground)]'
+                        ? 'bg-[var(--primary)]/10 text-[var(--primary)] font-medium'
+                        : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
                     )}
                     aria-current={isActive ? 'page' : undefined}
                   >
@@ -179,8 +178,8 @@ export function CategorySidebar({
                         className={cn(
                           'text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ml-2',
                           isActive
-                            ? 'bg-purple-100 text-[var(--primary)]'
-                            : 'bg-gray-100 text-[var(--muted-foreground)]'
+                            ? 'bg-[var(--primary)]/20 text-[var(--primary)]'
+                            : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
                         )}
                         aria-label={`${category.toolCount} tools`}
                       >
