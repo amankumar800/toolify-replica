@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createCategoriesRepository, createCategoryGroupsRepository, createSubcategoriesRepository } from '@/lib/db/repositories';
 import { categorySchema, validateFormData } from '@/lib/utils/admin-validation';
 import { TABLES } from '@/lib/db/constants/tables';
+import type { Json } from '@/lib/supabase/types';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -37,7 +38,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     // Get tool count for this category
     const categoriesWithToolCount = await repo.findWithToolCount();
-    const categoryWithCount = categoriesWithToolCount.find((c) => c.id === id);
+    const categoryWithCount = categoriesWithToolCount.find((c) => (c as { id?: string }).id === id);
     const tool_count = categoryWithCount?.computed_tool_count ?? 0;
 
     return NextResponse.json({
@@ -106,7 +107,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       icon: validation.data.icon || null,
       group_id: validation.data.group_id || null,
       display_order: validation.data.display_order,
-      metadata: validation.data.metadata || null,
+      metadata: (validation.data.metadata as Json) || null,
     });
 
     return NextResponse.json(category);
