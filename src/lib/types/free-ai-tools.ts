@@ -79,7 +79,10 @@ export const FeaturedToolSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   slug: z.string().min(1),
-  imageUrl: z.string().url(),
+  imageUrl: z.string().min(1).refine(
+    (val) => val.startsWith('/') || val.startsWith('http://') || val.startsWith('https://'),
+    { message: 'imageUrl must be a relative path starting with / or an absolute URL' }
+  ),
   description: z.string(),
   badge: z.enum(['Free', 'New', 'Popular']).nullable(),
   displayOrder: z.number().int().nonnegative(),
@@ -89,6 +92,7 @@ export const FeaturedToolSchema = z.object({
  * FAQItem Schema - FAQ questions and answers
  */
 export const FAQItemSchema = z.object({
+  id: z.string().min(1),
   question: z.string().min(1),
   answer: z.string().min(1),
 });

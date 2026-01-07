@@ -1,10 +1,11 @@
 /**
  * Free AI Tools Data Service
  * 
- * Provides access to free AI tools data with in-memory caching.
+ * Provides access to free AI tools data from Supabase with in-memory caching.
  * Implements Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 12.2
  */
 
+import { createClient } from '@/lib/supabase/server';
 import {
   type Category,
   type CategoryListItem,
@@ -13,10 +14,6 @@ import {
   type Tool,
   type Subcategory,
   type CategoryRef,
-  CategorySchema,
-  CategoriesListSchema,
-  FeaturedToolsListSchema,
-  FAQListSchema,
 } from '@/lib/types/free-ai-tools';
 
 // =============================================================================
@@ -81,6 +78,7 @@ interface CacheEntry<T> {
 class FreeAIToolsService {
   private cache = new Map<string, CacheEntry<unknown>>();
   private readonly TTL = 60 * 60 * 1000; // 1 hour in milliseconds
+  private readonly MAX_CACHE_SIZE = 100; // Maximum number of cache entries
 
   // ===========================================================================
   // Cache Management (Requirement 7.4)
@@ -92,6 +90,9 @@ class FreeAIToolsService {
   private getCached<T>(key: string): T | null {
     const entry = this.cache.get(key);
     if (entry && entry.expiry > Date.now()) {
+      // Move to end for LRU (delete and re-add)
+      this.cache.delete(key);
+      this.cache.set(key, entry);
       return entry.data as T;
     }
     // Remove expired entry
@@ -102,9 +103,25 @@ class FreeAIToolsService {
   }
 
   /**
-   * Set data in cache with TTL
+   * Set data in cache with TTL and LRU eviction
+   * Implements max cache size with LRU (Least Recently Used) eviction
    */
   private setCache<T>(key: string, data: T): void {
+    // If key already exists, delete it first (will be re-added at end)
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    }
+
+    // Evict oldest entries if cache is at max size
+    while (this.cache.size >= this.MAX_CACHE_SIZE) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      } else {
+        break;
+      }
+    }
+
     this.cache.set(key, {
       data,
       expiry: Date.now() + this.TTL,
@@ -169,22 +186,37 @@ class FreeAIToolsService {
     if (cached) return cached;
 
     try {
-      const data = await import('@/data/free-ai-tools/categories.json');
-      const validated = CategoriesListSchema.parse(data.default);
-      this.setCache(cacheKey, validated);
-      return validated;
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Cannot find module')) {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('free_ai_tools_categories')
+        .select('id, slug, name, icon, tool_count')
+        .order('display_order', { ascending: true });
+
+      if (error) {
         throw new FreeAIToolsError(
-          'Categories data file not found',
-          'NOT_FOUND',
-          false
+          `Failed to fetch categories: ${error.message}`,
+          'NETWORK_ERROR',
+          true
         );
       }
+
+      // Transform to match expected format
+      const categories: CategoryListItem[] = (data || []).map(cat => ({
+        id: cat.id,
+        slug: cat.slug,
+        name: cat.name,
+        icon: cat.icon,
+        toolCount: cat.tool_count,
+      }));
+
+      this.setCache(cacheKey, categories);
+      return categories;
+    } catch (error) {
+      if (error instanceof FreeAIToolsError) throw error;
       throw new FreeAIToolsError(
-        `Failed to parse categories data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'PARSE_ERROR',
-        false
+        `Failed to fetch categories: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'NETWORK_ERROR',
+        true
       );
     }
   }
@@ -199,32 +231,108 @@ class FreeAIToolsService {
     if (cached) return cached;
 
     try {
-      // Dynamic import for category-specific JSON file
-      const data = await import(`@/data/free-ai-tools/categories/${slug}.json`);
-      const validated = CategorySchema.parse(data.default);
-      this.setCache(cacheKey, validated);
-      return validated;
-    } catch (error) {
-      // Check for module not found errors (various formats)
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const isNotFound = 
-        errorMessage.includes('Cannot find module') ||
-        errorMessage.includes('Unknown variable dynamic import') ||
-        errorMessage.includes('Failed to load') ||
-        errorMessage.includes('ENOENT') ||
-        (error instanceof Error && error.name === 'TypeError');
+      const supabase = await createClient();
       
-      if (isNotFound) {
+      // Fetch category
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('free_ai_tools_categories')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (categoryError || !categoryData) {
         throw new FreeAIToolsError(
           `Category not found: ${slug}`,
           'NOT_FOUND',
           false
         );
       }
+
+      // Fetch subcategories with tools
+      const { data: subcategoriesData, error: subcategoriesError } = await supabase
+        .from('free_ai_tools_subcategories')
+        .select(`
+          id,
+          name,
+          tool_count,
+          display_order,
+          free_ai_tools_tools (
+            id,
+            name,
+            slug,
+            external_url,
+            description,
+            free_tier_details,
+            pricing,
+            category_ids
+          )
+        `)
+        .eq('category_id', categoryData.id)
+        .order('display_order', { ascending: true });
+
+      if (subcategoriesError) {
+        throw new FreeAIToolsError(
+          `Failed to fetch subcategories: ${subcategoriesError.message}`,
+          'NETWORK_ERROR',
+          true
+        );
+      }
+
+      // Transform subcategories to match expected format
+      const subcategories: Subcategory[] = (subcategoriesData || []).map(sub => ({
+        id: sub.id,
+        name: sub.name,
+        toolCount: sub.tool_count,
+        tools: (sub.free_ai_tools_tools || []).map((tool: {
+          id: string;
+          name: string;
+          slug: string;
+          external_url: string | null;
+          description: string;
+          free_tier_details: string | null;
+          pricing: string | null;
+          category_ids: string[];
+        }) => ({
+          id: tool.id,
+          name: tool.name,
+          slug: tool.slug,
+          externalUrl: tool.external_url,
+          description: tool.description,
+          freeTierDetails: tool.free_tier_details,
+          pricing: tool.pricing,
+          categoryIds: tool.category_ids || [],
+        })),
+      }));
+
+      // Build category object
+      const category: Category = {
+        id: categoryData.id,
+        slug: categoryData.slug,
+        name: categoryData.name,
+        description: categoryData.description,
+        icon: categoryData.icon,
+        toolCount: categoryData.tool_count,
+        subcategories,
+        previousCategory: categoryData.previous_category_slug ? {
+          slug: categoryData.previous_category_slug,
+          name: categoryData.previous_category_name || '',
+        } : null,
+        nextCategory: categoryData.next_category_slug ? {
+          slug: categoryData.next_category_slug,
+          name: categoryData.next_category_name || '',
+        } : null,
+        createdAt: categoryData.created_at || new Date().toISOString(),
+        updatedAt: categoryData.updated_at || new Date().toISOString(),
+      };
+
+      this.setCache(cacheKey, category);
+      return category;
+    } catch (error) {
+      if (error instanceof FreeAIToolsError) throw error;
       throw new FreeAIToolsError(
-        `Failed to parse category data for '${slug}': ${errorMessage}`,
-        'VALIDATION_ERROR',
-        false
+        `Failed to fetch category '${slug}': ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'NETWORK_ERROR',
+        true
       );
     }
   }
@@ -304,24 +412,39 @@ class FreeAIToolsService {
     if (cached) return cached;
 
     try {
-      const data = await import('@/data/free-ai-tools/featured-tools.json');
-      const validated = FeaturedToolsListSchema.parse(data.default);
-      // Sort by displayOrder
-      const sorted = validated.sort((a, b) => a.displayOrder - b.displayOrder);
-      this.setCache(cacheKey, sorted);
-      return sorted;
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Cannot find module')) {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('free_ai_tools_featured')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (error) {
         throw new FreeAIToolsError(
-          'Featured tools data file not found',
-          'NOT_FOUND',
-          false
+          `Failed to fetch featured tools: ${error.message}`,
+          'NETWORK_ERROR',
+          true
         );
       }
+
+      // Transform to match expected format
+      const featuredTools: FeaturedTool[] = (data || []).map(tool => ({
+        id: tool.id,
+        name: tool.name,
+        slug: tool.slug,
+        imageUrl: tool.image_url,
+        description: tool.description,
+        badge: tool.badge as 'Free' | 'New' | 'Popular' | null,
+        displayOrder: tool.display_order,
+      }));
+
+      this.setCache(cacheKey, featuredTools);
+      return featuredTools;
+    } catch (error) {
+      if (error instanceof FreeAIToolsError) throw error;
       throw new FreeAIToolsError(
-        `Failed to parse featured tools data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'PARSE_ERROR',
-        false
+        `Failed to fetch featured tools: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'NETWORK_ERROR',
+        true
       );
     }
   }
@@ -335,22 +458,34 @@ class FreeAIToolsService {
     if (cached) return cached;
 
     try {
-      const data = await import('@/data/free-ai-tools/faq.json');
-      const validated = FAQListSchema.parse(data.default);
-      this.setCache(cacheKey, validated);
-      return validated;
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Cannot find module')) {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('free_ai_tools_faqs')
+        .select('id, question, answer')
+        .order('display_order', { ascending: true });
+
+      if (error) {
         throw new FreeAIToolsError(
-          'FAQ data file not found',
-          'NOT_FOUND',
-          false
+          `Failed to fetch FAQ items: ${error.message}`,
+          'NETWORK_ERROR',
+          true
         );
       }
+
+      const faqItems: FAQItem[] = (data || []).map(item => ({
+        id: item.id,
+        question: item.question,
+        answer: item.answer,
+      }));
+
+      this.setCache(cacheKey, faqItems);
+      return faqItems;
+    } catch (error) {
+      if (error instanceof FreeAIToolsError) throw error;
       throw new FreeAIToolsError(
-        `Failed to parse FAQ data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'PARSE_ERROR',
-        false
+        `Failed to fetch FAQ items: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'NETWORK_ERROR',
+        true
       );
     }
   }
