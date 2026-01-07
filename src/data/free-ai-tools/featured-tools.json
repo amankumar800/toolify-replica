@@ -4,7 +4,7 @@
     "name": "Sample AI Tool",
     "slug": "sample-ai-tool",
     "description": "A sample AI tool for demonstration purposes",
-    "imageUrl": "https://placehold.co/400x300",
+    "imageUrl": "/images/featured-tool-placeholder.svg",
     "badge": null,
     "displayOrder": 1
   }
