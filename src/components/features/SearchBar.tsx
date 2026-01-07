@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search as SearchIcon, X, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { searchToolsAction } from '@/app/actions';
-import { Tool } from '@/lib/types/tool';
+import { PublicToolItem } from '@/lib/services/tools.service';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
@@ -15,7 +15,7 @@ interface SearchBarProps {
 
 export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState<Tool[]>([]);
+    const [results, setResults] = useState<PublicToolItem[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -28,7 +28,7 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                 setLoading(true);
                 try {
                     const data = await searchToolsAction(query);
-                    setResults(data);
+                    setResults(data.items);
                     setIsOpen(true);
                 } finally {
                     setLoading(false);
@@ -53,7 +53,7 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleSelect = (tool: Tool) => {
+    const handleSelect = (tool: PublicToolItem) => {
         router.push(`/tool/${tool.slug}`);
         setIsOpen(false);
         setQuery('');
@@ -117,17 +117,15 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                                 className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--muted)] cursor-pointer min-h-[48px] transition-colors"
                                 role="option"
                             >
-                                {tool.image && (
+                                {tool.image_url && (
                                     <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                                        <Image src={tool.image} alt={tool.name} fill className="object-cover" sizes="32px" />
+                                        <Image src={tool.image_url} alt={tool.name} fill className="object-cover" sizes="32px" />
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <div className="font-medium text-gray-900 truncate">{tool.name}</div>
                                     <div className="text-xs text-gray-500 truncate">
-                                        {tool.categories?.[0] && <span className="text-[var(--primary)]">{tool.categories[0]}</span>}
-                                        {tool.categories?.[0] && tool.shortDescription && ' · '}
-                                        {tool.shortDescription}
+                                        {tool.short_description}
                                     </div>
                                 </div>
                                 <span className="text-xs text-[var(--primary)] font-medium bg-purple-50 px-2 py-0.5 rounded-full">
