@@ -59,6 +59,17 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
         setQuery('');
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && query.length >= 2) {
+            e.preventDefault();
+            router.push(`/search?q=${encodeURIComponent(query)}`);
+            setIsOpen(false);
+        }
+        if (e.key === 'Escape') {
+            setIsOpen(false);
+        }
+    };
+
     const isHero = variant === 'hero';
 
     return (
@@ -76,6 +87,7 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     placeholder={isHero ? "Search 10,000+ AI Tools..." : "Search..."}
                     className="flex-1 bg-transparent border-none outline-none text-base placeholder:text-gray-400 w-full"
                     aria-label="Search AI tools"
@@ -124,7 +136,7 @@ export function SearchBar({ className, variant = 'header' }: SearchBarProps) {
                             </div>
                         ))}
                         <div
-                            onClick={() => { router.push(`/?q=${query}`); setIsOpen(false); }}
+                            onClick={() => { router.push(`/search?q=${encodeURIComponent(query)}`); setIsOpen(false); }}
                             className="block px-4 py-3 text-center text-sm font-medium text-[var(--primary)] border-t border-[var(--border)] hover:bg-gray-50 cursor-pointer min-h-[48px] flex items-center justify-center"
                         >
                             View all results for &quot;{query}&quot;

@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Container } from './Container';
 import { Search, LogOut } from 'lucide-react';
 import { SearchBar } from '@/components/features/SearchBar';
+import { MobileSearchModal } from '@/components/features/search/MobileSearchModal';
 import { MobileNav } from './MobileNav';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,7 @@ import { useAuth } from '@/components/providers/AuthProviderContext';
 export function Header() {
     const pathname = usePathname();
     const { user, loading, signOut } = useAuth();
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
     const navLinks = [
         { href: '/free-ai-tools', label: 'Free AI Tools' },
@@ -59,7 +62,12 @@ export function Header() {
                     </div>
 
                     {/* Mobile Search Trigger */}
-                    <button type="button" className="md:hidden p-2 text-[var(--muted-foreground)]" aria-label="Search">
+                    <button
+                        type="button"
+                        className="md:hidden p-2 text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors"
+                        aria-label="Search"
+                        onClick={() => setIsMobileSearchOpen(true)}
+                    >
                         <Search className="w-5 h-5" />
                     </button>
 
@@ -95,6 +103,12 @@ export function Header() {
                     <MobileNav />
                 </div>
             </Container>
+
+            {/* Mobile Search Modal */}
+            <MobileSearchModal
+                isOpen={isMobileSearchOpen}
+                onClose={() => setIsMobileSearchOpen(false)}
+            />
         </header>
     );
 }

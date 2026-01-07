@@ -30,7 +30,7 @@ const TABS: ModelTab[] = [
         icon: Database,
         placeholder: 'Search 10,000+ AI Tools...',
         color: 'text-blue-600',
-        searchUrl: '/?q=',
+        searchUrl: '/search?q=',
         isExternal: false
     },
     {
