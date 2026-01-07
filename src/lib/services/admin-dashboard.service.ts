@@ -349,7 +349,7 @@ export async function getRecentActivity(
   const activities: RecentActivityItem[] = [];
 
   // Add tools
-  for (const tool of (toolsResult.data ?? [])) {
+  for (const tool of (toolsResult.data ?? []) as unknown[]) {
     const t = tool as { id: string; name: string; slug: string; created_at: string; updated_at: string | null };
     const isUpdated = t.updated_at && t.updated_at !== t.created_at;
     activities.push({
@@ -363,7 +363,7 @@ export async function getRecentActivity(
   }
 
   // Add news
-  for (const news of (newsResult.data ?? [])) {
+  for (const news of (newsResult.data ?? []) as unknown[]) {
     const n = news as { id: string; title: string; slug: string; created_at: string; updated_at: string | null };
     const isUpdated = n.updated_at && n.updated_at !== n.created_at;
     activities.push({
@@ -377,7 +377,7 @@ export async function getRecentActivity(
   }
 
   // Add prompts
-  for (const prompt of (promptsResult.data ?? [])) {
+  for (const prompt of (promptsResult.data ?? []) as unknown[]) {
     const p = prompt as { id: string; title: string; slug: string; created_at: string; updated_at: string | null };
     const isUpdated = p.updated_at && p.updated_at !== p.created_at;
     activities.push({
