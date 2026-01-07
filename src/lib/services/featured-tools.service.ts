@@ -47,7 +47,6 @@ export interface FeaturedToolListItem {
   impression_count: number | null;
   click_count: number | null;
   created_at: string | null;
-  updated_at: string | null;
   status: FeaturedToolStatus;
 }
 
@@ -183,7 +182,6 @@ export async function listFeaturedTools(
         impression_count: row.impression_count,
         click_count: row.click_count,
         created_at: row.created_at,
-        updated_at: row.updated_at,
         status,
       };
     })
@@ -252,7 +250,6 @@ export async function getFeaturedToolById(id: string): Promise<FeaturedToolListI
     impression_count: data.impression_count,
     click_count: data.click_count,
     created_at: data.created_at,
-    updated_at: data.updated_at,
     status,
   };
 }
