@@ -42,7 +42,7 @@ export {
   mapCategoryToInsert,
   mapCategoryToUpdate,
   CATEGORY_DEFAULTS,
-  type CategoryWithGroup,
+  // Note: CategoryWithGroup is exported from repositories/index.ts, not here
   type CategoryInput,
 } from './category.mapper';
 
