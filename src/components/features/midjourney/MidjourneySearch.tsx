@@ -1,33 +1,63 @@
 'use client';
 
-import { useState } from 'react';
-import { Search } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MidjourneySearchProps {
     className?: string;
     placeholder?: string;
+    value?: string;
+    onChange?: (value: string) => void;
+    onSubmit?: (value: string) => void;
 }
 
 export function MidjourneySearch({
     className,
-    placeholder = "Search Midjourney styles... e.g. 'anime'"
+    placeholder = "Search styles, SREF codes, prompts...",
+    value: controlledValue,
+    onChange,
+    onSubmit
 }: MidjourneySearchProps) {
-    const [query, setQuery] = useState('');
+    const [internalValue, setInternalValue] = useState('');
     const [isFocused, setIsFocused] = useState(false);
-    const router = useRouter();
 
-    const handleSearch = (e: React.FormEvent) => {
+    // Use controlled or uncontrolled value
+    const value = controlledValue !== undefined ? controlledValue : internalValue;
+
+    // Sync internal value with controlled value
+    useEffect(() => {
+        if (controlledValue !== undefined) {
+            setInternalValue(controlledValue);
+        }
+    }, [controlledValue]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setInternalValue(newValue);
+        onChange?.(newValue);
+    };
+
+    const handleClear = () => {
+        setInternalValue('');
+        onChange?.('');
+        onSubmit?.('');
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (query.trim()) {
-            router.push(`/midjourney-library?search=${encodeURIComponent(query.trim())}`);
+        onSubmit?.(value);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            handleClear();
         }
     };
 
     return (
         <form
-            onSubmit={handleSearch}
+            onSubmit={handleSubmit}
             className={cn(
                 "relative w-full max-w-2xl mx-auto",
                 className
@@ -41,23 +71,45 @@ export function MidjourneySearch({
                         : "border-white/20 hover:border-white/40"
                 )}
             >
+                <div className="pl-5 text-gray-400">
+                    <Search className="w-5 h-5" aria-hidden="true" />
+                </div>
                 <input
                     type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    value={value}
+                    onChange={handleChange}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
+                    onKeyDown={handleKeyDown}
                     placeholder={placeholder}
-                    className="flex-1 bg-transparent px-6 py-4 text-white placeholder:text-gray-400 focus:outline-none text-base"
+                    className="flex-1 bg-transparent px-4 py-4 text-white placeholder:text-gray-400 focus:outline-none text-base"
+                    aria-label="Search prompts and styles"
                 />
+                {/* Clear button */}
+                {value && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="p-2 mr-1 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-white/10"
+                        aria-label="Clear search"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
                 <button
                     type="submit"
-                    className="flex items-center justify-center h-12 w-12 mr-2 rounded-full bg-purple-600 hover:bg-purple-700 transition-colors shrink-0"
+                    className="flex items-center justify-center h-10 w-10 mr-2 rounded-full bg-purple-600 hover:bg-purple-700 transition-colors shrink-0"
                     aria-label="Search"
                 >
-                    <Search className="w-5 h-5 text-white" />
+                    <Search className="w-4 h-4 text-white" />
                 </button>
             </div>
+            {/* Search hint */}
+            {isFocused && !value && (
+                <p className="absolute left-0 right-0 mt-2 text-xs text-gray-500 text-center">
+                    Try "anime", "cyberpunk", "watercolor", or any style you're looking for
+                </p>
+            )}
         </form>
     );
 }
