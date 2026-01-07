@@ -86,7 +86,7 @@ export function NewsCard({ news }: NewsCardProps) {
         )}>
             <div className="relative h-48 w-full overflow-hidden flex-shrink-0">
                 <NewsCardImage
-                    src={imageError ? undefined : news.image}
+                    src={imageError ? undefined : (news.image ?? undefined)}
                     alt={news.title}
                     onError={() => setImageError(true)}
                 />
@@ -128,12 +128,12 @@ export function NewsCard({ news }: NewsCardProps) {
                 </Link>
                 <div className="text-xs text-muted-foreground flex items-center gap-2 mt-2">
                     <span className="flex items-center gap-1">
-                        {news.sourceCount} source{news.sourceCount > 1 ? 's' : ''}
+                        {news.sourceCount ?? 1} source{(news.sourceCount ?? 1) > 1 ? 's' : ''}
                         <span>|</span>
                         {news.source?.name}
                     </span>
                     <span>•</span>
-                    <span>{formatDistanceToNow(new Date(news.date), { addSuffix: true })}</span>
+                    <span>{formatDistanceToNow(new Date(news.published_at || new Date()), { addSuffix: true })}</span>
                 </div>
             </CardHeader>
 
@@ -192,7 +192,7 @@ export function NewsCard({ news }: NewsCardProps) {
             </CardContent>
 
             <CardFooter className="p-4 pt-0 text-xs text-muted-foreground flex justify-between items-center border-t mt-auto pt-4">
-                <NewsCardStats views={news.stats.views} likes={news.stats.likes} />
+                <NewsCardStats views={news.stats?.views ?? 0} likes={news.stats?.likes ?? 0} />
 
                 {news.source?.url && (
                     <Link
