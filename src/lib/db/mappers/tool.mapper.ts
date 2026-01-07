@@ -7,7 +7,10 @@
 
 import type { ToolRow, ToolInsert, ToolWithCategories } from '../repositories/tools.repository';
 import type { Tool, PricingType } from '@/lib/types/tool';
-import type { ToolStatusType } from '@/lib/supabase/types';
+import type { Json } from '@/lib/supabase/types';
+
+/** Tool status type */
+type ToolStatusType = 'draft' | 'pending' | 'published' | 'rejected' | 'archived';
 
 /**
  * Default values applied when database columns are null.
@@ -254,7 +257,7 @@ export function mapToolWithWorkflowToInsert(tool: ToolWithWorkflowInput): ToolIn
     status: tool.status ?? 'pending',
     submitter_email: tool.submitterEmail ?? null,
     submitter_name: tool.submitterName ?? null,
-    metadata: tool.metadata ?? null,
+    metadata: (tool.metadata as Json) ?? null,
   };
 }
 
