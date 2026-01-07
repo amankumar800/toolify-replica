@@ -79,7 +79,7 @@ function CategorySuggestions() {
           <Link
             key={category.slug}
             href={`/free-ai-tools/${category.slug}`}
-            className="flex items-center gap-2 px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-3 bg-[var(--muted)] hover:bg-[var(--muted)]/80 rounded-lg transition-colors text-sm"
           >
             <span className="text-base" aria-hidden="true">
               {category.icon}
@@ -121,14 +121,16 @@ interface ErrorProps {
 export default function Error({ error, reset }: ErrorProps) {
   const is404 = isNotFoundError(error);
 
-  // Log error details for debugging - Requirement 18.2
+  // Log error details for debugging - only in development (Requirement 18.2)
   useEffect(() => {
-    console.error('[Free AI Tools Error]', {
-      message: error.message,
-      digest: error.digest,
-      stack: error.stack,
-      timestamp: new Date().toISOString(),
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[Free AI Tools Error]', {
+        message: error.message,
+        digest: error.digest,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      });
+    }
   }, [error]);
 
   return (
@@ -164,7 +166,7 @@ export default function Error({ error, reset }: ErrorProps) {
           {/* Browse Categories Link */}
           <Link
             href="/free-ai-tools"
-            className="px-6 py-2.5 bg-gray-100 text-[var(--foreground)] rounded-lg font-medium hover:bg-gray-200 transition-colors"
+            className="px-6 py-2.5 bg-[var(--muted)] text-[var(--foreground)] rounded-lg font-medium hover:bg-[var(--muted)]/80 transition-colors"
           >
             Browse all tools
           </Link>
@@ -179,7 +181,7 @@ export default function Error({ error, reset }: ErrorProps) {
             <summary className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-[var(--foreground)]">
               Error details (development only)
             </summary>
-            <pre className="mt-2 p-4 bg-gray-100 rounded-lg text-xs overflow-auto">
+            <pre className="mt-2 p-4 bg-[var(--muted)] rounded-lg text-xs overflow-auto">
               {JSON.stringify(
                 {
                   message: error.message,

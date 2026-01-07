@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { freeAIToolsService } from '@/lib/services/free-ai-tools.service';
+import type { FAQItem } from '@/lib/types/free-ai-tools';
 import {
   CategorySidebar,
   FeaturedToolsPanel,
@@ -109,7 +110,7 @@ function WhyUseSection() {
         {benefits.map((benefit, index) => (
           <div
             key={index}
-            className="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors"
+            className="bg-[var(--muted)] rounded-xl p-6 hover:bg-[var(--muted)]/80 transition-colors"
           >
             <div className="text-3xl mb-4" aria-hidden="true">
               {benefit.icon}
@@ -159,7 +160,7 @@ function ThreeStepsSection() {
         {steps.map((step) => (
           <div
             key={step.number}
-            className="flex-1 bg-gradient-to-br from-purple-50 to-white rounded-xl p-6 border border-purple-100"
+            className="flex-1 bg-gradient-to-br from-[var(--primary)]/5 to-[var(--background)] rounded-xl p-6 border border-[var(--primary)]/10"
           >
             <div className="w-10 h-10 bg-[var(--primary)] text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">
               {step.number}
@@ -181,7 +182,7 @@ function ThreeStepsSection() {
  * FAQ Section Component
  * Displays FAQ accordion - Requirement 2.6
  */
-function FAQSection({ faqItems }: { faqItems: { question: string; answer: string }[] }) {
+function FAQSection({ faqItems }: { faqItems: FAQItem[] }) {
   return (
     <section className="mb-10" id="faq">
       <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6">

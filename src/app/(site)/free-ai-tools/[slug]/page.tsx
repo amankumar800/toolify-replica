@@ -44,7 +44,8 @@ export async function generateMetadata({
   try {
     const category = await freeAIToolsService.getCategoryBySlug(slug);
 
-    const title = `Best Free AI Tools for ${category.name} in 2025 - AI Tools Book`;
+    const currentYear = new Date().getFullYear();
+    const title = `Best Free AI Tools for ${category.name} in ${currentYear} - AI Tools Book`;
     const description = `Discover the best free AI tools for ${category.name}. ${category.description}`;
 
     return {
