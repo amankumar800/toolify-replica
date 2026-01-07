@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToolById, updateTool, softDeleteTool } from '@/lib/services/tools.service';
 import { toolSchema } from '@/lib/utils/admin-validation';
+import type { Json } from '@/lib/supabase/types';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -64,7 +65,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { category_ids, ...toolData } = validationResult.data;
+    const { category_ids, ...toolDataRaw } = validationResult.data;
+
+    // Cast metadata to Json type for Supabase compatibility
+    const toolData = {
+      ...toolDataRaw,
+      metadata: toolDataRaw.metadata as Json | undefined,
+    };
 
     // Update tool
     const tool = await updateTool(id, toolData, category_ids);
