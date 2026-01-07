@@ -143,11 +143,11 @@ function isSupabaseProtectedRoute(pathname: string): boolean {
 }
 
 // ============================================================================
-// Middleware
+// Proxy
 // ============================================================================
 
 /**
- * Middleware that handles:
+ * Proxy that handles:
  * 1. Admin route protection with dedicated admin auth (JWT + httpOnly cookies)
  * 2. Supabase Auth session refresh for non-admin routes
  * 3. Protected route redirection for unauthenticated users
@@ -168,7 +168,7 @@ function isSupabaseProtectedRoute(pathname: string): boolean {
  * - 2.4: Use getUser() to validate sessions securely
  * - 2.5: Clear invalid cookies if session refresh fails
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // ========================================================================
@@ -224,7 +224,7 @@ export async function middleware(request: NextRequest) {
 
   // Log session refresh errors for debugging
   if (error) {
-    console.debug('[Middleware] Session refresh error:', error);
+    console.debug('[Proxy] Session refresh error:', error);
   }
 
   // Protected route check for Supabase auth
