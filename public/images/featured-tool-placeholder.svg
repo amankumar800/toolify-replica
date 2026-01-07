@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300" fill="none">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Subtle grid pattern -->
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="300" fill="url(#grid)"/>
+  
+  <!-- Center icon container -->
+  <rect x="150" y="100" width="100" height="100" rx="16" fill="#e2e8f0"/>
+  
+  <!-- AI/Tool icon -->
+  <g transform="translate(175, 125)">
+    <!-- Sparkle/AI symbol -->
+    <path d="M25 5 L27 15 L37 17 L27 19 L25 29 L23 19 L13 17 L23 15 Z" fill="#94a3b8"/>
+    <circle cx="25" cy="35" r="8" fill="none" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M25 30 L25 40 M20 35 L30 35" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="200" y="235" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#64748b">AI Tool</text>
+  <text x="200" y="255" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94a3b8">Image Coming Soon</text>
+</svg>
