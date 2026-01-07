@@ -106,11 +106,12 @@ export function mapCategoryRowToCategoryWithGroup(row: CategoryRow): CategoryWit
  * ```
  */
 export function mapCategoryWithToolCount(row: CategoryWithToolCount): Category {
+  const r = row as CategoryWithToolCount & { id: string; name: string; slug: string; description: string | null; group_id: string | null };
   return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    description: row.description ?? CATEGORY_DEFAULTS.description,
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    description: r.description ?? CATEGORY_DEFAULTS.description,
     count: row.computed_tool_count ?? CATEGORY_DEFAULTS.toolCount,
     toolCount: row.computed_tool_count ?? CATEGORY_DEFAULTS.toolCount,
   };
@@ -124,18 +125,19 @@ export function mapCategoryWithToolCount(row: CategoryWithToolCount): Category {
  * @returns Extended Category object with group and computed count
  */
 export function mapCategoryWithToolCountAndGroup(row: CategoryWithToolCount): CategoryWithGroup {
+  const r = row as CategoryWithToolCount & { id: string; name: string; slug: string; description: string | null; group_id: string | null; display_order: number | null; metadata: Record<string, unknown> | null; created_at: string | null; updated_at: string | null };
   return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    description: row.description ?? CATEGORY_DEFAULTS.description,
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    description: r.description ?? CATEGORY_DEFAULTS.description,
     count: row.computed_tool_count ?? CATEGORY_DEFAULTS.toolCount,
     toolCount: row.computed_tool_count ?? CATEGORY_DEFAULTS.toolCount,
-    groupId: row.group_id ?? undefined,
-    displayOrder: row.display_order ?? CATEGORY_DEFAULTS.displayOrder,
-    metadata: (row.metadata as Record<string, unknown>) ?? CATEGORY_DEFAULTS.metadata,
-    createdAt: row.created_at ?? undefined,
-    updatedAt: row.updated_at ?? undefined,
+    groupId: r.group_id ?? undefined,
+    displayOrder: r.display_order ?? CATEGORY_DEFAULTS.displayOrder,
+    metadata: (r.metadata as Record<string, unknown>) ?? CATEGORY_DEFAULTS.metadata,
+    createdAt: r.created_at ?? undefined,
+    updatedAt: r.updated_at ?? undefined,
   };
 }
 
