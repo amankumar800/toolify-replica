@@ -49,7 +49,19 @@ const nextConfig = {
             {
                 protocol: 'https',
                 hostname: 'www.gstatic.com',
-            }
+            },
+            {
+                protocol: 'https',
+                hostname: 'github.githubassets.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'avatars.githubusercontent.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'raw.githubusercontent.com',
+            },
         ],
     },
     async redirects() {
