@@ -7,9 +7,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
 import { createCategoriesRepository, createCategoryGroupsRepository, createSubcategoriesRepository } from '@/lib/db/repositories';
 import { categorySchema, validateFormData } from '@/lib/utils/admin-validation';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { TABLES } from '@/lib/db/constants/tables';
 import type { Json } from '@/lib/supabase/types';
 
@@ -22,8 +24,13 @@ interface RouteParams {
  * 
  * Fetches a single category by ID with group info and tool count.
  */
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const { id } = await params;
     const supabase = await createClient();
     const repo = createCategoriesRepository(supabase);
@@ -62,6 +69,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const { id } = await params;
     const body = await request.json();
 
@@ -130,8 +142,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
  * For any category being deleted, all related subcategories and tool_categories 
  * entries SHALL be cascade deleted.
  */
-export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const { id } = await params;
     const supabase = await createClient();
     const categoriesRepo = createCategoriesRepository(supabase);

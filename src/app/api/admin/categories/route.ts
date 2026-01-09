@@ -7,9 +7,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
 import { createCategoriesRepository, createCategoryGroupsRepository } from '@/lib/db/repositories';
 import { categorySchema, validateFormData } from '@/lib/utils/admin-validation';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { Json } from '@/lib/supabase/types';
 
 /**
@@ -21,6 +23,11 @@ import type { Json } from '@/lib/supabase/types';
  */
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const { searchParams } = new URL(request.url);
     const groupId = searchParams.get('group_id');
 
@@ -56,6 +63,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const body = await request.json();
 
     // Validate form data

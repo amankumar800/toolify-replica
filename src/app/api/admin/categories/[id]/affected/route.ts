@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
 import { createCategoriesRepository, createSubcategoriesRepository } from '@/lib/db/repositories';
 import { TABLES } from '@/lib/db/constants/tables';
@@ -24,6 +25,7 @@ interface RouteParams {
  */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
+    await requireAdmin();
     const { id } = await params;
     const supabase = await createClient();
     const categoriesRepo = createCategoriesRepository(supabase);
