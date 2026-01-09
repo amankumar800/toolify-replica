@@ -16,6 +16,9 @@
 
 import * as Sentry from '@sentry/nextjs';
 import { Component, type ReactNode } from 'react';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('ErrorBoundary');
 
 // ============================================================================
 // Types
@@ -74,8 +77,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error);
-      console.error('Component stack:', errorInfo.componentStack);
+      log.error('ErrorBoundary caught an error', error, { data: { componentStack: errorInfo.componentStack } });
     }
   }
 

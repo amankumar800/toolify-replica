@@ -10,6 +10,9 @@ import {
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { signOut as authServiceSignOut } from '@/lib/services/auth.service';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AuthProviderContext');
 
 /**
  * User type for auth context
@@ -36,7 +39,7 @@ const defaultContextValue: AuthContextValue = {
   user: null,
   loading: true,
   signOut: async () => {
-    console.warn('signOut called outside of AuthProviderContext');
+    log.warn('signOut called outside of AuthProviderContext');
   },
 };
 
@@ -102,7 +105,7 @@ export function AuthProviderContext({ children }: AuthProviderContextProps) {
   const handleSignOut = useCallback(async () => {
     const result = await authServiceSignOut();
     if (!result.success && result.error) {
-      console.error('Sign out failed:', result.error);
+      log.error('Sign out failed', result.error, { action: 'signOut' });
     }
     // Note: User state will be updated by onAuthStateChange listener
   }, []);
