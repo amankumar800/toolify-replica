@@ -63,28 +63,32 @@
 
 ---
 
-### ❌ 4. Implement Rate Limiting
+### ✅ 4. Implement Rate Limiting
 **Priority**: P0 - SECURITY  
 **Issue**: No protection against abuse/DDoS
+**Status**: COMPLETED
 
-**Action Items**:
-- [ ] Install: `npm install @upstash/ratelimit @upstash/redis`
-- [ ] Sign up for Upstash Redis (free tier)
-- [ ] Create `src/lib/rate-limit.ts`:
-```typescript
-import { Ratelimit } from "@upstash/ratelimit"
-import { Redis } from "@upstash/redis"
+**Implementation Summary**:
+- [x] Installed: `@upstash/ratelimit` and `@upstash/redis`
+- [x] Created comprehensive rate limiting library at `src/lib/rate-limit/`
+- [x] Added global rate limiting in middleware (200 req/10s per IP)
+- [x] Applied rate limiting to all admin API routes
+- [x] Applied rate limiting to public API routes
 
-export const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, "10 s"),
-})
-```
-- [ ] Add to server actions in `src/app/actions.ts`
-- [ ] Add to API routes
-- [ ] Test rate limiting behavior
+**Rate Limit Tiers**:
+- `login`: 5 requests per 15 minutes (brute-force protection)
+- `adminMutation`: 60 requests per minute (write operations)
+- `bulkOperation`: 10 requests per minute (bulk delete/update)
+- `adminRead`: 300 requests per minute (read operations)
+- `public`: 100 requests per minute (public API endpoints)
+- `global`: 200 requests per 10 seconds (middleware-level DDoS protection)
 
-**Estimated Time**: 1-2 hours
+**Configuration**:
+Set these environment variables in Vercel:
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+Rate limiting gracefully degrades if Upstash is not configured.
 
 ---
 
