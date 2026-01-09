@@ -9,7 +9,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { UserActivityFilters, UserActivityStats } from '@/lib/services/admin-crud.types';
 
 /**
@@ -32,6 +34,11 @@ interface UserActivityItem {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const supabase = await createClient();
     const searchParams = request.nextUrl.searchParams;
 
