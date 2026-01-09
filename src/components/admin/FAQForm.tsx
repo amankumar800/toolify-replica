@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { useUnsavedChanges } from '@/components/admin/UnsavedChangesProvider';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('FAQForm');
 import {
   TextField,
   SelectField,
@@ -162,7 +165,7 @@ export function FAQForm({
       router.push('/admin/faqs');
       router.refresh();
     } catch (error) {
-      console.error('Error saving FAQ:', error);
+      log.error('Error saving FAQ', error, { action: 'save' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save FAQ',

@@ -7,6 +7,9 @@ import { TextField } from '@/components/admin/form-fields/TextField';
 import { NumberField } from '@/components/admin/form-fields/NumberField';
 import { IconPickerField } from '@/components/admin/form-fields/IconPickerField';
 import { useToast } from '@/components/admin/Toast';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('CategoryGroupForm');
 import { RelatedDataSection, type RelatedDataItem } from '@/components/admin/RelatedDataSection';
 import { categoryGroupSchema, validateFormData } from '@/lib/utils/admin-validation';
 import type { CategoryGroupFormData } from '@/lib/types/admin-forms';
@@ -72,7 +75,7 @@ export function CategoryGroupForm({ initialData, isNew }: CategoryGroupFormProps
           setRelatedCategoriesCount(data.totalCount || 0);
         }
       } catch (error) {
-        console.error('Error fetching related categories:', error);
+        log.error('Error fetching related categories', error, { action: 'fetchRelatedCategories' });
       } finally {
         setIsLoadingRelatedCategories(false);
       }
@@ -142,7 +145,7 @@ export function CategoryGroupForm({ initialData, isNew }: CategoryGroupFormProps
       router.push('/admin/category-groups');
       router.refresh();
     } catch (error) {
-      console.error('Error saving category group:', error);
+      log.error('Error saving category group', error, { action: 'save' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save category group',

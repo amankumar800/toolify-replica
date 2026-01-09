@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { useUnsavedChanges } from '@/components/admin/UnsavedChangesProvider';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('FeaturedToolForm');
 import {
   TextField,
   NumberField,
@@ -125,7 +128,7 @@ export function FeaturedToolForm({
           }
         }
       } catch (error) {
-        console.error('Error fetching tool details:', error);
+        log.error('Error fetching tool details', error, { action: 'fetchToolDetails' });
       } finally {
         setIsLoadingToolDetails(false);
       }
@@ -181,7 +184,7 @@ export function FeaturedToolForm({
 
       return await response.json();
     } catch (error) {
-      console.error('Error searching tools:', error);
+      log.error('Error searching tools', error, { action: 'searchTools' });
       return [];
     }
   }, [formData.tool_id]);
@@ -259,7 +262,7 @@ export function FeaturedToolForm({
       router.push('/admin/featured');
       router.refresh();
     } catch (error) {
-      console.error('Error saving featured tool:', error);
+      log.error('Error saving featured tool', error, { action: 'save' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save featured tool',

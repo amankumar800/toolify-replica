@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { useUnsavedChanges } from '@/components/admin/UnsavedChangesProvider';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('PromptForm');
 import {
   TextField,
   TextareaField,
@@ -177,7 +180,7 @@ export function PromptForm({
       router.push('/admin/prompts');
       router.refresh();
     } catch (error) {
-      console.error('Error saving prompt:', error);
+      log.error('Error saving prompt', error, { action: 'save' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save prompt',

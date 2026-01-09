@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { useUnsavedChanges } from '@/components/admin/UnsavedChangesProvider';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('NewsForm');
 import {
   TextField,
   TextareaField,
@@ -189,7 +192,7 @@ export function NewsForm({
       router.push('/admin/news');
       router.refresh();
     } catch (error) {
-      console.error('Error saving news:', error);
+      log.error('Error saving news', error, { action: 'save' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save news',

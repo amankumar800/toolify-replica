@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { useUnsavedChanges } from '@/components/admin/UnsavedChangesProvider';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('ToolForm');
 import {
   TextField,
   TextareaField,
@@ -164,7 +167,7 @@ export function ToolForm({
         setDuplicates(result);
       }
     } catch (error) {
-      console.error('Error checking duplicates:', error);
+      log.error('Error checking duplicates', error, { action: 'checkDuplicates' });
     } finally {
       setIsCheckingDuplicates(false);
     }
@@ -280,7 +283,7 @@ export function ToolForm({
       router.push('/admin/tools');
       router.refresh();
     } catch (error) {
-      console.error('Error saving tool:', error);
+      log.error('Error saving tool', error, { action: 'save' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save tool',

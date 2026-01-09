@@ -7,6 +7,9 @@ import { TextField } from '@/components/admin/form-fields/TextField';
 import { NumberField } from '@/components/admin/form-fields/NumberField';
 import { SelectField } from '@/components/admin/form-fields/SelectField';
 import { useToast } from '@/components/admin/Toast';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('SubcategoryForm');
 import { subcategorySchema, validateFormData, generateSlug } from '@/lib/utils/admin-validation';
 import type { SubcategoryFormData } from '@/lib/types/admin-forms';
 import { Loader2, Save, ArrowLeft } from 'lucide-react';
@@ -76,7 +79,7 @@ export function SubcategoryForm({ initialData, isNew }: SubcategoryFormProps) {
           setCategories(data.data || []);
         }
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        log.error('Error fetching categories', error, { action: 'fetchCategories' });
         addToast({
           variant: 'error',
           message: 'Failed to load categories',
@@ -166,7 +169,7 @@ export function SubcategoryForm({ initialData, isNew }: SubcategoryFormProps) {
       router.push('/admin/subcategories');
       router.refresh();
     } catch (error) {
-      console.error('Error saving subcategory:', error);
+      log.error('Error saving subcategory', error, { action: 'save' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save subcategory',

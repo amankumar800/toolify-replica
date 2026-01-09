@@ -10,6 +10,9 @@ import { useRouter } from 'next/navigation';
 import { Search, X, Wrench, Newspaper, Sparkles, Folder, HelpCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('GlobalSearch');
 
 // ============================================
 // Types
@@ -192,7 +195,7 @@ export async function defaultSearchFunction(query: string): Promise<SearchResult
       );
     }
   } catch (error) {
-    console.error('Global search error:', error);
+    log.error('Global search error', error, { action: 'search' });
   }
 
   return results;
@@ -333,7 +336,7 @@ export function GlobalSearch({
       const searchResults = await onSearch(searchQuery);
       setResults(searchResults);
     } catch (error) {
-      console.error('Search error:', error);
+      log.error('Search error', error, { action: 'performSearch' });
       setResults([]);
     } finally {
       setIsLoading(false);

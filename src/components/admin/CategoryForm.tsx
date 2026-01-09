@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/admin/form-fields/TextField';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('CategoryForm');
 import { TextareaField } from '@/components/admin/form-fields/TextareaField';
 import { NumberField } from '@/components/admin/form-fields/NumberField';
 import { SelectField } from '@/components/admin/form-fields/SelectField';
@@ -81,7 +84,7 @@ export function CategoryForm({ initialData, isNew }: CategoryFormProps) {
           setCategoryGroups(data.data || []);
         }
       } catch (error) {
-        console.error('Error fetching category groups:', error);
+        log.error('Error fetching category groups', error, { action: 'fetchGroups' });
       } finally {
         setIsLoadingGroups(false);
       }
@@ -110,7 +113,7 @@ export function CategoryForm({ initialData, isNew }: CategoryFormProps) {
           setRelatedToolsCount(data.totalCount || 0);
         }
       } catch (error) {
-        console.error('Error fetching related tools:', error);
+        log.error('Error fetching related tools', error, { action: 'fetchRelatedTools' });
       } finally {
         setIsLoadingRelatedTools(false);
       }
@@ -196,7 +199,7 @@ export function CategoryForm({ initialData, isNew }: CategoryFormProps) {
       router.push('/admin/categories');
       router.refresh();
     } catch (error) {
-      console.error('Error saving category:', error);
+      log.error('Error saving category', error, { action: 'save' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save category',
