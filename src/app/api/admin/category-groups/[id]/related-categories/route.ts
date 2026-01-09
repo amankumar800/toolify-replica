@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminCategoryGroupsRelatedCategoriesAPI');
 
 /**
  * GET /api/admin/category-groups/[id]/related-categories
@@ -26,7 +29,7 @@ export async function GET(
       .eq('group_id', id);
 
     if (countError) {
-      console.error('Error counting categories:', countError);
+      log.error('Error counting categories', countError, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to count categories' },
         { status: 500 }
@@ -43,7 +46,7 @@ export async function GET(
       .limit(10);
 
     if (categoriesError) {
-      console.error('Error fetching categories:', categoriesError);
+      log.error('Error fetching categories', categoriesError, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to fetch categories' },
         { status: 500 }
@@ -55,7 +58,7 @@ export async function GET(
       totalCount: count ?? 0,
     });
   } catch (error) {
-    console.error('Error in related-categories API:', error);
+    log.error('Error in related-categories API', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

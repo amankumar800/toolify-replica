@@ -12,6 +12,9 @@ import { createClient } from '@/lib/supabase/server';
 import { createCategoryGroupsRepository } from '@/lib/db/repositories';
 import { categoryGroupSchema, validateFormData } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminCategoryGroupsIdAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -36,7 +39,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const group = await repo.findById(id);
     return NextResponse.json(group);
   } catch (error) {
-    console.error('Error fetching category group:', error);
+    log.error('Error fetching category group', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Category group not found' },
       { status: 404 }
@@ -90,7 +93,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(group);
   } catch (error) {
-    console.error('Error updating category group:', error);
+    log.error('Error updating category group', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Failed to update category group' },
       { status: 500 }
@@ -133,7 +136,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting category group:', error);
+    log.error('Error deleting category group', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to delete category group' },
       { status: 500 }

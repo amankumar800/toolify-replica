@@ -11,6 +11,9 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
 import { createCategoryGroupsRepository } from '@/lib/db/repositories';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminCategoryGroupsReorderAPI');
 
 /**
  * POST /api/admin/category-groups/reorder
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error reordering category groups:', error);
+    log.error('Error reordering category groups', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to reorder category groups' },
       { status: 500 }
