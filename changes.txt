@@ -1,0 +1,23 @@
+﻿ M src/app/admin/featured/[id]/edit/page.tsx
+ M src/app/admin/tools/page.tsx
+ M src/app/api/admin/categories/[id]/route.ts
+ M src/app/api/admin/categories/route.ts
+ M src/app/api/admin/logout/route.ts
+ M src/app/api/admin/tools/[id]/route.ts
+ M src/app/api/admin/tools/route.ts
+ M src/app/sitemap.ts
+ M src/components/features/MasonryGrid.tsx
+ M src/components/features/PromptCard.tsx
+ M src/components/features/SearchBar.tsx
+ M src/components/features/ToolGrid.tsx
+ M src/components/features/midjourney/MidjourneySearch.tsx
+ M src/components/features/midjourney/TagCloud.tsx
+ M src/components/features/news/NewsCard.tsx
+ M src/lib/db/mappers/category.mapper.ts
+ M src/lib/db/mappers/index.ts
+ M src/lib/services/admin-auth.service.ts
+ M src/lib/services/admin-dashboard.service.ts
+ M src/lib/services/featured-tools.service.ts
+?? .claude/
+?? changes.txt
+?? pending_changes.txt
