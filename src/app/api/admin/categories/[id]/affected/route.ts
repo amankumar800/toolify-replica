@@ -12,6 +12,9 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
 import { createCategoriesRepository, createSubcategoriesRepository } from '@/lib/db/repositories';
 import { TABLES } from '@/lib/db/constants/tables';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminCategoriesAffectedAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -56,7 +59,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       .eq('category_id', id);
 
     if (toolCatError) {
-      console.error('Error fetching tool_categories:', toolCatError);
+      log.error('Error fetching tool_categories', toolCatError, { action: 'GET' });
     }
 
     // Extract unique tools
@@ -84,7 +87,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Error fetching affected records:', error);
+    log.error('Error fetching affected records', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch affected records' },
       { status: 500 }

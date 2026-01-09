@@ -14,6 +14,9 @@ import { categorySchema, validateFormData } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { TABLES } from '@/lib/db/constants/tables';
 import type { Json } from '@/lib/supabase/types';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('CategoriesAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -53,7 +56,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       tool_count,
     });
   } catch (error) {
-    console.error('Error fetching category:', error);
+    log.error('Error fetching category', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Category not found' },
       { status: 404 }
@@ -124,7 +127,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(category);
   } catch (error) {
-    console.error('Error updating category:', error);
+    log.error('Error updating category', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Failed to update category' },
       { status: 500 }
@@ -173,7 +176,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('category_id', id);
 
     if (countError) {
-      console.error('Error counting tool_categories:', countError);
+      log.error('Error counting tool_categories', countError, { action: 'DELETE', data: { categoryId: id } });
     }
 
     // Return affected records info if there are any
@@ -189,7 +192,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('category_id', id);
 
     if (toolCatError) {
-      console.error('Error deleting tool_categories:', toolCatError);
+      log.error('Error deleting tool_categories', toolCatError, { action: 'DELETE', data: { categoryId: id } });
       return NextResponse.json(
         { error: 'Failed to delete tool category associations' },
         { status: 500 }
@@ -213,7 +216,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Error deleting category:', error);
+    log.error('Error deleting category', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to delete category' },
       { status: 500 }

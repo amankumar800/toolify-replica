@@ -12,7 +12,10 @@ import { createClient } from '@/lib/supabase/server';
 import { createCategoriesRepository, createCategoryGroupsRepository } from '@/lib/db/repositories';
 import { categorySchema, validateFormData } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { Json } from '@/lib/supabase/types';
+
+const log = createLogger('AdminCategoriesAPI');
 
 /**
  * GET /api/admin/categories
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
       total: filteredCategories.length,
     });
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    log.error('Error fetching categories', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch categories' },
       { status: 500 }
@@ -128,7 +131,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(category, { status: 201 });
   } catch (error) {
-    console.error('Error creating category:', error);
+    log.error('Error creating category', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to create category' },
       { status: 500 }

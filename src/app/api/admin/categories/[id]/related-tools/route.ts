@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('RelatedToolsAPI');
 
 /**
  * GET /api/admin/categories/[id]/related-tools
@@ -26,7 +29,7 @@ export async function GET(
       .eq('category_id', id);
 
     if (junctionError) {
-      console.error('Error fetching tool_categories:', junctionError);
+      log.error('Error fetching tool_categories', junctionError, { action: 'GET', data: { categoryId: id } });
       return NextResponse.json(
         { error: 'Failed to fetch related tools' },
         { status: 500 }
@@ -52,7 +55,7 @@ export async function GET(
       .limit(10);
 
     if (toolsError) {
-      console.error('Error fetching tools:', toolsError);
+      log.error('Error fetching tools', toolsError, { action: 'GET', data: { categoryId: id } });
       return NextResponse.json(
         { error: 'Failed to fetch tool details' },
         { status: 500 }
@@ -64,7 +67,7 @@ export async function GET(
       totalCount,
     });
   } catch (error) {
-    console.error('Error in related-tools API:', error);
+    log.error('Error in related-tools API', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
