@@ -1,8 +1,10 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 interface ReorderItem {
   id: string;
@@ -17,6 +19,11 @@ interface ReorderItem {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const supabase = createAdminClient();
     const body = await request.json();
 

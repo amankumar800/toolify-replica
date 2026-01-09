@@ -1,9 +1,11 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { faqSchema } from '@/lib/utils/admin-validation';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * GET /api/admin/faqs
@@ -13,6 +15,11 @@ import { faqSchema } from '@/lib/utils/admin-validation';
  */
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const supabase = createAdminClient();
     const { searchParams } = new URL(request.url);
 
@@ -84,6 +91,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const supabase = createAdminClient();
     const body = await request.json();
 
