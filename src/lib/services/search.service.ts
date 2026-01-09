@@ -8,7 +8,11 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { unstable_cache } from 'next/cache';
 import { TABLES } from '@/lib/db/constants/tables';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('SearchService');
 
 // ============================================================================
 // Types
@@ -138,7 +142,7 @@ async function searchTools(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error('Failed to search tools:', error);
+    log.error('Failed to search tools', error, { action: 'searchTools', data: { query } });
     return { results: [], count: 0 };
   }
 
@@ -183,7 +187,7 @@ async function searchNews(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error('Failed to search news:', error);
+    log.error('Failed to search news', error, { action: 'searchNews', data: { query } });
     return { results: [], count: 0 };
   }
 
@@ -220,7 +224,7 @@ async function searchPrompts(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error('Failed to search prompts:', error);
+    log.error('Failed to search prompts', error, { action: 'searchPrompts', data: { query } });
     return { results: [], count: 0 };
   }
 
@@ -257,7 +261,7 @@ async function searchCategories(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error('Failed to search categories:', error);
+    log.error('Failed to search categories', error, { action: 'searchCategories', data: { query } });
     return { results: [], count: 0 };
   }
 
@@ -298,105 +302,124 @@ export async function globalSearch(options: SearchOptions): Promise<GlobalSearch
 
   const sanitizedQuery = query.trim();
 
-  // Determine per-type limits based on how many types are requested
-  // If searching all types, limit each to a fraction
-  // If searching specific types, give them the full limit
-  const perTypeLimit = types.length === 1 ? limit : Math.ceil(limit / types.length);
-
-  // Execute searches in parallel for requested types
-  const searchPromises: Promise<{ type: SearchResultType; results: SearchResult[]; count: number }>[] = [];
-
-  if (types.includes('tool')) {
-    searchPromises.push(
-      searchTools(sanitizedQuery, perTypeLimit, offset).then((r) => ({
-        type: 'tool' as const,
-        results: r.results,
-        count: r.count,
-      }))
-    );
-  }
-
-  if (types.includes('news')) {
-    searchPromises.push(
-      searchNews(sanitizedQuery, perTypeLimit, offset).then((r) => ({
-        type: 'news' as const,
-        results: r.results,
-        count: r.count,
-      }))
-    );
-  }
-
-  if (types.includes('prompt')) {
-    searchPromises.push(
-      searchPrompts(sanitizedQuery, perTypeLimit, offset).then((r) => ({
-        type: 'prompt' as const,
-        results: r.results,
-        count: r.count,
-      }))
-    );
-  }
-
-  if (types.includes('category')) {
-    searchPromises.push(
-      searchCategories(sanitizedQuery, perTypeLimit, offset).then((r) => ({
-        type: 'category' as const,
-        results: r.results,
-        count: r.count,
-      }))
-    );
-  }
-
-  const searchResults = await Promise.all(searchPromises);
-
-  // Aggregate results
-  const counts = {
-    tools: 0,
-    news: 0,
-    prompts: 0,
-    categories: 0,
-    total: 0,
-  };
-
-  const allResults: SearchResult[] = [];
-
-  for (const result of searchResults) {
-    allResults.push(...result.results);
-
-    switch (result.type) {
-      case 'tool':
-        counts.tools = result.count;
-        break;
-      case 'news':
-        counts.news = result.count;
-        break;
-      case 'prompt':
-        counts.prompts = result.count;
-        break;
-      case 'category':
-        counts.categories = result.count;
-        break;
-    }
-  }
-
-  counts.total = counts.tools + counts.news + counts.prompts + counts.categories;
-
-  // Sort results by type priority: tools > news > categories > prompts
-  const typePriority: Record<SearchResultType, number> = {
-    tool: 0,
-    news: 1,
-    category: 2,
-    prompt: 3,
-  };
-
-  allResults.sort((a, b) => typePriority[a.type] - typePriority[b.type]);
-
-  return {
-    query: sanitizedQuery,
-    results: allResults.slice(0, limit),
-    counts,
-    hasMore: offset + limit < counts.total,
-  };
+  // Use cached search for better performance
+  return cachedGlobalSearch(sanitizedQuery, types, limit, offset);
 }
+
+/**
+ * Cached global search implementation
+ * Cache for 5 minutes to balance freshness with performance
+ */
+const cachedGlobalSearch = unstable_cache(
+  async (
+    sanitizedQuery: string,
+    types: SearchResultType[],
+    limit: number,
+    offset: number
+  ): Promise<GlobalSearchResponse> => {
+    // Determine per-type limits based on how many types are requested
+    const perTypeLimit = types.length === 1 ? limit : Math.ceil(limit / types.length);
+
+    // Execute searches in parallel for requested types
+    const searchPromises: Promise<{ type: SearchResultType; results: SearchResult[]; count: number }>[] = [];
+
+    if (types.includes('tool')) {
+      searchPromises.push(
+        searchTools(sanitizedQuery, perTypeLimit, offset).then((r) => ({
+          type: 'tool' as const,
+          results: r.results,
+          count: r.count,
+        }))
+      );
+    }
+
+    if (types.includes('news')) {
+      searchPromises.push(
+        searchNews(sanitizedQuery, perTypeLimit, offset).then((r) => ({
+          type: 'news' as const,
+          results: r.results,
+          count: r.count,
+        }))
+      );
+    }
+
+    if (types.includes('prompt')) {
+      searchPromises.push(
+        searchPrompts(sanitizedQuery, perTypeLimit, offset).then((r) => ({
+          type: 'prompt' as const,
+          results: r.results,
+          count: r.count,
+        }))
+      );
+    }
+
+    if (types.includes('category')) {
+      searchPromises.push(
+        searchCategories(sanitizedQuery, perTypeLimit, offset).then((r) => ({
+          type: 'category' as const,
+          results: r.results,
+          count: r.count,
+        }))
+      );
+    }
+
+    const searchResults = await Promise.all(searchPromises);
+
+    // Aggregate results
+    const counts = {
+      tools: 0,
+      news: 0,
+      prompts: 0,
+      categories: 0,
+      total: 0,
+    };
+
+    const allResults: SearchResult[] = [];
+
+    for (const result of searchResults) {
+      allResults.push(...result.results);
+
+      switch (result.type) {
+        case 'tool':
+          counts.tools = result.count;
+          break;
+        case 'news':
+          counts.news = result.count;
+          break;
+        case 'prompt':
+          counts.prompts = result.count;
+          break;
+        case 'category':
+          counts.categories = result.count;
+          break;
+      }
+    }
+
+    counts.total = counts.tools + counts.news + counts.prompts + counts.categories;
+
+    // Sort results by type priority: tools > news > categories > prompts
+    const typePriority: Record<SearchResultType, number> = {
+      tool: 0,
+      news: 1,
+      category: 2,
+      prompt: 3,
+    };
+
+    allResults.sort((a, b) => typePriority[a.type] - typePriority[b.type]);
+
+    return {
+      query: sanitizedQuery,
+      results: allResults.slice(0, limit),
+      counts,
+      hasMore: offset + limit < counts.total,
+    };
+  },
+  ['global-search'],
+  {
+    revalidate: 300, // Cache for 5 minutes
+    tags: ['search'],
+  }
+);
 
 /**
  * Quick search for typeahead - returns limited results optimized for speed

@@ -63,3 +63,9 @@ export {
   type DashboardStats,
   type RecentTool,
 } from './admin-dashboard.service';
+
+// Public stats service exports
+export {
+  getHomePageStats,
+  type HomePageStats,
+} from './stats.service';

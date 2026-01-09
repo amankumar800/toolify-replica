@@ -2,6 +2,9 @@ import { Tool, CategoryGroup } from '@/lib/types/tool';
 import fs from 'fs/promises';
 import path from 'path';
 import { cache } from 'react';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminService');
 
 // Path to the mock database file
 // In production, this filesystem write will ONLY work if the host supports it (e.g. VPS).
@@ -22,7 +25,7 @@ const readDb = async (): Promise<DatabaseSchema> => {
         const data = await fs.readFile(DB_PATH, 'utf-8');
         return JSON.parse(data);
     } catch (error) {
-        console.error("Failed to read DB:", error);
+        log.error('Failed to read DB', error, { action: 'readDb' });
         throw new Error("Database access failed");
     }
 };
@@ -34,7 +37,7 @@ const writeDb = async (data: DatabaseSchema): Promise<void> => {
     try {
         await fs.writeFile(DB_PATH, JSON.stringify(data, null, 4), 'utf-8');
     } catch (error) {
-        console.error("Failed to write DB:", error);
+        log.error('Failed to write DB', error, { action: 'writeDb' });
         throw new Error("Database write failed");
     }
 };

@@ -9,6 +9,7 @@
  * Requirements: 3.1-3.11, 17.1, 19.1-19.7, 21.1-21.5
  */
 
+import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createToolsRepository, type ToolInsert, type ToolUpdate } from '@/lib/db/repositories/tools.repository';
 import { createCategoriesRepository } from '@/lib/db/repositories/categories.repository';
@@ -23,6 +24,9 @@ import type {
 import type { ToolStatus } from '@/lib/types/admin-forms';
 import { TABLES } from '@/lib/db/constants/tables';
 import type { Database } from '@/lib/supabase/types';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('ToolsService');
 
 // ============================================================================
 // Types
@@ -401,7 +405,7 @@ export async function checkForDuplicates(
     .limit(5);
 
   if (nameError) {
-    console.error('Error checking name duplicates:', nameError);
+    log.error('Error checking name duplicates', nameError, { action: 'checkForDuplicates', data: { name } });
   } else if (nameMatches) {
     for (const match of nameMatches) {
       if (excludeId && match.id === excludeId) continue;
@@ -432,7 +436,7 @@ export async function checkForDuplicates(
       .limit(5);
 
     if (urlError) {
-      console.error('Error checking URL duplicates:', urlError);
+      log.error('Error checking URL duplicates', urlError, { action: 'checkForDuplicates', data: { websiteUrl } });
     } else if (urlMatches) {
       for (const match of urlMatches) {
         if (excludeId && match.id === excludeId) continue;
@@ -546,8 +550,53 @@ export async function getTools(options: GetToolsOptions = {}): Promise<{
   total: number;
   hasMore: boolean;
 }> {
-  const supabase = await createClient();
   const { search, category, limit = 20, offset = 0 } = options;
+  
+  // Use cached version for non-search queries
+  if (!search) {
+    return getCachedTools(category, limit, offset);
+  }
+  
+  // For search queries, don't cache (too many variations)
+  return getToolsInternal(search, category, limit, offset);
+}
+
+/**
+ * Cached tools fetching for category browsing
+ */
+const getCachedTools = unstable_cache(
+  async (
+    category: string | undefined,
+    limit: number,
+    offset: number
+  ): Promise<{
+    items: PublicToolItem[];
+    total: number;
+    hasMore: boolean;
+  }> => {
+    return getToolsInternal(undefined, category, limit, offset);
+  },
+  ['tools-list'],
+  {
+    revalidate: 1800, // Cache for 30 minutes
+    tags: ['tools'],
+  }
+);
+
+/**
+ * Internal tools fetching implementation
+ */
+async function getToolsInternal(
+  search: string | undefined,
+  category: string | undefined,
+  limit: number,
+  offset: number
+): Promise<{
+  items: PublicToolItem[];
+  total: number;
+  hasMore: boolean;
+}> {
+  const supabase = await createClient();
 
   let query = supabase
     .from(TABLES.TOOLS)
@@ -584,7 +633,7 @@ export async function getTools(options: GetToolsOptions = {}): Promise<{
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Failed to fetch tools:', error);
+    log.error('Failed to fetch tools', error, { action: 'getToolsInternal', data: { search, category } });
     return { items: [], total: 0, hasMore: false };
   }
 

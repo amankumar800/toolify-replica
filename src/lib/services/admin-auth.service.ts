@@ -18,6 +18,9 @@ import { createAdminsRepository, isAccountLocked, MAX_FAILED_ATTEMPTS } from '@/
 import { verifyPassword } from '@/lib/utils/password';
 import { signToken, verifyToken } from '@/lib/utils/jwt';
 import { validateEmail } from '@/lib/utils/validation';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminAuthService');
 
 // ============================================================================
 // Types
@@ -180,7 +183,7 @@ export async function loginAdmin(email: string, password: string): Promise<Login
     return { success: true, token };
   } catch (error) {
     // Log error internally but return generic message (Req 8.4)
-    console.error('Login error:', error);
+    log.error('Login error', error, { action: 'loginAdmin' });
     return { success: false, error: ERROR_INVALID_CREDENTIALS };
   }
 }
@@ -261,7 +264,7 @@ export async function getAdminFromRequest(): Promise<AdminUser | null> {
 
     return session.admin;
   } catch (error) {
-    console.error('Error reading admin session:', error);
+    log.error('Error reading admin session', error, { action: 'getAdminFromRequest' });
     return null;
   }
 }

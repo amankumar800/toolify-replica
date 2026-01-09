@@ -5,6 +5,7 @@
  * @module categories.service
  */
 
+import { unstable_cache } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createCategoriesRepository } from '@/lib/db/repositories/categories.repository';
 import { createSubcategoriesRepository } from '@/lib/db/repositories/subcategories.repository';
@@ -16,6 +17,9 @@ import {
 import { mapSubcategoryRowToSubcategory } from '@/lib/db/mappers/subcategory.mapper';
 import { TABLES } from '@/lib/db/constants/tables';
 import type { Category, CategoryGroup } from '@/lib/types/tool';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('CategoriesService');
 
 /**
  * Options for filtering and paginating categories.
@@ -142,7 +146,21 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
  * });
  * ```
  */
-export async function getCategoryGroups(): Promise<CategoryGroup[]> {
+export const getCategoryGroups = unstable_cache(
+  async (): Promise<CategoryGroup[]> => {
+    return getCategoryGroupsInternal();
+  },
+  ['category-groups'],
+  {
+    revalidate: 3600, // Cache for 1 hour
+    tags: ['categories'],
+  }
+);
+
+/**
+ * Internal implementation of getCategoryGroups
+ */
+async function getCategoryGroupsInternal(): Promise<CategoryGroup[]> {
   const supabase = getSupabaseClient();
 
   // Get all category groups
@@ -153,7 +171,7 @@ export async function getCategoryGroups(): Promise<CategoryGroup[]> {
     .order('display_order', { ascending: true });
 
   if (groupsError) {
-    console.error('Error fetching category groups:', groupsError);
+    log.error('Error fetching category groups', groupsError, { action: 'getCategoryGroupsInternal' });
     return [];
   }
 
@@ -168,7 +186,7 @@ export async function getCategoryGroups(): Promise<CategoryGroup[]> {
     const categoriesWithCounts = await categoriesRepo.findWithToolCount();
     categories = categoriesWithCounts.map(mapCategoryWithToolCount);
   } catch (error) {
-    console.error('Error fetching categories with tool counts:', error);
+    log.error('Error fetching categories with tool counts', error, { action: 'getCategoryGroupsInternal' });
     // Fall back to getting categories without tool counts
     try {
       const categoriesRepo = createCategoriesRepository(supabase);
@@ -178,7 +196,7 @@ export async function getCategoryGroups(): Promise<CategoryGroup[]> {
       });
       categories = basicCategories.map(mapCategoryRowToCategory);
     } catch (fallbackError) {
-      console.error('Error fetching basic categories:', fallbackError);
+      log.error('Error fetching basic categories', fallbackError, { action: 'getCategoryGroupsInternal' });
       return [];
     }
   }

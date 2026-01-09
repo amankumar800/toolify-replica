@@ -9,6 +9,7 @@
  * Requirements: 7.1-7.8
  */
 
+import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAINewsRepository, type AINewsInsert, type AINewsUpdate, type AINewsRow } from '@/lib/db/repositories/ai-news.repository';
 import type {
@@ -375,8 +376,38 @@ export class NewsService {
     source: { name?: string; url?: string } | null;
     isPublished: boolean;
   } | null> {
-    const supabase = await createClient();
     const { preview = false } = options;
+    
+    // Don't cache preview requests
+    if (preview) {
+      return this.getNewsBySlugInternal(slug, preview);
+    }
+    
+    // Use cached version for public requests
+    return cachedGetNewsBySlug(slug);
+  }
+
+  /**
+   * Internal implementation for getNewsBySlug
+   */
+  private static async getNewsBySlugInternal(
+    slug: string,
+    preview: boolean
+  ): Promise<{
+    id: string;
+    title: string;
+    slug: string;
+    summary: string;
+    content: string;
+    category: string;
+    tags: string[];
+    date: string;
+    image: string | null;
+    author: { name: string; avatar?: string };
+    source: { name?: string; url?: string } | null;
+    isPublished: boolean;
+  } | null> {
+    const supabase = await createClient();
 
     // Build query
     let query = supabase
@@ -416,6 +447,16 @@ export class NewsService {
   static async getRelatedNews(
     slug: string,
     limit = 5
+  ): Promise<PublicNewsItem[]> {
+    return cachedGetRelatedNews(slug, limit);
+  }
+
+  /**
+   * Internal implementation for getRelatedNews
+   */
+  static async getRelatedNewsInternal(
+    slug: string,
+    limit: number
   ): Promise<PublicNewsItem[]> {
     const supabase = await createClient();
 
@@ -475,8 +516,32 @@ export class NewsService {
     total: number;
     hasMore: boolean;
   }> {
-    const supabase = await createClient();
     const { page = 1, limit = 8, filter = 'weekly', category, search } = options;
+    
+    // Don't cache search queries (too many variations)
+    if (search) {
+      return this.getAllNewsInternal(page, limit, filter, category, search);
+    }
+    
+    // Use cached version for non-search queries
+    return cachedGetAllNews(page, limit, filter, category);
+  }
+
+  /**
+   * Internal implementation for getAllNews
+   */
+  static async getAllNewsInternal(
+    page: number,
+    limit: number,
+    filter: TimeFilter,
+    category?: string,
+    search?: string
+  ): Promise<{
+    items: PublicNewsItem[];
+    total: number;
+    hasMore: boolean;
+  }> {
+    const supabase = await createClient();
 
     let query = supabase
       .from(TABLES.AI_NEWS)
@@ -558,6 +623,13 @@ export class NewsService {
    * Get trending/popular news items
    */
   static async getTrendingNews(limit = 5): Promise<PublicNewsItem[]> {
+    return cachedGetTrendingNews(limit);
+  }
+
+  /**
+   * Internal implementation for getTrendingNews
+   */
+  static async getTrendingNewsInternal(limit: number): Promise<PublicNewsItem[]> {
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -601,6 +673,17 @@ export class NewsService {
     importantStories: number;
     lastUpdated: string;
   }> {
+    return cachedGetNewsStats();
+  }
+
+  /**
+   * Internal implementation for getNewsStats
+   */
+  static async getNewsStatsInternal(): Promise<{
+    totalAnalyzed: number;
+    importantStories: number;
+    lastUpdated: string;
+  }> {
     const supabase = await createClient();
 
     // Get total count
@@ -629,3 +712,77 @@ export class NewsService {
     };
   }
 }
+
+// ============================================================================
+// Cached wrapper functions for NewsService
+// ============================================================================
+
+/**
+ * Cached getNewsBySlug - 15 minute cache
+ */
+const cachedGetNewsBySlug = unstable_cache(
+  async (slug: string) => {
+    return NewsService['getNewsBySlugInternal'](slug, false);
+  },
+  ['news-by-slug'],
+  {
+    revalidate: 900, // 15 minutes
+    tags: ['news'],
+  }
+);
+
+/**
+ * Cached getRelatedNews - 15 minute cache
+ */
+const cachedGetRelatedNews = unstable_cache(
+  async (slug: string, limit: number) => {
+    return NewsService.getRelatedNewsInternal(slug, limit);
+  },
+  ['related-news'],
+  {
+    revalidate: 900, // 15 minutes
+    tags: ['news'],
+  }
+);
+
+/**
+ * Cached getAllNews - 15 minute cache
+ */
+const cachedGetAllNews = unstable_cache(
+  async (page: number, limit: number, filter: TimeFilter, category?: string) => {
+    return NewsService.getAllNewsInternal(page, limit, filter, category, undefined);
+  },
+  ['all-news'],
+  {
+    revalidate: 900, // 15 minutes
+    tags: ['news'],
+  }
+);
+
+/**
+ * Cached getTrendingNews - 15 minute cache
+ */
+const cachedGetTrendingNews = unstable_cache(
+  async (limit: number) => {
+    return NewsService.getTrendingNewsInternal(limit);
+  },
+  ['trending-news'],
+  {
+    revalidate: 900, // 15 minutes
+    tags: ['news'],
+  }
+);
+
+/**
+ * Cached getNewsStats - 1 hour cache
+ */
+const cachedGetNewsStats = unstable_cache(
+  async () => {
+    return NewsService.getNewsStatsInternal();
+  },
+  ['news-stats'],
+  {
+    revalidate: 3600, // 1 hour
+    tags: ['news'],
+  }
+);
