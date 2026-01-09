@@ -36,6 +36,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimiters, isRateLimitingEnabled, type RateLimitType } from './config';
 import { getRateLimitIdentifier, getClientIp } from './identifiers';
 import { createRateLimitResponse } from './response';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('RateLimit');
 
 // ============================================================================
 // Types
@@ -96,7 +99,7 @@ export async function checkRateLimit(
 
     if (!success) {
       // Log rate limit exceeded for monitoring
-      console.warn(`[Rate Limit] Exceeded: type=${type}, identifier=${identifier}`);
+      log.warn('Rate limit exceeded', { data: { type, identifier } });
       return createRateLimitResponse({ limit, remaining, reset });
     }
 
@@ -105,7 +108,7 @@ export async function checkRateLimit(
   } catch (error) {
     // Fail open: if rate limiting fails, allow the request
     // This prevents rate limiting from becoming a single point of failure
-    console.error('[Rate Limit] Error:', error);
+    log.error('Rate limit error', error, { action: 'checkRateLimit' });
     return null;
   }
 }
