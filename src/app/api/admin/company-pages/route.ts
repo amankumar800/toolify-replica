@@ -11,7 +11,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { getAdminFromRequest } from '@/lib/services/admin-auth.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { CompanyPageRow } from '@/lib/supabase/types';
+
+const log = createLogger('AdminCompanyPagesAPI');
 
 /**
  * GET /api/admin/company-pages
@@ -44,7 +47,7 @@ export async function GET(request: NextRequest) {
       .order('slug', { ascending: true });
 
     if (error) {
-      console.error('[company-pages] Supabase error:', error);
+      log.error('Supabase error', error, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to fetch company pages', details: error.message },
         { status: 500 }
@@ -56,7 +59,7 @@ export async function GET(request: NextRequest) {
       total: data?.length ?? 0,
     });
   } catch (error) {
-    console.error('[company-pages] Error fetching company pages:', error);
+    log.error('Error fetching company pages', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch company pages', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }

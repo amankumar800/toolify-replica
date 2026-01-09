@@ -11,7 +11,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { getAdminFromRequest } from '@/lib/services/admin-auth.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { CompanyPageFormData, CompanyPageRow } from '@/lib/supabase/types';
+
+const log = createLogger('AdminCompanyPagesSlugAPI');
 
 interface RouteParams {
   params: Promise<{ slug: string }>;
@@ -79,7 +82,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .maybeSingle();
 
     if (error) {
-      console.error('[company-pages] Supabase error:', error);
+      log.error('Supabase error', error, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to fetch company page', details: error.message },
         { status: 500 }
@@ -95,7 +98,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(data as CompanyPageRow);
   } catch (error) {
-    console.error('Error fetching company page:', error);
+    log.error('Error fetching company page', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch company page' },
       { status: 500 }
@@ -149,7 +152,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .maybeSingle();
 
     if (fetchError) {
-      console.error('[company-pages] Supabase error:', fetchError);
+      log.error('Supabase error', fetchError, { action: 'PUT' });
       return NextResponse.json(
         { error: 'Failed to fetch company page', details: fetchError.message },
         { status: 500 }
@@ -175,7 +178,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (updateError) {
-      console.error('[company-pages] Supabase update error:', updateError);
+      log.error('Supabase update error', updateError, { action: 'PUT' });
       return NextResponse.json(
         { error: 'Failed to update company page', details: updateError.message },
         { status: 500 }
@@ -187,7 +190,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       message: 'Company page updated successfully',
     });
   } catch (error) {
-    console.error('Error updating company page:', error);
+    log.error('Error updating company page', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Failed to update company page' },
       { status: 500 }
