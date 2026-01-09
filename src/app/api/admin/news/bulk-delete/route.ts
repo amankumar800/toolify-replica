@@ -7,7 +7,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { bulkDeleteNews } from '@/lib/services/news.service';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/admin/news/bulk-delete
@@ -17,6 +19,11 @@ import { bulkDeleteNews } from '@/lib/services/news.service';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: bulkOperation (10 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'bulkOperation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const body = await request.json();
     const { ids } = body;
 
