@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { checkForDuplicates } from '@/lib/services/tools.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminToolsCheckDuplicatesAPI');
 
 /**
  * POST /api/admin/tools/check-duplicates
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error checking duplicates:', error);
+    log.error('Error checking duplicates', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to check for duplicates' },
       { status: 500 }

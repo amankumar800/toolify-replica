@@ -15,7 +15,10 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { getToolById, updateTool, softDeleteTool } from '@/lib/services/tools.service';
 import { toolSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { Json } from '@/lib/supabase/types';
+
+const log = createLogger('AdminToolsIdAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -45,7 +48,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(tool);
   } catch (error) {
-    console.error('Error fetching tool:', error);
+    log.error('Error fetching tool', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch tool' },
       { status: 500 }
@@ -90,7 +93,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(tool);
   } catch (error) {
-    console.error('Error updating tool:', error);
+    log.error('Error updating tool', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Failed to update tool' },
       { status: 500 }
@@ -118,7 +121,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting tool:', error);
+    log.error('Error deleting tool', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to delete tool' },
       { status: 500 }

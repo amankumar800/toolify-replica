@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { restoreTool } from '@/lib/services/tools.service';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminToolsRestoreAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -29,7 +32,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(tool);
   } catch (error) {
-    console.error('Error restoring tool:', error);
+    log.error('Error restoring tool', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to restore tool' },
       { status: 500 }

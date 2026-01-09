@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { permanentlyDeleteTool } from '@/lib/services/tools.service';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminToolsPermanentDeleteAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -29,7 +32,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error permanently deleting tool:', error);
+    log.error('Error permanently deleting tool', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to permanently delete tool' },
       { status: 500 }

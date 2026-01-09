@@ -14,9 +14,12 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { listTools, createTool, getAllCategories } from '@/lib/services/tools.service';
 import { toolSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { ToolFilters } from '@/lib/services/admin-crud.types';
 import type { ToolStatus, ToolPricing } from '@/lib/types/admin-forms';
 import type { Json } from '@/lib/supabase/types';
+
+const log = createLogger('AdminToolsAPI');
 
 /**
  * GET /api/admin/tools
@@ -78,7 +81,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error listing tools:', error);
+    log.error('Error listing tools', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to list tools' },
       { status: 500 }
@@ -122,7 +125,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(tool, { status: 201 });
   } catch (error) {
-    console.error('Error creating tool:', error);
+    log.error('Error creating tool', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to create tool' },
       { status: 500 }

@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { bulkSoftDeleteTools } from '@/lib/services/tools.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminToolsBulkDeleteAPI');
 
 /**
  * POST /api/admin/tools/bulk-delete
@@ -38,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, count: ids.length });
   } catch (error) {
-    console.error('Error bulk deleting tools:', error);
+    log.error('Error bulk deleting tools', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to delete tools' },
       { status: 500 }
