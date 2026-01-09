@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Container } from '@/components/layout/Container';
 import { createClient } from '@/lib/supabase/server';
 import { createCompanyPagesRepository } from '@/lib/db/repositories/company-pages.repository';
+import { sanitizeHtml } from '@/lib/utils/sanitize-html';
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
@@ -34,7 +35,7 @@ export default async function TermsPage() {
           {hasContent ? (
             <div
               className="prose prose-lg max-w-none bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6 md:p-8"
-              dangerouslySetInnerHTML={{ __html: page.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }}
             />
           ) : (
             <div className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6 md:p-8 text-center">
