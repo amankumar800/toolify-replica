@@ -11,6 +11,9 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
 import { createSubcategoriesRepository } from '@/lib/db/repositories';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminSubcategoriesReorderAPI');
 
 /**
  * POST /api/admin/subcategories/reorder
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error reordering subcategories:', error);
+    log.error('Error reordering subcategories', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to reorder subcategories' },
       { status: 500 }

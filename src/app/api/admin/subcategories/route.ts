@@ -12,6 +12,9 @@ import { createClient } from '@/lib/supabase/server';
 import { createSubcategoriesRepository, createCategoriesRepository } from '@/lib/db/repositories';
 import { subcategorySchema, validateFormData } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminSubcategoriesAPI');
 
 /**
  * GET /api/admin/subcategories
@@ -60,7 +63,7 @@ export async function GET(request: NextRequest) {
       total: enrichedSubcategories.length,
     });
   } catch (error) {
-    console.error('Error fetching subcategories:', error);
+    log.error('Error fetching subcategories', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch subcategories' },
       { status: 500 }
@@ -136,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(subcategory, { status: 201 });
   } catch (error) {
-    console.error('Error creating subcategory:', error);
+    log.error('Error creating subcategory', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to create subcategory' },
       { status: 500 }

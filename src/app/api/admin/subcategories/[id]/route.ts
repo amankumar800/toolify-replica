@@ -12,6 +12,9 @@ import { createClient } from '@/lib/supabase/server';
 import { createSubcategoriesRepository, createCategoriesRepository } from '@/lib/db/repositories';
 import { subcategorySchema, validateFormData } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminSubcategoriesIdAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       category,
     });
   } catch (error) {
-    console.error('Error fetching subcategory:', error);
+    log.error('Error fetching subcategory', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Subcategory not found' },
       { status: 404 }
@@ -135,7 +138,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(subcategory);
   } catch (error) {
-    console.error('Error updating subcategory:', error);
+    log.error('Error updating subcategory', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Failed to update subcategory' },
       { status: 500 }
@@ -179,7 +182,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Error deleting subcategory:', error);
+    log.error('Error deleting subcategory', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to delete subcategory' },
       { status: 500 }
