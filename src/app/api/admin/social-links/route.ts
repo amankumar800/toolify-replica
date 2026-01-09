@@ -5,7 +5,10 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { SocialLinkRow, SocialLinksFormData } from '@/lib/supabase/types';
+
+const log = createLogger('AdminSocialLinksAPI');
 
 /**
  * GET /api/admin/social-links
@@ -28,7 +31,7 @@ export async function GET(request: NextRequest) {
       .order('platform', { ascending: true });
 
     if (error) {
-      console.error('Error fetching social links:', error);
+      log.error('Error fetching social links', error, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to fetch social links' },
         { status: 500 }
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest) {
       raw: data,
     });
   } catch (error) {
-    console.error('Error in GET /api/admin/social-links:', error);
+    log.error('Error in GET /api/admin/social-links', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -112,7 +115,7 @@ export async function PUT(request: NextRequest) {
           .single();
 
         if (error) {
-          console.error(`Error updating ${platform}:`, error);
+          log.error(`Error updating ${platform}`, error, { action: 'PUT' });
           return { platform, success: false, error };
         }
 
@@ -151,7 +154,7 @@ export async function PUT(request: NextRequest) {
       message: 'Social links updated successfully',
     });
   } catch (error) {
-    console.error('Error in PUT /api/admin/social-links:', error);
+    log.error('Error in PUT /api/admin/social-links', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
