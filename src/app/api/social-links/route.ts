@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { TABLES } from '@/lib/db/constants/tables';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { SocialLinkRow } from '@/lib/supabase/types';
 
 /**
@@ -10,8 +11,12 @@ import type { SocialLinkRow } from '@/lib/supabase/types';
  * Returns only platforms with non-empty URLs.
  * Requirements: 2.1, 2.2, 5.5
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Rate limit: public (100 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'public', useAuth: false });
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
 
     const { data, error } = await supabase
