@@ -4,6 +4,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import type { Subcategory } from '@/lib/types/free-ai-tools';
 import { getSubcategorySectionId } from '@/lib/utils/free-ai-tools-utils';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('OnThisPageNav');
 
 // Re-export for backwards compatibility
 export { getSubcategorySectionId };
@@ -138,7 +141,7 @@ export function scrollToSection(id: string, offset: number = 80): void {
     const top = element.getBoundingClientRect().top + window.scrollY - offset;
     window.scrollTo({ top, behavior: 'smooth' });
   } else if (process.env.NODE_ENV === 'development') {
-    console.warn(`[OnThisPageNav] Section with id "${id}" not found. Check that the section IDs match.`);
+    log.warn(`Section with id "${id}" not found. Check that the section IDs match.`);
   }
 }
 

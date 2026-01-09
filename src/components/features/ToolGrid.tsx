@@ -6,6 +6,9 @@ import { ToolCard } from './ToolCard';
 import { ToolCardSkeleton } from './ToolCardSkeleton';
 import { filterToolsAction } from '@/app/actions';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('ToolGrid');
 
 interface ToolGridProps {
     initialTools: Tool[]; // SSR Hydration Data
@@ -35,7 +38,7 @@ export function ToolGrid({ initialTools, category }: ToolGridProps) {
         setError(null);
 
         // Analytics Stub
-        console.log('[Analytics] Load More Clicked', { category, page: page + 1 });
+        log.info('Load More Clicked', { data: { category, page: page + 1 } });
 
         const nextPage = page + 1;
 
@@ -62,7 +65,7 @@ export function ToolGrid({ initialTools, category }: ToolGridProps) {
                 setPage(nextPage);
             }
         } catch (e) {
-            console.error("Failed to load more tools", e);
+            log.error('Failed to load more tools', e, { action: 'loadMore' });
             setError("Failed to load more tools. Please check your connection.");
         } finally {
             setLoading(false);

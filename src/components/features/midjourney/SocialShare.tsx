@@ -3,6 +3,9 @@
 import { Twitter, Facebook, Link2, Check } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('SocialShare');
 
 interface SocialShareProps {
     url?: string;
@@ -38,7 +41,7 @@ export function SocialShare({ url, title, className }: SocialShareProps) {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
-            console.error('Failed to copy:', err);
+            log.error('Failed to copy', err, { action: 'copyLink' });
         }
     };
 

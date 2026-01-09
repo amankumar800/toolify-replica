@@ -2,6 +2,9 @@
 
 import { Component, ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('HomeErrorBoundary');
 
 interface ErrorBoundaryProps {
     /** Child components to wrap */
@@ -34,7 +37,7 @@ export class HomeErrorBoundary extends Component<ErrorBoundaryProps, ErrorBounda
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         // Log error to console (could also send to error reporting service)
-        console.error('Component error:', error, errorInfo);
+        log.error('Component error', error, { data: { componentStack: errorInfo.componentStack } });
     }
 
     render() {
