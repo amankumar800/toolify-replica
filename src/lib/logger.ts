@@ -137,6 +137,67 @@ function warn(message: string, context?: LogContext): void {
 }
 
 /**
+ * Serialize error for logging, handling Supabase PostgrestError and other special cases
+ */
+function serializeError(err: unknown): unknown {
+  if (err === null || err === undefined) {
+    return err;
+  }
+  
+  // Handle Supabase PostgrestError (has message, details, hint, code properties)
+  if (typeof err === 'object' && err !== null) {
+    const errorObj = err as Record<string, unknown>;
+    
+    // Check for PostgrestError-like structure
+    if ('message' in errorObj || 'code' in errorObj || 'details' in errorObj || 'hint' in errorObj) {
+      const result: Record<string, unknown> = {
+        message: errorObj.message,
+        code: errorObj.code,
+        details: errorObj.details,
+        hint: errorObj.hint,
+      };
+      // Include stack if it's an Error instance
+      if (err instanceof Error) {
+        result.stack = err.stack;
+      }
+      return result;
+    }
+    
+    // Standard Error object
+    if (err instanceof Error) {
+      const result: Record<string, unknown> = {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+      };
+      // Include cause if present
+      if (err.cause) {
+        result.cause = serializeError(err.cause);
+      }
+      return result;
+    }
+    
+    // Try to extract enumerable properties
+    const keys = Object.keys(errorObj);
+    if (keys.length > 0) {
+      return errorObj;
+    }
+    
+    // Last resort: try JSON stringify
+    try {
+      const jsonStr = JSON.stringify(err);
+      if (jsonStr !== '{}') {
+        return JSON.parse(jsonStr);
+      }
+    } catch {
+      // Ignore stringify errors
+    }
+  }
+  
+  return err;
+}
+
+/**
  * Error level logging
  * Always sends to Sentry in production via error-tracking module
  * 
@@ -153,7 +214,8 @@ function error(
   // Always log errors in development
   if (isDevelopment || isTest) {
     if (err) {
-      console.error(formattedMessage, err);
+      const serializedError = serializeError(err);
+      console.error(formattedMessage, serializedError);
     } else {
       console.error(formattedMessage);
     }
