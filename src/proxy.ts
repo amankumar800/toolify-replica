@@ -4,6 +4,8 @@ import { updateSession } from '@/lib/supabase/middleware';
 import { verifyToken } from '@/lib/utils/jwt';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/types';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 // ============================================================================
 // Constants
@@ -23,6 +25,57 @@ const ADMIN_DASHBOARD_PATH = '/admin/dashboard';
  * Note: Admin routes are handled separately with dedicated admin auth
  */
 const SUPABASE_PROTECTED_ROUTES: string[] = [];
+
+// ============================================================================
+// Global Rate Limiter (from middleware.ts)
+// ============================================================================
+
+/**
+ * Create global rate limiter for proxy-level protection.
+ * This provides a first line of defense against DDoS and abuse.
+ */
+function createGlobalRateLimiter(): Ratelimit | null {
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return null;
+  }
+
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+
+  return new Ratelimit({
+    redis,
+    // Global limit: 200 requests per 10 seconds per IP
+    limiter: Ratelimit.slidingWindow(200, '10 s'),
+    analytics: true,
+    prefix: 'ratelimit:global',
+  });
+}
+
+const globalRateLimiter = createGlobalRateLimiter();
+
+/**
+ * Get client IP from request headers (Vercel-compatible)
+ */
+function getClientIp(request: NextRequest): string {
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp) {
+    return realIp.trim();
+  }
+  return 'unknown';
+}
+
+/**
+ * Check if the request path is an API route that needs rate limiting
+ */
+function isApiRoute(pathname: string): boolean {
+  return pathname.startsWith('/api/');
+}
 
 // ============================================================================
 // Admin Auth Helpers
@@ -170,6 +223,42 @@ function isSupabaseProtectedRoute(pathname: string): boolean {
  */
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // ========================================================================
+  // Global Rate Limiting for API Routes
+  // ========================================================================
+  if (isApiRoute(pathname) && globalRateLimiter) {
+    try {
+      const ip = getClientIp(request);
+      const { success, limit, remaining, reset } = await globalRateLimiter.limit(`global:${ip}`);
+
+      if (!success) {
+        console.warn(`[Global Rate Limit] Exceeded: ip=${ip}, path=${pathname}`);
+        const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+        
+        return new NextResponse(
+          JSON.stringify({
+            error: 'Too Many Requests',
+            message: 'You have exceeded the global rate limit. Please slow down.',
+            retryAfter,
+          }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-RateLimit-Limit': limit.toString(),
+              'X-RateLimit-Remaining': remaining.toString(),
+              'X-RateLimit-Reset': new Date(reset).toISOString(),
+              'Retry-After': retryAfter.toString(),
+            },
+          }
+        );
+      }
+    } catch (error) {
+      // Fail open: if rate limiting fails, allow the request
+      console.error('[Global Rate Limit] Error:', error);
+    }
+  }
 
   // ========================================================================
   // Admin Route Handling (Dedicated Admin Auth)
