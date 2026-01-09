@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server';
 import { TABLES } from '@/lib/db/constants/tables';
 import { checkRateLimit } from '@/lib/rate-limit';
 import type { SocialLinkRow } from '@/lib/supabase/types';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('SocialLinksAPI');
 
 /**
  * GET /api/social-links
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest) {
       .order('platform', { ascending: true });
 
     if (error) {
-      console.error('Error fetching social links:', error);
+      log.error('Error fetching social links', error, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to fetch social links' },
         { status: 500 }
@@ -45,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Error in GET /api/social-links:', error);
+    log.error('Error in GET /api/social-links', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

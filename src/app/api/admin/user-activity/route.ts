@@ -12,7 +12,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { UserActivityFilters, UserActivityStats } from '@/lib/services/admin-crud.types';
+
+const log = createLogger('AdminUserActivityAPI');
 
 /**
  * User activity list item
@@ -94,7 +97,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching user activity:', error);
+      log.error('Error fetching user activity', error, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to fetch user activity' },
         { status: 500 }
@@ -118,7 +121,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error) {
-    console.error('Error in user activity API:', error);
+    log.error('Error in user activity API', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch user activity' },
       { status: 500 }
