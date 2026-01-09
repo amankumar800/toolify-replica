@@ -1,51 +1,10 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { Container } from './Container';
 import { getSocialPlatformIcon, SOCIAL_PLATFORMS } from '@/lib/utils/icon-mapping';
-import type { SocialLinksResponse, ExternalLinksResponse } from '@/lib/supabase/types';
+import { getSocialLinks } from '@/lib/services/social-links.service';
 
-interface FooterLinksData {
-    socialLinks: SocialLinksResponse;
-    externalLinks: ExternalLinksResponse;
-}
-
-export function Footer() {
-    const [linksData, setLinksData] = useState<FooterLinksData>({
-        socialLinks: {},
-        externalLinks: {}
-    });
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchLinks() {
-            try {
-                const response = await fetch('/api/social-links');
-                if (response.ok) {
-                    const data = await response.json();
-                    // Separate social media links from external links
-                    const socialLinks: SocialLinksResponse = {};
-                    const externalLinks: ExternalLinksResponse = {};
-                    
-                    if (data.twitter) socialLinks.twitter = data.twitter;
-                    if (data.linkedin) socialLinks.linkedin = data.linkedin;
-                    if (data.facebook) socialLinks.facebook = data.facebook;
-                    if (data.instagram) socialLinks.instagram = data.instagram;
-                    if (data.community) externalLinks.community = data.community;
-                    if (data.help_center) externalLinks.help_center = data.help_center;
-                    
-                    setLinksData({ socialLinks, externalLinks });
-                }
-            } catch (error) {
-                console.error('Failed to fetch links:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        fetchLinks();
-    }, []);
+export async function Footer() {
+    const linksData = await getSocialLinks();
 
     // Get active social links (platforms with non-empty URLs)
     const activeSocialLinks = SOCIAL_PLATFORMS.filter(
@@ -61,7 +20,7 @@ export function Footer() {
                         <p className="text-sm text-[var(--muted-foreground)] mb-6 max-w-sm">
                             Discover the best AI tools for your workflow. We curate and review the latest artificial intelligence software to help you stay ahead.
                         </p>
-                        {!isLoading && activeSocialLinks.length > 0 && (
+                        {activeSocialLinks.length > 0 && (
                             <div className="flex gap-4">
                                 {activeSocialLinks.map((platform) => {
                                     const Icon = getSocialPlatformIcon(platform);
