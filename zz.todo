@@ -6,4 +6,37 @@ UPSTASH_REDIS_REST_TOKEN=your-upstash-redis-token
 Get these from Upstash Console (free tier available).
 
 Graceful Degradation
-Rate limiting is optional - if Upstash isn't configured, all requests pass through normally. This ensures your app works in development without Redis
+Rate limiting is optional - if Upstash isn't configured, all requests pass through normally. This ensures your app works in development without 
+
+Sentry Error Tracking Integration Complete ✅
+I've integrated Sentry error tracking into your Next.js project. Here's what was added:
+
+Configuration Files (root):
+
+sentry.client.config.ts - Browser-side error tracking with session replay
+sentry.server.config.ts - Server-side error tracking
+sentry.edge.config.ts - Edge runtime (proxy) error tracking
+instrumentation.ts - Next.js instrumentation hook
+Updated next.config.ts - Wrapped with Sentry webpack plugin
+Error Handling Components:
+
+src/app/error.tsx - App-level error page
+src/app/global-error.tsx - Root layout error page
+src/components/providers/ErrorBoundary.tsx - React error boundary with HOC
+Utilities:
+
+src/lib/error-tracking.ts - Centralized error tracking API
+src/lib/error-tracking.example.ts - Usage examples (delete after reviewing)
+Other Changes:
+
+Merged rate limiting from middleware.ts into proxy.ts (deleted middleware.ts due to Next.js 16 conflict)
+Updated .env.example with Sentry environment variables
+To activate Sentry:
+
+Create a project at sentry.io
+Add to your .env:
+NEXT_PUBLIC_SENTRY_DSN=https://your-key@your-org.ingest.sentry.io/your-project-id
+SENTRY_AUTH_TOKEN=your-auth-token  # Optional, for source maps
+SENTRY_ORG=your-org-slug
+SENTRY_PROJECT=your-project-slug
+The build errors you see are pre-existing issues with static generation and cookies, not related to Sentry.

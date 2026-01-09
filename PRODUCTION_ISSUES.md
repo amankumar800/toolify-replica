@@ -141,12 +141,15 @@ Only the homepage has `revalidate = 3600`. Other pages make direct DB calls on e
 
 ---
 
-### 10. Footer Fetches Data on Every Page Load
+### 10. Footer Fetches Data on Every Page Load ✅ FIXED
 **Severity: HIGH** | **Type: Performance**
 
-`src/components/layout/Footer.tsx` is a client component that fetches `/api/social-links` on every page load.
+~~`src/components/layout/Footer.tsx` is a client component that fetches `/api/social-links` on every page load.~~
 
-**Fix:** Make it a server component or cache the response.
+**Fixed:** Converted Footer to a server component with cached data fetching:
+- Created `src/lib/services/social-links.service.ts` with `unstable_cache` (1-hour revalidation)
+- Removed `'use client'` directive and client-side state/effects from Footer
+- Data is now fetched server-side and cached, eliminating per-page API calls
 
 ---
 
@@ -259,7 +262,7 @@ Found TODO/FIXME in `src/app/(site)/page.tsx` - clean up before production.
 | P1 | Add health check endpoint | ⬜ |
 | P1 | Fetch real stats from DB | ⬜ |
 | P1 | Add caching to pages | ⬜ |
-| P1 | Fix Footer data fetching | ⬜ |
+| P1 | Fix Footer data fetching | ✅ |
 | P2 | Remove/replace console logs | ⬜ |
 | P2 | Add error.tsx to all routes | ⬜ |
 | P2 | Add loading.tsx to all routes | ⬜ |
