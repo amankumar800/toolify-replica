@@ -9,7 +9,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { searchToolsForSelect, getToolForSelect } from '@/lib/services/featured-tools.service';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * GET /api/admin/featured/search-tools
@@ -19,6 +21,11 @@ import { searchToolsForSelect, getToolForSelect } from '@/lib/services/featured-
  */
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q') ?? '';
     const toolId = searchParams.get('id');

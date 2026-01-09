@@ -10,8 +10,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { listFeaturedTools, createFeaturedTool } from '@/lib/services/featured-tools.service';
 import { featuredToolSchema } from '@/lib/utils/admin-validation';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { FeaturedToolFilters, FeaturedToolStatus } from '@/lib/services/admin-crud.types';
 import type { FeaturedPlacementType } from '@/lib/types/admin-forms';
 
@@ -23,6 +25,11 @@ import type { FeaturedPlacementType } from '@/lib/types/admin-forms';
  */
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const searchParams = request.nextUrl.searchParams;
 
     // Parse pagination
@@ -82,6 +89,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const body = await request.json();
 
     // Convert date strings to Date objects for validation

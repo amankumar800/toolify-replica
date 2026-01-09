@@ -11,12 +11,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import {
   getFeaturedToolById,
   updateFeaturedTool,
   deleteFeaturedTool,
 } from '@/lib/services/featured-tools.service';
 import { featuredToolSchema } from '@/lib/utils/admin-validation';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -29,6 +31,11 @@ interface RouteParams {
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const { id } = await params;
     const featuredTool = await getFeaturedToolById(id);
 
@@ -57,6 +64,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const { id } = await params;
     const body = await request.json();
 
@@ -105,6 +117,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const { id } = await params;
     await deleteFeaturedTool(id);
 
