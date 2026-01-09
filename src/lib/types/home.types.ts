@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('HomeTypes');
 
 // ============================================
 // SCHEMAS FOR RUNTIME VALIDATION
@@ -88,7 +91,7 @@ export function safeParseArray<T>(
 ): T[] | null {
     const result = z.array(schema).safeParse(data);
     if (!result.success) {
-        console.error('Validation error:', result.error.format());
+        log.error('Validation error', undefined, { data: { errors: result.error.format() } });
         return null;
     }
     return result.data;
