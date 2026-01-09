@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { bulkPublishNews, bulkUnpublishNews } from '@/lib/services/news.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminNewsBulkStatusAPI');
 
 /**
  * POST /api/admin/news/bulk-status
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest) {
       affectedCount: ids.length,
     });
   } catch (error) {
-    console.error('Error bulk updating news status:', error);
+    log.error('Error bulk updating news status', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to update news status' },
       { status: 500 }

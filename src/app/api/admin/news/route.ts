@@ -14,8 +14,11 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { listNews, createNews } from '@/lib/services/news.service';
 import { aiNewsSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { NewsFilters } from '@/lib/services/admin-crud.types';
 import type { NewsCategory } from '@/lib/types/admin-forms';
+
+const log = createLogger('AdminNewsAPI');
 
 /**
  * GET /api/admin/news
@@ -68,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error listing news:', error);
+    log.error('Error listing news', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to list news' },
       { status: 500 }
@@ -116,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(news, { status: 201 });
   } catch (error) {
-    console.error('Error creating news:', error);
+    log.error('Error creating news', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to create news' },
       { status: 500 }

@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { bulkDeleteNews } from '@/lib/services/news.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminNewsBulkDeleteAPI');
 
 /**
  * POST /api/admin/news/bulk-delete
@@ -41,7 +44,7 @@ export async function POST(request: NextRequest) {
       affectedCount: ids.length,
     });
   } catch (error) {
-    console.error('Error bulk deleting news:', error);
+    log.error('Error bulk deleting news', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to delete news' },
       { status: 500 }

@@ -15,6 +15,9 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { getNewsById, updateNews, deleteNews } from '@/lib/services/news.service';
 import { aiNewsSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminNewsIdAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -44,7 +47,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(news);
   } catch (error) {
-    console.error('Error fetching news:', error);
+    log.error('Error fetching news', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch news' },
       { status: 500 }
@@ -102,7 +105,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(news);
   } catch (error) {
-    console.error('Error updating news:', error);
+    log.error('Error updating news', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Failed to update news' },
       { status: 500 }
@@ -138,7 +141,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting news:', error);
+    log.error('Error deleting news', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to delete news' },
       { status: 500 }
