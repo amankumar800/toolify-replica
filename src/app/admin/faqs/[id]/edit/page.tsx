@@ -4,7 +4,10 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { FAQForm } from '@/components/admin/FAQForm';
 import { useToast } from '@/components/admin/Toast';
+import { createLogger } from '@/lib/logger';
 import type { FAQFormData } from '@/lib/types/admin-forms';
+
+const log = createLogger('EditFAQPage');
 
 interface EditFAQPageProps {
   params: Promise<{ id: string }>;
@@ -50,7 +53,7 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
         const data = await response.json();
         setFaq(data);
       } catch (error) {
-        console.error('Error fetching FAQ:', error);
+        log.error('Error fetching FAQ', error, { action: 'fetchFAQ' });
         addToast({
           variant: 'error',
           message: 'Failed to load FAQ. Please try again.',

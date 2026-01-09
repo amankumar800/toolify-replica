@@ -7,6 +7,9 @@ import { useToast } from '@/components/admin/Toast';
 import { TextField } from '@/components/admin/form-fields/TextField';
 import { RichTextField } from '@/components/admin/form-fields/RichTextField';
 import { Button } from '@/components/ui/button';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('EditCompanyPagePage');
 import {
   FileText,
   Save,
@@ -112,7 +115,7 @@ export default function EditCompanyPagePage({ params }: PageProps) {
         content: data.content || '',
       });
     } catch (error) {
-      console.error('Error fetching company page:', error);
+      log.error('Error fetching company page', error, { action: 'fetchPage' });
       setLoadError('Failed to load company page');
       addToast({
         variant: 'error',
@@ -181,7 +184,7 @@ export default function EditCompanyPagePage({ params }: PageProps) {
         message: 'Company page updated successfully!',
       });
     } catch (error) {
-      console.error('Error saving company page:', error);
+      log.error('Error saving company page', error, { action: 'saveCompanyPage' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save company page. Please try again.',

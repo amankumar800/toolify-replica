@@ -4,7 +4,10 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { SubcategoryForm } from '@/components/admin/SubcategoryForm';
 import { useToast } from '@/components/admin/Toast';
+import { createLogger } from '@/lib/logger';
 import { Loader2 } from 'lucide-react';
+
+const log = createLogger('EditSubcategoryPage');
 
 // ============================================================================
 // Types
@@ -64,7 +67,7 @@ export default function EditSubcategoryPage({ params }: PageProps) {
         const data = await response.json();
         setSubcategory(data);
       } catch (err) {
-        console.error('Error fetching subcategory:', err);
+        log.error('Error fetching subcategory', err, { action: 'fetchSubcategory' });
         setError('Failed to load subcategory');
         addToast({
           variant: 'error',

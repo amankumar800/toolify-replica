@@ -4,7 +4,10 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { CategoryForm } from '@/components/admin/CategoryForm';
 import { useToast } from '@/components/admin/Toast';
+import { createLogger } from '@/lib/logger';
 import { Loader2 } from 'lucide-react';
+
+const log = createLogger('EditCategoryPage');
 
 // ============================================================================
 // Types
@@ -60,7 +63,7 @@ export default function EditCategoryPage({ params }: PageProps) {
         const data = await response.json();
         setCategory(data);
       } catch (err) {
-        console.error('Error fetching category:', err);
+        log.error('Error fetching category', err, { action: 'fetchCategory' });
         setError('Failed to load category');
         addToast({
           variant: 'error',
