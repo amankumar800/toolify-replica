@@ -63,7 +63,7 @@ const nonFreeAIToolsPathArbitrary = fc.oneof(
   fc.constant('/'),
   fc.constant('/category'),
   fc.constant('/tool/some-tool'),
-  fc.constant('/Best-trending-AI-Tools'),
+  fc.constant('/best-trending-ai-tools'),
   fc.constant('/midjourney-library'),
   fc.constant('/submit'),
   fc.constant('/login'),

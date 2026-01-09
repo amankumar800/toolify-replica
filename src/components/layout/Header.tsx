@@ -19,7 +19,7 @@ export function Header() {
 
     const navLinks = [
         { href: '/free-ai-tools', label: 'Free AI Tools' },
-        { href: '/Best-trending-AI-Tools', label: 'Ranking' },
+        { href: '/best-trending-ai-tools', label: 'Ranking' },
         { href: '/midjourney-library', label: 'Midjourney' },
         { href: '/category', label: 'Categories' },
         { href: '/submit', label: 'Submit Tool' },

@@ -47,7 +47,7 @@ export async function Footer() {
                     <div>
                         <h4 className="font-semibold mb-4">Product</h4>
                         <ul className="space-y-3 text-sm text-[var(--muted-foreground)]">
-                            <li><Link href="/Best-trending-AI-Tools" className="hover:text-[var(--primary)] transition-colors">Ranking Leaderboard</Link></li>
+                            <li><Link href="/best-trending-ai-tools" className="hover:text-[var(--primary)] transition-colors">Ranking Leaderboard</Link></li>
                             <li><Link href="/midjourney-library" className="hover:text-[var(--primary)] transition-colors">Midjourney Library</Link></li>
                             <li><Link href="/submit" className="hover:text-[var(--primary)] transition-colors">Submit Tool</Link></li>
                         </ul>
