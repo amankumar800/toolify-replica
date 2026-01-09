@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { permanentlyDeleteTool } from '@/lib/services/tools.service';
 
 interface RouteParams {
@@ -21,6 +22,7 @@ interface RouteParams {
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    await requireAdmin();
     const { id } = await params;
 
     await permanentlyDeleteTool(id);

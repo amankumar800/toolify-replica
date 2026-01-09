@@ -7,7 +7,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { bulkUpdateToolStatus } from '@/lib/services/tools.service';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { ToolStatus } from '@/lib/types/admin-forms';
 
 /**
@@ -18,6 +20,11 @@ import type { ToolStatus } from '@/lib/types/admin-forms';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: bulkOperation (10 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'bulkOperation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const body = await request.json();
     const { ids, status } = body as { ids: string[]; status: ToolStatus };
 

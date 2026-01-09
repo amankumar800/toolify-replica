@@ -7,7 +7,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { checkForDuplicates } from '@/lib/services/tools.service';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/admin/tools/check-duplicates
@@ -17,6 +19,11 @@ import { checkForDuplicates } from '@/lib/services/tools.service';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min) - this is a read operation
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const body = await request.json();
     const { name, website_url, excludeId } = body as {
       name: string;
