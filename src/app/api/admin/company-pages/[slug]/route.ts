@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { getAdminFromRequest } from '@/lib/services/admin-auth.service';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { CompanyPageFormData, CompanyPageRow } from '@/lib/supabase/types';
 
 interface RouteParams {
@@ -53,8 +54,12 @@ export function validateCompanyPageData(data: CompanyPageFormData): {
  *
  * Requirements: 2.2
  */
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Check admin authentication
     const admin = await getAdminFromRequest();
     if (!admin) {
@@ -109,6 +114,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Check admin authentication
     const admin = await getAdminFromRequest();
     if (!admin) {

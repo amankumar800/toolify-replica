@@ -6,10 +6,11 @@
  * Requirements: 1.1
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { getAdminFromRequest } from '@/lib/services/admin-auth.service';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { CompanyPageRow } from '@/lib/supabase/types';
 
 /**
@@ -20,8 +21,12 @@ import type { CompanyPageRow } from '@/lib/supabase/types';
  *
  * Requirements: 1.1
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Check admin authentication
     const admin = await getAdminFromRequest();
     if (!admin) {
