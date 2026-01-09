@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { getAdminById, unlockAdmin } from '@/lib/services/admins.service';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminAdminsUnlockAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -51,7 +54,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       message: 'Admin account has been unlocked',
     });
   } catch (error) {
-    console.error('Error unlocking admin:', error);
+    log.error('Error unlocking admin', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to unlock admin' },
       { status: 500 }

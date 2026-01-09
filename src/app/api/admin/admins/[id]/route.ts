@@ -16,6 +16,9 @@ import { getAdminById, updateAdmin, deleteAdmin } from '@/lib/services/admins.se
 import { getAdminFromRequest } from '@/lib/services/admin-auth.service';
 import { adminEditSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminAdminsIdAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -46,7 +49,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(admin);
   } catch (error) {
-    console.error('Error fetching admin:', error);
+    log.error('Error fetching admin', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch admin' },
       { status: 500 }
@@ -96,7 +99,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(admin);
   } catch (error) {
-    console.error('Error updating admin:', error);
+    log.error('Error updating admin', error, { action: 'PUT' });
     const message = error instanceof Error ? error.message : 'Failed to update admin';
     
     // Check for specific errors
@@ -158,7 +161,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting admin:', error);
+    log.error('Error deleting admin', error, { action: 'DELETE' });
     const message = error instanceof Error ? error.message : 'Failed to delete admin';
     
     // Check for self-deletion error

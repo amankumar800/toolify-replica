@@ -14,7 +14,10 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { listAdmins, createAdmin } from '@/lib/services/admins.service';
 import { adminCreateSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { AdminFilters } from '@/lib/services/admin-crud.types';
+
+const log = createLogger('AdminAdminsAPI');
 
 /**
  * GET /api/admin/admins
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error listing admins:', error);
+    log.error('Error listing admins', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to list admins' },
       { status: 500 }
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(admin, { status: 201 });
   } catch (error) {
-    console.error('Error creating admin:', error);
+    log.error('Error creating admin', error, { action: 'POST' });
     const message = error instanceof Error ? error.message : 'Failed to create admin';
     
     // Check for duplicate email error

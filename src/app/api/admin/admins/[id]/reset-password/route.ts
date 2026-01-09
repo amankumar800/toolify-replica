@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { getAdminById, resetAdminPassword } from '@/lib/services/admins.service';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminAdminsResetPasswordAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       message: 'Password has been reset. Please save this password as it will only be shown once.',
     });
   } catch (error) {
-    console.error('Error resetting password:', error);
+    log.error('Error resetting password', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to reset password' },
       { status: 500 }
