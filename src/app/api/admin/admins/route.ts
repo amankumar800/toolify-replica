@@ -10,8 +10,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { listAdmins, createAdmin } from '@/lib/services/admins.service';
 import { adminCreateSchema } from '@/lib/utils/admin-validation';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { AdminFilters } from '@/lib/services/admin-crud.types';
 
 /**
@@ -22,6 +24,11 @@ import type { AdminFilters } from '@/lib/services/admin-crud.types';
  */
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const searchParams = request.nextUrl.searchParams;
 
     // Parse pagination
@@ -66,6 +73,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const body = await request.json();
 
     // Validate input
