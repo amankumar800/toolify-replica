@@ -10,6 +10,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { createAINewsRepository, type AINewsInsert, type AINewsUpdate, type AINewsRow } from '@/lib/db/repositories/ai-news.repository';
 import type {
@@ -19,6 +20,18 @@ import type {
   NewsFilters,
 } from '@/lib/services/admin-crud.types';
 import { TABLES } from '@/lib/db/constants/tables';
+import type { Database } from '@/lib/supabase/types';
+
+/**
+ * Creates a static Supabase client for public data fetching.
+ * This client doesn't use cookies, making it safe for use inside unstable_cache.
+ */
+function createStaticClient() {
+  return createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 // ============================================================================
 // Types
@@ -407,7 +420,8 @@ export class NewsService {
     source: { name?: string; url?: string } | null;
     isPublished: boolean;
   } | null> {
-    const supabase = await createClient();
+    // Use static client for cached calls (preview=false), server client for preview
+    const supabase = preview ? await createClient() : createStaticClient();
 
     // Build query
     let query = supabase
@@ -458,7 +472,7 @@ export class NewsService {
     slug: string,
     limit: number
   ): Promise<PublicNewsItem[]> {
-    const supabase = await createClient();
+    const supabase = createStaticClient();
 
     // First get the current news to find its category
     const { data: currentNews } = await supabase
@@ -541,7 +555,7 @@ export class NewsService {
     total: number;
     hasMore: boolean;
   }> {
-    const supabase = await createClient();
+    const supabase = createStaticClient();
 
     let query = supabase
       .from(TABLES.AI_NEWS)
@@ -630,7 +644,7 @@ export class NewsService {
    * Internal implementation for getTrendingNews
    */
   static async getTrendingNewsInternal(limit: number): Promise<PublicNewsItem[]> {
-    const supabase = await createClient();
+    const supabase = createStaticClient();
 
     const { data, error } = await supabase
       .from(TABLES.AI_NEWS)
@@ -684,7 +698,7 @@ export class NewsService {
     importantStories: number;
     lastUpdated: string;
   }> {
-    const supabase = await createClient();
+    const supabase = createStaticClient();
 
     // Get total count
     const { count: totalCount } = await supabase

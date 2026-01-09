@@ -11,6 +11,7 @@
 
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createAnonClient } from '@/lib/supabase/anon';
 import { createToolsRepository, type ToolInsert, type ToolUpdate } from '@/lib/db/repositories/tools.repository';
 import { createCategoriesRepository } from '@/lib/db/repositories/categories.repository';
 import type {
@@ -558,11 +559,14 @@ export async function getTools(options: GetToolsOptions = {}): Promise<{
   }
   
   // For search queries, don't cache (too many variations)
-  return getToolsInternal(search, category, limit, offset);
+  // Use anon client since this is public data
+  const supabase = createAnonClient();
+  return getToolsInternal(supabase, undefined, category, limit, offset);
 }
 
 /**
  * Cached tools fetching for category browsing
+ * Uses anon client to avoid cookies() inside unstable_cache()
  */
 const getCachedTools = unstable_cache(
   async (
@@ -574,7 +578,9 @@ const getCachedTools = unstable_cache(
     total: number;
     hasMore: boolean;
   }> => {
-    return getToolsInternal(undefined, category, limit, offset);
+    // Create anon client inside cache - no cookies() dependency
+    const supabase = createAnonClient();
+    return getToolsInternal(supabase, undefined, category, limit, offset);
   },
   ['tools-list'],
   {
@@ -585,8 +591,10 @@ const getCachedTools = unstable_cache(
 
 /**
  * Internal tools fetching implementation
+ * Accepts supabase client to support both cached (anon) and non-cached (server) usage
  */
 async function getToolsInternal(
+  supabase: ReturnType<typeof createAnonClient>,
   search: string | undefined,
   category: string | undefined,
   limit: number,
@@ -596,7 +604,6 @@ async function getToolsInternal(
   total: number;
   hasMore: boolean;
 }> {
-  const supabase = await createClient();
 
   let query = supabase
     .from(TABLES.TOOLS)

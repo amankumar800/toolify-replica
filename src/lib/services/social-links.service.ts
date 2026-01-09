@@ -6,12 +6,23 @@
  */
 
 import { unstable_cache } from 'next/cache';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { TABLES } from '@/lib/db/constants/tables';
-import type { SocialLinkRow, SocialLinksResponse, ExternalLinksResponse } from '@/lib/supabase/types';
+import type { Database, SocialLinkRow, SocialLinksResponse, ExternalLinksResponse } from '@/lib/supabase/types';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('SocialLinksService');
+
+/**
+ * Creates a static Supabase client for public data fetching.
+ * This client doesn't use cookies, making it safe for use inside unstable_cache.
+ */
+function createStaticClient() {
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 export interface FooterLinksData {
   socialLinks: SocialLinksResponse;
@@ -23,7 +34,7 @@ export interface FooterLinksData {
  */
 async function fetchSocialLinksInternal(): Promise<FooterLinksData> {
   try {
-    const supabase = await createClient();
+    const supabase = createStaticClient();
 
     const { data, error } = await supabase
       .from(TABLES.SOCIAL_LINKS)

@@ -171,7 +171,16 @@ async function getCategoryGroupsInternal(): Promise<CategoryGroup[]> {
     .order('display_order', { ascending: true });
 
   if (groupsError) {
-    log.error('Error fetching category groups', groupsError, { action: 'getCategoryGroupsInternal' });
+    log.error('Error fetching category groups', groupsError, { 
+      action: 'getCategoryGroupsInternal',
+      data: { 
+        table: TABLES.CATEGORY_GROUPS,
+        errorCode: groupsError.code,
+        errorMessage: groupsError.message,
+        errorDetails: groupsError.details,
+        errorHint: groupsError.hint,
+      }
+    });
     return [];
   }
 
