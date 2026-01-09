@@ -5,6 +5,9 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminFaqsReorderAPI');
 
 interface ReorderItem {
   id: string;
@@ -49,7 +52,7 @@ export async function POST(request: NextRequest) {
     // Check for errors
     const errors = results.filter((r) => r.error);
     if (errors.length > 0) {
-      console.error('Errors updating FAQ order:', errors);
+      log.error('Errors updating FAQ order', errors, { action: 'POST' });
       return NextResponse.json(
         { error: 'Failed to update some FAQ orders' },
         { status: 500 }
@@ -58,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in POST /api/admin/faqs/reorder:', error);
+    log.error('Error in POST /api/admin/faqs/reorder', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

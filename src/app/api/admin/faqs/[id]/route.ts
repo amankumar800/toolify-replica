@@ -6,6 +6,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { faqSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminFaqsIdAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -39,7 +42,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           { status: 404 }
         );
       }
-      console.error('Error fetching FAQ:', error);
+      log.error('Error fetching FAQ', error, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to fetch FAQ' },
         { status: 500 }
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in GET /api/admin/faqs/[id]:', error);
+    log.error('Error in GET /api/admin/faqs/[id]', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -99,7 +102,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 404 }
         );
       }
-      console.error('Error updating FAQ:', error);
+      log.error('Error updating FAQ', error, { action: 'PUT' });
       return NextResponse.json(
         { error: 'Failed to update FAQ' },
         { status: 500 }
@@ -108,7 +111,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(faq);
   } catch (error) {
-    console.error('Error in PUT /api/admin/faqs/[id]:', error);
+    log.error('Error in PUT /api/admin/faqs/[id]', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -137,7 +140,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting FAQ:', error);
+      log.error('Error deleting FAQ', error, { action: 'DELETE' });
       return NextResponse.json(
         { error: 'Failed to delete FAQ' },
         { status: 500 }
@@ -146,7 +149,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in DELETE /api/admin/faqs/[id]:', error);
+    log.error('Error in DELETE /api/admin/faqs/[id]', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -6,6 +6,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
 import { faqSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminFaqsAPI');
 
 /**
  * GET /api/admin/faqs
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching FAQs:', error);
+      log.error('Error fetching FAQs', error, { action: 'GET' });
       return NextResponse.json(
         { error: 'Failed to fetch FAQs' },
         { status: 500 }
@@ -75,7 +78,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error in GET /api/admin/faqs:', error);
+    log.error('Error in GET /api/admin/faqs', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -130,7 +133,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating FAQ:', error);
+      log.error('Error creating FAQ', error, { action: 'POST' });
       return NextResponse.json(
         { error: 'Failed to create FAQ' },
         { status: 500 }
@@ -139,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(faq, { status: 201 });
   } catch (error) {
-    console.error('Error in POST /api/admin/faqs:', error);
+    log.error('Error in POST /api/admin/faqs', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
