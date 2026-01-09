@@ -14,8 +14,11 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { listPrompts, createPrompt } from '@/lib/services/prompts.service';
 import { promptSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { PromptFilters } from '@/lib/services/admin-crud.types';
 import type { PromptType } from '@/lib/types/admin-forms';
+
+const log = createLogger('AdminPromptsAPI');
 
 /**
  * GET /api/admin/prompts
@@ -64,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error listing prompts:', error);
+    log.error('Error listing prompts', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to list prompts' },
       { status: 500 }
@@ -101,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(prompt, { status: 201 });
   } catch (error) {
-    console.error('Error creating prompt:', error);
+    log.error('Error creating prompt', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to create prompt' },
       { status: 500 }

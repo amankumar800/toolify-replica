@@ -15,6 +15,9 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { getPromptById, updatePrompt, deletePrompt } from '@/lib/services/prompts.service';
 import { promptSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminPromptsIdAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -44,7 +47,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(prompt);
   } catch (error) {
-    console.error('Error fetching prompt:', error);
+    log.error('Error fetching prompt', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch prompt' },
       { status: 500 }
@@ -82,7 +85,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(prompt);
   } catch (error) {
-    console.error('Error updating prompt:', error);
+    log.error('Error updating prompt', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Failed to update prompt' },
       { status: 500 }
@@ -107,7 +110,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting prompt:', error);
+    log.error('Error deleting prompt', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to delete prompt' },
       { status: 500 }

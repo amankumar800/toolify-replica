@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { bulkDeletePrompts } from '@/lib/services/prompts.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminPromptsBulkDeleteAPI');
 
 /**
  * POST /api/admin/prompts/bulk-delete
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
       deletedCount: ids.length,
     });
   } catch (error) {
-    console.error('Error bulk deleting prompts:', error);
+    log.error('Error bulk deleting prompts', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to delete prompts' },
       { status: 500 }
