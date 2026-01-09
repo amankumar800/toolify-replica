@@ -6,6 +6,9 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/types';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('Proxy');
 
 // ============================================================================
 // Constants
@@ -122,7 +125,7 @@ async function checkAdminIsActive(adminId: string): Promise<boolean> {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !serviceRoleKey) {
-      console.error('[Admin Auth] Missing Supabase credentials');
+      log.error('Missing Supabase credentials', undefined, { action: 'checkAdminIsActive' });
       return false;
     }
 
@@ -140,7 +143,7 @@ async function checkAdminIsActive(adminId: string): Promise<boolean> {
       .maybeSingle();
 
     if (error) {
-      console.error('[Admin Auth] Database error checking is_active:', error.message);
+      log.error('Database error checking is_active', error, { action: 'checkAdminIsActive', data: { adminId } });
       return false;
     }
 
@@ -150,7 +153,7 @@ async function checkAdminIsActive(adminId: string): Promise<boolean> {
 
     return data.is_active === true;
   } catch (error) {
-    console.error('[Admin Auth] Error checking admin status:', error);
+    log.error('Error checking admin status', error, { action: 'checkAdminIsActive' });
     return false;
   }
 }
@@ -167,7 +170,7 @@ function logUnauthorizedAccess(request: NextRequest, reason: string): void {
              'unknown';
   const pathname = request.nextUrl.pathname;
   
-  console.warn(`[Admin Auth] Unauthorized access attempt: ${pathname} - ${reason} - IP: ${ip}`);
+  log.warn('Unauthorized access attempt', { data: { pathname, reason, ip } });
 }
 
 // ============================================================================
@@ -233,7 +236,7 @@ export async function proxy(request: NextRequest) {
       const { success, limit, remaining, reset } = await globalRateLimiter.limit(`global:${ip}`);
 
       if (!success) {
-        console.warn(`[Global Rate Limit] Exceeded: ip=${ip}, path=${pathname}`);
+        log.warn('Global rate limit exceeded', { data: { ip, pathname } });
         const retryAfter = Math.ceil((reset - Date.now()) / 1000);
         
         return new NextResponse(
@@ -256,7 +259,7 @@ export async function proxy(request: NextRequest) {
       }
     } catch (error) {
       // Fail open: if rate limiting fails, allow the request
-      console.error('[Global Rate Limit] Error:', error);
+      log.error('Global rate limit error', error, { action: 'proxy' });
     }
   }
 
