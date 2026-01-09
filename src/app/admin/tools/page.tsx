@@ -8,6 +8,9 @@ import { DataTable, type Column, type Filter, type RowAction, type BulkAction, t
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
 import { exportToCSV, downloadCSV } from '@/lib/utils/csv-export';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminToolsPage');
 import {
   Plus,
   Pencil,
@@ -171,7 +174,7 @@ export default function ToolsPage() {
       setTools(data.data);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching tools:', error);
+      log.error('Error fetching tools', error, { action: 'fetchTools' });
       addToast({
         variant: 'error',
         message: 'Failed to load tools. Please try again.',
@@ -376,7 +379,7 @@ export default function ToolsPage() {
       setDeleteModal({ isOpen: false, tool: null, isPermanent: false });
       fetchTools();
     } catch (error) {
-      console.error('Error deleting tool:', error);
+      log.error('Error deleting tool', error, { action: 'deleteTool' });
       addToast({
         variant: 'error',
         message: 'Failed to delete tool. Please try again.',
@@ -403,7 +406,7 @@ export default function ToolsPage() {
 
       fetchTools();
     } catch (error) {
-      console.error('Error restoring tool:', error);
+      log.error('Error restoring tool', error, { action: 'restoreTool' });
       addToast({
         variant: 'error',
         message: 'Failed to restore tool. Please try again.',
@@ -430,7 +433,7 @@ export default function ToolsPage() {
 
       fetchTools();
     } catch (error) {
-      console.error('Error updating tools:', error);
+      log.error('Error updating tools', error, { action: 'bulkStatusChange' });
       addToast({
         variant: 'error',
         message: 'Failed to update tools. Please try again.',
@@ -457,7 +460,7 @@ export default function ToolsPage() {
 
       fetchTools();
     } catch (error) {
-      console.error('Error deleting tools:', error);
+      log.error('Error deleting tools', error, { action: 'bulkDelete' });
       addToast({
         variant: 'error',
         message: 'Failed to delete tools. Please try again.',

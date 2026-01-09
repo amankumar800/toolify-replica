@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/admin/Toast';
 import { validateSocialUrl } from '@/lib/utils/validation';
 import { Button } from '@/components/ui/button';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminSocialLinksPage');
 import {
   Twitter,
   Linkedin,
@@ -151,7 +154,7 @@ export default function SocialLinksPage() {
       const result = await response.json();
       setFormData(result.data);
     } catch (error) {
-      console.error('Error fetching social links:', error);
+      log.error('Error fetching social links', error, { action: 'fetchSocialLinks' });
       addToast({
         variant: 'error',
         message: 'Failed to load social links. Please try again.',
@@ -229,7 +232,7 @@ export default function SocialLinksPage() {
         message: 'Social links updated successfully!',
       });
     } catch (error) {
-      console.error('Error saving social links:', error);
+      log.error('Error saving social links', error, { action: 'saveSocialLinks' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to save social links. Please try again.',

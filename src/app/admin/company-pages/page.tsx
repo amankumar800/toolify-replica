@@ -4,6 +4,9 @@ import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/components/admin/Toast';
 import { Button } from '@/components/ui/button';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminCompanyPagesPage');
 import {
   FileText,
   Pencil,
@@ -39,7 +42,7 @@ export default function CompanyPagesPage() {
       const result = await response.json();
       setPages(result.data || []);
     } catch (error) {
-      console.error('Error fetching company pages:', error);
+      log.error('Error fetching company pages', error, { action: 'fetchPages' });
       addToast({
         variant: 'error',
         message: 'Failed to load company pages. Please try again.',

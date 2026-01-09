@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
 import { exportToCSV, downloadCSV } from '@/lib/utils/csv-export';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminFAQsPage');
 import {
   Plus,
   Pencil,
@@ -152,7 +155,7 @@ export default function FAQsPage() {
       setFaqs(data.data);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching FAQs:', error);
+      log.error('Error fetching FAQs', error, { action: 'fetchFAQs' });
       addToast({
         variant: 'error',
         message: 'Failed to load FAQs. Please try again.',
@@ -188,7 +191,7 @@ export default function FAQsPage() {
       setDeleteModal({ isOpen: false, faq: null });
       fetchFAQs();
     } catch (error) {
-      console.error('Error deleting FAQ:', error);
+      log.error('Error deleting FAQ', error, { action: 'deleteFAQ' });
       addToast({
         variant: 'error',
         message: 'Failed to delete FAQ. Please try again.',
@@ -248,7 +251,7 @@ export default function FAQsPage() {
       // Refresh to get updated display_order values
       fetchFAQs();
     } catch (error) {
-      console.error('Error saving order:', error);
+      log.error('Error saving order', error, { action: 'reorderFAQs' });
       addToast({
         variant: 'error',
         message: 'Failed to save order. Please try again.',

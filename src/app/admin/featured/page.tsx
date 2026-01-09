@@ -8,6 +8,9 @@ import { DataTable, type Column, type Filter, type RowAction, type SortConfig } 
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
 import { exportToCSV, downloadCSV } from '@/lib/utils/csv-export';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminFeaturedPage');
 import {
   Plus,
   Pencil,
@@ -222,7 +225,7 @@ export default function FeaturedToolsPage() {
       setFeaturedTools(data.data);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching featured tools:', error);
+      log.error('Error fetching featured tools', error, { action: 'fetchFeaturedTools' });
       addToast({
         variant: 'error',
         message: 'Failed to load featured tools. Please try again.',
@@ -380,7 +383,7 @@ export default function FeaturedToolsPage() {
       setDeleteModal({ isOpen: false, featuredTool: null });
       fetchFeaturedTools();
     } catch (error) {
-      console.error('Error deleting featured tool:', error);
+      log.error('Error deleting featured tool', error, { action: 'deleteFeaturedTool' });
       addToast({
         variant: 'error',
         message: 'Failed to delete featured tool. Please try again.',

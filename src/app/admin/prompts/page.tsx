@@ -8,6 +8,9 @@ import { DataTable, type Column, type Filter, type RowAction, type BulkAction, t
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
 import { exportToCSV, downloadCSV } from '@/lib/utils/csv-export';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminPromptsPage');
 import {
   Plus,
   Pencil,
@@ -173,7 +176,7 @@ export default function PromptsPage() {
       setPrompts(data.data);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching prompts:', error);
+      log.error('Error fetching prompts', error, { action: 'fetchPrompts' });
       addToast({
         variant: 'error',
         message: 'Failed to load prompts. Please try again.',
@@ -325,7 +328,7 @@ export default function PromptsPage() {
       setDeleteModal({ isOpen: false, prompt: null });
       fetchPrompts();
     } catch (error) {
-      console.error('Error deleting prompt:', error);
+      log.error('Error deleting prompt', error, { action: 'deletePrompt' });
       addToast({
         variant: 'error',
         message: 'Failed to delete prompt. Please try again.',
@@ -354,7 +357,7 @@ export default function PromptsPage() {
 
       fetchPrompts();
     } catch (error) {
-      console.error('Error deleting prompts:', error);
+      log.error('Error deleting prompts', error, { action: 'bulkDelete' });
       addToast({
         variant: 'error',
         message: 'Failed to delete prompts. Please try again.',

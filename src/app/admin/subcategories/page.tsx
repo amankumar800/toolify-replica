@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminSubcategoriesPage');
 import {
   Plus,
   Pencil,
@@ -75,7 +78,7 @@ export default function SubcategoriesPage() {
         setCategories(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      log.error('Error fetching categories', error, { action: 'fetchCategories' });
     }
   }, []);
 
@@ -94,7 +97,7 @@ export default function SubcategoriesPage() {
       const data = await response.json();
       setSubcategories(data.data);
     } catch (error) {
-      console.error('Error fetching subcategories:', error);
+      log.error('Error fetching subcategories', error, { action: 'fetchSubcategories' });
       addToast({
         variant: 'error',
         message: 'Failed to load subcategories. Please try again.',
@@ -143,7 +146,7 @@ export default function SubcategoriesPage() {
       setDeleteModal({ isOpen: false, subcategory: null });
       fetchSubcategories();
     } catch (error) {
-      console.error('Error deleting subcategory:', error);
+      log.error('Error deleting subcategory', error, { action: 'deleteSubcategory' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to delete subcategory',
@@ -211,7 +214,7 @@ export default function SubcategoriesPage() {
       // Refresh to get updated display_order values
       fetchSubcategories();
     } catch (error) {
-      console.error('Error saving order:', error);
+      log.error('Error saving order', error, { action: 'reorderSubcategories' });
       addToast({
         variant: 'error',
         message: 'Failed to save order. Please try again.',

@@ -3,6 +3,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { DataTable, type Column, type Filter, type SortConfig } from '@/components/admin/DataTable';
 import { useToast } from '@/components/admin/Toast';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminUserActivityPage');
 import {
   Heart,
   Bookmark,
@@ -204,7 +207,7 @@ export default function UserActivityPage() {
       setPagination(data.pagination);
       setStats(data.stats);
     } catch (error) {
-      console.error('Error fetching user activity:', error);
+      log.error('Error fetching user activity', error, { action: 'fetchUserActivity' });
       addToast({
         variant: 'error',
         message: 'Failed to load user activity. Please try again.',

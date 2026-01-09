@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { DataTable, type Column, type RowAction, type SortConfig } from '@/components/admin/DataTable';
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminCategoryGroupsPage');
 import {
   Plus,
   Pencil,
@@ -66,7 +69,7 @@ export default function CategoryGroupsPage() {
       const data = await response.json();
       setGroups(data.data);
     } catch (error) {
-      console.error('Error fetching category groups:', error);
+      log.error('Error fetching category groups', error, { action: 'fetchGroups' });
       addToast({
         variant: 'error',
         message: 'Failed to load category groups. Please try again.',
@@ -191,7 +194,7 @@ export default function CategoryGroupsPage() {
           }
         }
       } catch (error) {
-        console.error('Error checking categories:', error);
+        log.error('Error checking categories', error, { action: 'checkCategories' });
       }
     }
     
@@ -234,7 +237,7 @@ export default function CategoryGroupsPage() {
       setDeleteModal({ isOpen: false, group: null, affectedCategories: [] });
       fetchGroups();
     } catch (error) {
-      console.error('Error deleting category group:', error);
+      log.error('Error deleting category group', error, { action: 'deleteCategoryGroup' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to delete category group',
@@ -294,7 +297,7 @@ export default function CategoryGroupsPage() {
       // Refresh to get updated display_order values
       fetchGroups();
     } catch (error) {
-      console.error('Error saving order:', error);
+      log.error('Error saving order', error, { action: 'reorderCategoryGroups' });
       addToast({
         variant: 'error',
         message: 'Failed to save order. Please try again.',

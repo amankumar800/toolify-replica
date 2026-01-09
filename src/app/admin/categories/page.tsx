@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminCategoriesPage');
 import {
   Plus,
   Pencil,
@@ -85,7 +88,7 @@ export default function CategoriesPage() {
         setCategoryGroups(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching category groups:', error);
+      log.error('Error fetching category groups', error, { action: 'fetchGroups' });
     }
   }, []);
 
@@ -104,7 +107,7 @@ export default function CategoriesPage() {
       const data = await response.json();
       setCategories(data.data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      log.error('Error fetching categories', error, { action: 'fetchCategories' });
       addToast({
         variant: 'error',
         message: 'Failed to load categories. Please try again.',
@@ -142,7 +145,7 @@ export default function CategoriesPage() {
         });
       }
     } catch (error) {
-      console.error('Error fetching affected records:', error);
+      log.error('Error fetching affected records', error, { action: 'fetchAffectedRecords' });
       setDeleteModal({
         isOpen: true,
         category,
@@ -176,7 +179,7 @@ export default function CategoriesPage() {
       setDeleteModal({ isOpen: false, category: null, affectedRecords: null });
       fetchCategories();
     } catch (error) {
-      console.error('Error deleting category:', error);
+      log.error('Error deleting category', error, { action: 'deleteCategory' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to delete category',
@@ -244,7 +247,7 @@ export default function CategoriesPage() {
       // Refresh to get updated display_order values
       fetchCategories();
     } catch (error) {
-      console.error('Error saving order:', error);
+      log.error('Error saving order', error, { action: 'reorderCategories' });
       addToast({
         variant: 'error',
         message: 'Failed to save order. Please try again.',

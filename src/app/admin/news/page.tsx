@@ -8,6 +8,9 @@ import { DataTable, type Column, type Filter, type RowAction, type BulkAction, t
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
 import { exportToCSV, downloadCSV } from '@/lib/utils/csv-export';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminNewsPage');
 import {
   Plus,
   Pencil,
@@ -165,7 +168,7 @@ export default function NewsPage() {
       setNews(data.data);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching news:', error);
+      log.error('Error fetching news', error, { action: 'fetchNews' });
       addToast({
         variant: 'error',
         message: 'Failed to load news. Please try again.',
@@ -337,7 +340,7 @@ export default function NewsPage() {
       setDeleteModal({ isOpen: false, news: null });
       fetchNews();
     } catch (error) {
-      console.error('Error deleting news:', error);
+      log.error('Error deleting news', error, { action: 'deleteNews' });
       addToast({
         variant: 'error',
         message: 'Failed to delete news. Please try again.',
@@ -366,7 +369,7 @@ export default function NewsPage() {
 
       fetchNews();
     } catch (error) {
-      console.error('Error updating news:', error);
+      log.error('Error updating news', error, { action: 'bulkStatusChange' });
       addToast({
         variant: 'error',
         message: 'Failed to update news. Please try again.',
@@ -393,7 +396,7 @@ export default function NewsPage() {
 
       fetchNews();
     } catch (error) {
-      console.error('Error deleting news:', error);
+      log.error('Error deleting news', error, { action: 'bulkDelete' });
       addToast({
         variant: 'error',
         message: 'Failed to delete news. Please try again.',

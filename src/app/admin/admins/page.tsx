@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { DataTable, type Column, type RowAction, type SortConfig } from '@/components/admin/DataTable';
 import { useToast } from '@/components/admin/Toast';
 import { DeleteModal } from '@/components/admin/DeleteModal';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminAdminsPage');
 import {
   Plus,
   Pencil,
@@ -126,7 +129,7 @@ export default function AdminsPage() {
       setAdmins(data.data);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching admins:', error);
+      log.error('Error fetching admins', error, { action: 'fetchAdmins' });
       addToast({
         variant: 'error',
         message: 'Failed to load admins. Please try again.',
@@ -260,7 +263,7 @@ export default function AdminsPage() {
       setDeleteModal({ isOpen: false, admin: null });
       fetchAdmins();
     } catch (error) {
-      console.error('Error deleting admin:', error);
+      log.error('Error deleting admin', error, { action: 'deleteAdmin' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to delete admin',
@@ -291,7 +294,7 @@ export default function AdminsPage() {
         message: 'Password reset successfully',
       });
     } catch (error) {
-      console.error('Error resetting password:', error);
+      log.error('Error resetting password', error, { action: 'resetPassword' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to reset password',
@@ -321,7 +324,7 @@ export default function AdminsPage() {
 
       fetchAdmins();
     } catch (error) {
-      console.error('Error unlocking admin:', error);
+      log.error('Error unlocking admin', error, { action: 'unlockAdmin' });
       addToast({
         variant: 'error',
         message: error instanceof Error ? error.message : 'Failed to unlock admin',
