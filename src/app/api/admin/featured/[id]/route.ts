@@ -19,6 +19,9 @@ import {
 } from '@/lib/services/featured-tools.service';
 import { featuredToolSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminFeaturedIdAPI');
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(featuredTool);
   } catch (error) {
-    console.error('Error fetching featured tool:', error);
+    log.error('Error fetching featured tool', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch featured tool' },
       { status: 500 }
@@ -101,7 +104,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(featuredTool);
   } catch (error) {
-    console.error('Error updating featured tool:', error);
+    log.error('Error updating featured tool', error, { action: 'PUT' });
     return NextResponse.json(
       { error: 'Failed to update featured tool' },
       { status: 500 }
@@ -127,7 +130,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting featured tool:', error);
+    log.error('Error deleting featured tool', error, { action: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to delete featured tool' },
       { status: 500 }

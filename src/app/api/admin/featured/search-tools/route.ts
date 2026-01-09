@@ -12,6 +12,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { searchToolsForSelect, getToolForSelect } from '@/lib/services/featured-tools.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminFeaturedSearchToolsAPI');
 
 /**
  * GET /api/admin/featured/search-tools
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
     const results = await searchToolsForSelect(query);
     return NextResponse.json(results);
   } catch (error) {
-    console.error('Error searching tools:', error);
+    log.error('Error searching tools', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to search tools' },
       { status: 500 }

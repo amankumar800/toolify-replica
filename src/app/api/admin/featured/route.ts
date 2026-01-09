@@ -14,8 +14,11 @@ import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { listFeaturedTools, createFeaturedTool } from '@/lib/services/featured-tools.service';
 import { featuredToolSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
 import type { FeaturedToolFilters, FeaturedToolStatus } from '@/lib/services/admin-crud.types';
 import type { FeaturedPlacementType } from '@/lib/types/admin-forms';
+
+const log = createLogger('AdminFeaturedAPI');
 
 /**
  * GET /api/admin/featured
@@ -73,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error listing featured tools:', error);
+    log.error('Error listing featured tools', error, { action: 'GET' });
     return NextResponse.json(
       { error: 'Failed to list featured tools' },
       { status: 500 }
@@ -125,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(featuredTool, { status: 201 });
   } catch (error) {
-    console.error('Error creating featured tool:', error);
+    log.error('Error creating featured tool', error, { action: 'POST' });
     return NextResponse.json(
       { error: 'Failed to create featured tool' },
       { status: 500 }
