@@ -1,6 +1,9 @@
+// ISR revalidation - cache for 30 minutes
+export const revalidate = 1800;
+
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
-import { getToolBySlug } from '@/lib/services/tools.service';
+import { getToolBySlug, getTools } from '@/lib/services/tools.service';
 import { Container } from '@/components/layout/Container';
 import { DraftPreviewBanner } from '@/components/admin/DraftPreviewBanner';
 import { Share2, Bookmark, Star, ExternalLink } from 'lucide-react';
@@ -9,6 +12,19 @@ import type { Metadata } from 'next';
 interface PageProps {
     params: Promise<{ slug: string }>;
     searchParams: Promise<{ preview?: string }>;
+}
+
+/**
+ * Generate static params for tool pages at build time
+ * Generates params for the most popular tools
+ */
+export async function generateStaticParams() {
+    try {
+        const { items } = await getTools({ limit: 100 });
+        return items.map((tool) => ({ slug: tool.slug }));
+    } catch {
+        return [];
+    }
 }
 
 /**

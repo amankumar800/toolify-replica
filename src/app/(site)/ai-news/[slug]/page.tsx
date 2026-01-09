@@ -1,4 +1,8 @@
 import { Metadata } from 'next';
+
+// ISR revalidation - cache for 15 minutes
+export const revalidate = 900;
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -10,6 +14,19 @@ import { NewsSidebar } from '@/components/features/news/NewsSidebar';
 import { DraftPreviewBanner } from '@/components/admin/DraftPreviewBanner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
+/**
+ * Generate static params for news pages at build time
+ * Generates params for recent news articles
+ */
+export async function generateStaticParams() {
+    try {
+        const { items } = await NewsService.getAllNews({ limit: 50 });
+        return items.map((news) => ({ slug: news.slug }));
+    } catch {
+        return [];
+    }
+}
 
 export async function generateMetadata(
     props: {

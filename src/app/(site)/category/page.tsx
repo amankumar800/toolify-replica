@@ -1,4 +1,8 @@
 import { Metadata } from 'next';
+
+// ISR revalidation - cache for 1 hour
+export const revalidate = 3600;
+
 import { CategoryLayout } from '@/components/features/category/CategoryLayout';
 import { CategorySidebar } from '@/components/features/category/CategorySidebar';
 import { CategoryMainList } from '@/components/features/CategoryMainList';

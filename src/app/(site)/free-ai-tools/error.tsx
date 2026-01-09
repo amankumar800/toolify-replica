@@ -2,6 +2,9 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('FreeAIToolsError');
 
 /**
  * Error Boundary for Free AI Tools Pages
@@ -124,11 +127,11 @@ export default function Error({ error, reset }: ErrorProps) {
   // Log error details for debugging - only in development (Requirement 18.2)
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.error('[Free AI Tools Error]', {
-        message: error.message,
-        digest: error.digest,
-        stack: error.stack,
-        timestamp: new Date().toISOString(),
+      log.error('Free AI Tools Error', error, { 
+        data: { 
+          digest: error.digest,
+          timestamp: new Date().toISOString() 
+        } 
       });
     }
   }, [error]);

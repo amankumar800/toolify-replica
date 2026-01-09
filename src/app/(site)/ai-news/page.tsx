@@ -1,5 +1,12 @@
 import { Suspense } from 'react';
 import { Metadata } from 'next';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('NewsPage');
+
+// ISR revalidation - cache for 15 minutes (news should be fresher)
+export const revalidate = 900;
+
 import { NewsService, TimeFilter } from '@/lib/services/news.service';
 import { NewsCard } from '@/components/features/news/NewsCard';
 import { NewsSidebar } from '@/components/features/news/NewsSidebar';
@@ -53,7 +60,7 @@ export default async function NewsPage(props: {
         trendingNews = await NewsService.getTrendingNews();
     } catch (e) {
         error = 'Failed to load news. Please try again later.';
-        console.error('NewsPage error:', e);
+        log.error('NewsPage error', e, { action: 'loadNews' });
     }
 
     return (

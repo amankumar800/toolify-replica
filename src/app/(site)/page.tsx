@@ -15,6 +15,7 @@ import {
   CategoryGridSkeleton
 } from '@/components/features/home';
 import { MultiModelSearch } from '@/components/features/MultiModelSearch';
+import { getHomePageStats } from '@/lib/services';
 
 // Data imports
 import myToolsData from '@/data/my-tools.json';
@@ -61,17 +62,16 @@ export async function generateMetadata(): Promise<Metadata> {
  * All 52 critique issues addressed throughout this page and its components.
  */
 export default async function HomePage() {
-  // Fetch data
-  const trendingNews = await NewsService.getTrendingNews();
+  // Fetch data in parallel
+  const [trendingNews, stats] = await Promise.all([
+    NewsService.getTrendingNews(),
+    getHomePageStats(),
+  ]);
 
   // Validate data with Zod - Issue #23, #27
   const validatedMyTools = safeParseArray(MyToolSchema, myToolsData);
   const validatedFeaturedTools = safeParseArray(FeaturedToolSchema, featuredToolsData);
   const validatedCategories = safeParseArray(CategoryItemSchema, categoriesData);
-
-  // TODO: Issue #44, #45 - Fetch real stats from database
-  // const stats = await getHomePageStats();
-  const stats = { totalTools: 27682, totalCategories: 459 };
 
   return (
     <div className="min-h-screen pb-20">

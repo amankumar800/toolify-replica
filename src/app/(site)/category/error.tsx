@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('CategoryError');
 
 export default function Error({
     error,
@@ -10,7 +13,7 @@ export default function Error({
     reset: () => void;
 }) {
     useEffect(() => {
-        console.error(error);
+        log.error('Category page error', error, { data: { digest: error.digest } });
     }, [error]);
 
     return (

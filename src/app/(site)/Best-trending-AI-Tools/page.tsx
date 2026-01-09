@@ -1,3 +1,6 @@
+// ISR revalidation - cache for 1 hour
+export const revalidate = 3600;
+
 import { Container } from '@/components/layout/Container';
 import { RankingTable } from '@/components/features/RankingTable';
 import { getTools } from '@/lib/services/tools.service';
