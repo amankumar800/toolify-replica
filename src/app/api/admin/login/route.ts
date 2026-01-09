@@ -22,6 +22,9 @@ import {
 } from '@/lib/services/admin-auth.service';
 import { validateEmail } from '@/lib/utils/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('AdminLoginAPI');
 
 /**
  * POST /api/admin/login
@@ -100,7 +103,7 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     // Log error internally but return generic message (Req 8.4)
-    console.error('Login API error:', error);
+    log.error('Login API error', error, { action: 'POST' });
     return NextResponse.json(
       { success: false, error: 'An error occurred. Please try again.' },
       { status: 500 }
