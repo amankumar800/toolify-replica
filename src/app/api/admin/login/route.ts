@@ -21,6 +21,7 @@ import {
   ERROR_ACCOUNT_LOCKED,
 } from '@/lib/services/admin-auth.service';
 import { validateEmail } from '@/lib/utils/validation';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/admin/login
@@ -40,6 +41,16 @@ import { validateEmail } from '@/lib/utils/validation';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Apply strict rate limiting for login attempts (5 per 15 minutes per IP)
+    const rateLimitResponse = await checkRateLimit(request, {
+      type: 'login',
+      useAuth: false, // Use IP-based limiting for login
+    });
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     // Parse JSON body
     let body: { email?: string; password?: string };
     try {
