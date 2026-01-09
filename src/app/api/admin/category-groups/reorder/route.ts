@@ -7,8 +7,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
 import { createCategoryGroupsRepository } from '@/lib/db/repositories';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/admin/category-groups/reorder
@@ -17,6 +19,11 @@ import { createCategoryGroupsRepository } from '@/lib/db/repositories';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const body = await request.json();
 
     // Validate request body
