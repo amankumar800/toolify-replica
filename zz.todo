@@ -1,0 +1,9 @@
+Configuration Required
+Add these to your Vercel environment variables:
+
+UPSTASH_REDIS_REST_URL=https://your-region.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-upstash-redis-token
+Get these from Upstash Console (free tier available).
+
+Graceful Degradation
+Rate limiting is optional - if Upstash isn't configured, all requests pass through normally. This ensures your app works in development without Redis
