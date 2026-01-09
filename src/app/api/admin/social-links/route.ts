@@ -1,8 +1,10 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
+import { checkRateLimit } from '@/lib/rate-limit';
 import type { SocialLinkRow, SocialLinksFormData } from '@/lib/supabase/types';
 
 /**
@@ -11,8 +13,13 @@ import type { SocialLinkRow, SocialLinksFormData } from '@/lib/supabase/types';
  * Fetches all social links for the admin panel.
  * Requirements: 1.3
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Rate limit: adminRead (300 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const supabase = createAdminClient();
 
     const { data, error } = await supabase
@@ -66,6 +73,11 @@ export async function GET() {
  */
 export async function PUT(request: NextRequest) {
   try {
+    // Rate limit: adminMutation (60 req/min)
+    const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    await requireAdmin();
     const supabase = createAdminClient();
     const body: SocialLinksFormData = await request.json();
 
