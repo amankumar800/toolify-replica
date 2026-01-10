@@ -301,6 +301,26 @@ export function ToolForm({
     }
   };
 
+  // Handle image upload to Supabase Storage
+  // Requirements: P3-1 - Implement Supabase Storage for Images
+  const handleImageUpload = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/admin/upload/tool-image', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
+
   // Category options for multi-select
   const categoryOptions = categories.map((c) => ({
     value: c.id,
@@ -449,8 +469,9 @@ export function ToolForm({
           label="Tool Image"
           value={formData.image_url ?? null}
           onChange={(v) => updateField('image_url', v ?? '')}
+          onUpload={handleImageUpload}
           error={errors.image_url}
-          helpText="Recommended size: 600x400px. Supports JPG, PNG, WebP (max 5MB)"
+          helpText="Recommended size: 600x400px. Supports JPG, PNG, WebP, GIF (max 5MB)"
         />
       </FormSection>
 
