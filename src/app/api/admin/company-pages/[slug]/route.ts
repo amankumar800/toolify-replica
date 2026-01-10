@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TABLES } from '@/lib/db/constants/tables';
-import { getAdminFromRequest } from '@/lib/services/admin-auth.service';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { createLogger } from '@/lib/logger';
 import type { CompanyPageFormData, CompanyPageRow } from '@/lib/supabase/types';
@@ -64,13 +64,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     if (rateLimitResponse) return rateLimitResponse;
 
     // Check admin authentication
-    const admin = await getAdminFromRequest();
-    if (!admin) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    await requireAdmin();
 
     const { slug } = await params;
     const supabase = createAdminClient();
@@ -122,13 +116,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (rateLimitResponse) return rateLimitResponse;
 
     // Check admin authentication
-    const admin = await getAdminFromRequest();
-    if (!admin) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    await requireAdmin();
 
     const { slug } = await params;
     const body: CompanyPageFormData = await request.json();

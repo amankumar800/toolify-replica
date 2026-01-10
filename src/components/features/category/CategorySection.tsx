@@ -1,10 +1,7 @@
-'use client';
-
-import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Tool, Category } from '@/lib/types/tool';
-import { ToolCard } from '@/components/features/tool/ToolCard'; // Will create this next
+import { ToolCard } from '@/components/features/tool/ToolCard';
 
 interface CategorySectionProps {
     category: Category;

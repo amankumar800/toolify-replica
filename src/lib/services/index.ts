@@ -69,3 +69,10 @@ export {
   getHomePageStats,
   type HomePageStats,
 } from './stats.service';
+
+// Homepage service exports
+export {
+  getFeaturedToolsForHomepage,
+  getCategoriesForHomepage,
+  getMyToolsForHomepage,
+} from './homepage.service';

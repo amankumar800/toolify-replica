@@ -2,7 +2,14 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from './types'
 
 /**
+ * Singleton admin client instance.
+ * Reusing the same instance is more efficient for serverless.
+ */
+let adminClient: ReturnType<typeof createClient<Database>> | null = null
+
+/**
  * Creates a Supabase client with SERVICE ROLE key.
+ * Uses singleton pattern for efficiency in serverless environments.
  * 
  * ⚠️ WARNING: This client bypasses all Row Level Security (RLS) policies.
  * ONLY use this server-side for admin operations that require elevated privileges.
@@ -43,10 +50,17 @@ export function createAdminClient() {
     throw new Error('Missing Supabase admin credentials: SUPABASE_SERVICE_ROLE_KEY')
   }
 
-  return createClient<Database>(supabaseUrl, serviceRoleKey, {
+  // Return existing instance if available
+  if (adminClient) {
+    return adminClient
+  }
+
+  adminClient = createClient<Database>(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
   })
+
+  return adminClient
 }

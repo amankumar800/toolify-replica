@@ -1,5 +1,3 @@
-'use client';
-
 import { CompactToolCard } from './CompactToolCard';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -18,6 +16,8 @@ interface ToolCardsGridProps {
 /**
  * Tool Cards Grid - Displays a responsive grid of tool cards with More button
  * 
+ * Converted to Server Component - no client-side state needed
+ * 
  * Fixes applied:
  * - #3: Removed dead showAll state
  * - #7: Focus-visible on More button
@@ -32,7 +32,7 @@ export function ToolCardsGrid({
     initialCount = INITIAL_TOOLS_COUNT,
     activeFilter = 'new'
 }: ToolCardsGridProps) {
-    // Issue #3: Removed unused showAll state - just slice to initialCount
+    // Just slice to initialCount - no state needed
     const displayedTools = tools.slice(0, initialCount);
     const hasMore = tools.length > initialCount;
 

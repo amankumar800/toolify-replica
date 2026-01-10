@@ -1,11 +1,7 @@
-'use client';
-
-import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Tool } from '@/lib/types/tool';
 import { Star, Bookmark, ExternalLink, BadgeCheck } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ToolCardProps {
     tool: Tool;
@@ -26,9 +22,9 @@ export function ToolCard({ tool, priority = false }: ToolCardProps) {
                     priority={priority}
                 />
                 <div className="absolute top-3 right-3 flex gap-2">
-                    <button className="p-1.5 bg-white/90 rounded-full hover:text-toolify-purple-600 transition-colors shadow-sm backdrop-blur-sm">
+                    <span className="p-1.5 bg-white/90 rounded-full hover:text-toolify-purple-600 transition-colors shadow-sm backdrop-blur-sm">
                         <Bookmark className="w-4 h-4" />
-                    </button>
+                    </span>
                 </div>
                 {tool.pricing && (
                     <div className="absolute top-3 left-3">

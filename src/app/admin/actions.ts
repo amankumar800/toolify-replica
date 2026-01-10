@@ -1,6 +1,7 @@
 'use server';
 
-import { createTool, updateTool, deleteTool } from '@/lib/services/admin.service';
+import { createToolPublic, deleteTool } from '@/lib/services/tools.service';
+import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -17,6 +18,8 @@ const ToolSchema = z.object({
 
 export async function createToolAction(prevState: unknown, formData: FormData) {
     try {
+        // Require admin authentication for server action
+        await requireAdmin();
         const rawData = {
             name: formData.get('name'),
             slug: formData.get('slug'),
@@ -32,13 +35,13 @@ export async function createToolAction(prevState: unknown, formData: FormData) {
         // Type casting for known enum values
         const pricing = validateddev.pricing as 'Free' | 'Freemium' | 'Paid' | 'Contact for Pricing';
 
-        await createTool({
+        await createToolPublic({
             ...validateddev,
             pricing,
-            shortDescription: validateddev.shortDescription || '', // Ensure string
-            image: validateddev.image || 'https://placehold.co/600x400',
+            shortDescription: validateddev.shortDescription || '',
+            imageUrl: validateddev.image || 'https://placehold.co/600x400',
             tags: [],
-            categories: []
+            categoryIds: []
         });
 
         revalidatePath('/admin/tools');
@@ -51,6 +54,8 @@ export async function createToolAction(prevState: unknown, formData: FormData) {
 
 export async function deleteToolAction(id: string) {
     try {
+        // Require admin authentication for server action
+        await requireAdmin();
         await deleteTool(id);
         revalidatePath('/admin/tools');
         revalidatePath('/');

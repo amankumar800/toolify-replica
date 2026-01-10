@@ -1,5 +1,3 @@
-'use client';
-
 import { Palette, Clipboard, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

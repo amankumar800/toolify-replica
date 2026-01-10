@@ -18,6 +18,9 @@ import { getSubcategorySectionId } from '@/lib/utils/free-ai-tools-utils';
  * Implements Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 8.2, 8.3, 8.4, 8.5, 20.3, 21.3, 21.5
  */
 
+// Force dynamic rendering since we use cookies() via Supabase client
+export const dynamic = 'force-dynamic';
+
 // ISR: Revalidate every 24 hours (86400 seconds) - Requirement 20.3
 export const revalidate = 86400;
 

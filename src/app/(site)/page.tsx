@@ -15,12 +15,12 @@ import {
   CategoryGridSkeleton
 } from '@/components/features/home';
 import { MultiModelSearch } from '@/components/features/MultiModelSearch';
-import { getHomePageStats } from '@/lib/services';
-
-// Data imports
-import myToolsData from '@/data/my-tools.json';
-import featuredToolsData from '@/data/featured-tools.json';
-import categoriesData from '@/data/categories-home.json';
+import {
+  getHomePageStats,
+  getFeaturedToolsForHomepage,
+  getCategoriesForHomepage,
+  getMyToolsForHomepage,
+} from '@/lib/services';
 
 // Types
 import {
@@ -62,10 +62,13 @@ export async function generateMetadata(): Promise<Metadata> {
  * All 52 critique issues addressed throughout this page and its components.
  */
 export default async function HomePage() {
-  // Fetch data in parallel
-  const [trendingNews, stats] = await Promise.all([
+  // Fetch all data in parallel from database
+  const [trendingNews, stats, featuredToolsData, categoriesData, myToolsData] = await Promise.all([
     NewsService.getTrendingNews(),
     getHomePageStats(),
+    getFeaturedToolsForHomepage(),
+    getCategoriesForHomepage(),
+    getMyToolsForHomepage(),
   ]);
 
   // Validate data with Zod - Issue #23, #27
