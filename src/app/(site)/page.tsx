@@ -19,8 +19,9 @@ import {
   getHomePageStats,
   getFeaturedToolsForHomepage,
   getCategoriesForHomepage,
-  getMyToolsForHomepage,
+  getMyToolsForUser,
 } from '@/lib/services';
+import { createClient } from '@/lib/supabase/server';
 
 // Types
 import {
@@ -62,13 +63,17 @@ export async function generateMetadata(): Promise<Metadata> {
  * All 52 critique issues addressed throughout this page and its components.
  */
 export default async function HomePage() {
+  // Get user session for personalized content
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   // Fetch all data in parallel from database
   const [trendingNews, stats, featuredToolsData, categoriesData, myToolsData] = await Promise.all([
     NewsService.getTrendingNews(),
     getHomePageStats(),
     getFeaturedToolsForHomepage(),
     getCategoriesForHomepage(),
-    getMyToolsForHomepage(),
+    getMyToolsForUser(user?.email ?? null, supabase), // Pass user email and authenticated client for personalized favorites
   ]);
 
   // Validate data with Zod - Issue #23, #27
