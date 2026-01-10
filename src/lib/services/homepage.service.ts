@@ -221,3 +221,102 @@ export const getMyToolsForHomepage = unstable_cache(
   ['homepage-my-tools'],
   { revalidate: 3600, tags: ['tools', 'homepage'] }
 );
+
+// ============================================================================
+// User-Specific My Tools (Favorites)
+// ============================================================================
+
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/supabase/types';
+
+/**
+ * Get user-specific "My Tools" for homepage display.
+ * 
+ * Architecture Decision (Option A):
+ * - Logged-in users with favorites: Show their saved favorites
+ * - Logged-in users without favorites: Fallback to popular tools
+ * - Anonymous users: Show popular tools (default)
+ * 
+ * IMPORTANT: This function requires an authenticated Supabase client to query
+ * user_favorites due to RLS policies that check auth.jwt() ->> 'email'.
+ * 
+ * @param userEmail - User's email address (null for anonymous users)
+ * @param supabaseClient - Authenticated Supabase client with user session context
+ * @returns MyTool[] - Tools in the format expected by MyToolsSection component
+ */
+export async function getMyToolsForUser(
+  userEmail: string | null,
+  supabaseClient?: SupabaseClient<Database>
+): Promise<MyTool[]> {
+  // If no user email, return default popular tools
+  if (!userEmail) {
+    return getMyToolsForHomepage();
+  }
+
+  // If no authenticated client provided, fallback to popular tools
+  // (anon client won't work due to RLS policies requiring auth.jwt())
+  if (!supabaseClient) {
+    console.warn('[homepage.service] No authenticated client provided for user favorites, falling back to popular tools');
+    return getMyToolsForHomepage();
+  }
+
+  // Get user's favorites from user_favorites table
+  // RLS policy: (auth.jwt() ->> 'email'::text) = user_email
+  const { data: favorites, error: favError } = await supabaseClient
+    .from('user_favorites')
+    .select('tool_id, tool_name, custom_icon_color, display_order')
+    .eq('user_email', userEmail)
+    .order('display_order', { ascending: true })
+    .limit(11);
+
+  if (favError) {
+    console.error('[homepage.service] Failed to fetch user favorites:', favError);
+    return getMyToolsForHomepage();
+  }
+
+  // If user has no favorites, fallback to popular tools
+  if (!favorites || favorites.length === 0) {
+    return getMyToolsForHomepage();
+  }
+
+  // Get tool slugs from favorites (tool_id in user_favorites is the slug)
+  const toolSlugs = favorites.map((f) => f.tool_id);
+
+  // Fetch full tool data for the favorites using anon client (public data, no RLS restriction)
+  const anonSupabase = createAnonClient();
+  const { data: tools, error: toolsError } = await anonSupabase
+    .from('tools')
+    .select('id, name, slug, image_url, website_url')
+    .in('slug', toolSlugs)
+    .eq('status', 'published');
+
+  if (toolsError) {
+    console.error('[homepage.service] Failed to fetch favorite tools data:', toolsError);
+    return getMyToolsForHomepage();
+  }
+
+  // Create a map for quick lookup
+  const toolMap = new Map(tools?.map((t) => [t.slug, t]) ?? []);
+
+  // Map favorites to MyTool format, preserving user's display order
+  const myTools: MyTool[] = [];
+  for (const fav of favorites) {
+    const tool = toolMap.get(fav.tool_id);
+    if (tool) {
+      myTools.push({
+        id: tool.slug,
+        name: tool.name,
+        icon: tool.image_url || getFaviconUrl(tool.website_url),
+        url: `/tool/${tool.slug}`,
+        color: fav.custom_icon_color || getColorFromString(tool.name, DEFAULT_TOOL_COLORS),
+      });
+    }
+  }
+
+  // If all favorites were invalid/unpublished, fallback to popular tools
+  if (myTools.length === 0) {
+    return getMyToolsForHomepage();
+  }
+
+  return myTools;
+}
