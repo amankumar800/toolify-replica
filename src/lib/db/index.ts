@@ -24,6 +24,10 @@
  *   // Errors
  *   DatabaseError,
  *   NotFoundError,
+ *
+ *   // Connection pooling utilities
+ *   validateSupabaseConfig,
+ *   CONNECTION_POOLING,
  * } from '@/lib/db';
  * ```
  */
@@ -43,3 +47,15 @@ export {
   NotFoundError,
   ValidationError,
 } from './errors';
+
+// Re-export connection pooling utilities
+export {
+  CONNECTION_POOLING,
+  validateSupabaseConfig,
+  checkConnectionHealth,
+  getPoolerUrl,
+  getProjectRef,
+  getPoolingStatus,
+  type ConnectionHealthStatus,
+  type ConfigValidationResult,
+} from './connection-pooling';
