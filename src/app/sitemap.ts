@@ -3,6 +3,9 @@ import { getTools } from '@/lib/services/tools.service';
 import { getCategories } from '@/lib/services/categories.service';
 import { freeAIToolsService } from '@/lib/services/free-ai-tools.service';
 
+// Force dynamic rendering to allow cookies() usage in service functions
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
