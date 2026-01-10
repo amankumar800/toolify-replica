@@ -1,4 +1,8 @@
-// ISR revalidation - cache for 1 hour
+// Force dynamic rendering to ensure database queries work on Vercel
+// The page fetches from Supabase which requires runtime environment variables
+export const dynamic = 'force-dynamic';
+
+// ISR revalidation - cache for 1 hour (works with dynamic = 'force-dynamic' for on-demand revalidation)
 export const revalidate = 3600;
 
 import { Container } from '@/components/layout/Container';
