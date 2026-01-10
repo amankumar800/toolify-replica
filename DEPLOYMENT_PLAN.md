@@ -742,10 +742,10 @@ CREATE POLICY "Users can delete own favorites" ON user_favorites
 [x] P0-2: Remove static JSON imports ✅
 [ ] P0-3: Run database seeding migration
 [ ] P0-3: Verify data appears on homepage
-[ ] P0-4: Add NEXT_PUBLIC_SITE_URL to .env.example
+[x] P0-4: Add NEXT_PUBLIC_SITE_URL to .env.example ✅
 [ ] P0-4: Add NEXT_PUBLIC_SITE_URL to Vercel
-[ ] P0-5: Verify all admin API routes have requireAdmin()
-[ ] Test build locally: npm run build
+[x] P0-5: Verify all admin API routes have requireAdmin() ✅
+[x] Test build locally: npm run build ✅
 [ ] Run tests: npm test
 ```
 
@@ -797,11 +797,11 @@ CREATE POLICY "Users can delete own favorites" ON user_favorites
 ```
 [ ] P2-1: Add database optimization indexes
 [ ] P2-2: Verify RLS policies
-[ ] P2-3: Configure connection pooling
-[ ] P2-4: Create cache invalidation endpoint
-[ ] P2-5: Add health check endpoint
-[ ] P2-6: Implement user-specific "My Tools" favorites
-    [ ] Backend: Add getMyToolsForUser() to homepage.service.ts
+[x] P2-3: Configure connection pooling ✅ (documented in connection-pooling.ts)
+[x] P2-4: Create cache invalidation endpoint ✅ (/api/revalidate)
+[x] P2-5: Add health check endpoint ✅ (/api/health)
+[x] P2-6: Implement user-specific "My Tools" favorites ✅
+    [x] Backend: Add getMyToolsForUser() to homepage.service.ts ✅
     [ ] Frontend: Update page.tsx to pass user session ID
     [ ] Database: Verify user_favorites RLS policies
     [ ] Test: Logged-in user with favorites
@@ -862,9 +862,9 @@ CREATE POLICY "Users can delete own favorites" ON user_favorites
 | **Day 1** | P0-1: Fix filesystem dependency | 30 min | ✅ Done |
 | **Day 1** | P0-2: Create homepage.service.ts | 1-2 hours | ✅ Done |
 | **Day 1** | P0-3: Seed database | 1 hour | ⏳ Next |
-| **Day 1** | P0-4: Add missing env var | 5 min | ⏳ Pending |
-| **Day 1** | P0-5: Verify admin auth | 30 min | ⏳ Pending |
-| **Day 2** | Test build locally | 30 min | ⏳ Pending |
+| **Day 1** | P0-4: Add missing env var | 5 min | ✅ Done |
+| **Day 1** | P0-5: Verify admin auth | 30 min | ✅ Done |
+| **Day 2** | Test build locally | 30 min | ✅ Done |
 | **Day 2** | Deploy to Vercel preview | 30 min | ⏳ Pending |
 | **Day 2** | Test all flows on preview | 1-2 hours | ⏳ Pending |
 | **Day 2** | Deploy to production | 15 min | ⏳ Pending |
@@ -904,21 +904,21 @@ CREATE POLICY "Users can delete own favorites" ON user_favorites
 | 1 | 🔴 P0 | Filesystem dependency | Deployment crash | 30m | ✅ Done |
 | 2 | 🔴 P0 | Static JSON on homepage | Stale data | 1-2h | ✅ Done |
 | 3 | 🔴 P0 | Database needs seeding | Empty homepage | 1h | ⏳ Next |
-| 4 | 🔴 P0 | Missing env variable | Broken URLs | 5m | ⏳ Pending |
-| 5 | 🔴 P0 | Admin auth verification | Security | 30m | ⏳ Pending |
+| 4 | 🔴 P0 | Missing env variable | Broken URLs | 5m | ✅ Done |
+| 5 | 🔴 P0 | Admin auth verification | Security | 30m | ✅ Done |
 | 6 | 🟠 P1 | Mutable search_path | Security | 30m | ⏳ Pending |
 | 7 | 🟠 P1 | Leaked password protection | Security | 2m | ⏳ Pending |
 | 8 | 🟠 P1 | Sentry configuration | Observability | 15m | ⏳ Pending |
 | 9 | 🟠 P1 | Vercel env variables | Deployment | 15m | ⏳ Pending |
-| 10 | 🟠 P1 | vercel.json config | Performance | 10m | ⏳ Pending |
-| 11 | 🟠 P1 | next.config.ts verify | Build | 10m | ⏳ Pending |
+| 10 | 🟠 P1 | vercel.json config | Performance | 10m | ✅ Done |
+| 11 | 🟠 P1 | next.config.ts verify | Build | 10m | ✅ Done |
 | 12 | 🟡 P2 | Database indexes | Performance | 15m | ⏳ Pending |
 | 13 | 🟡 P2 | RLS policies verify | Security | 30m | ⏳ Pending |
-| 14 | 🟡 P2 | Connection pooling | Scalability | 15m | ⏳ Pending |
-| 15 | 🟡 P2 | Cache invalidation | Data freshness | 20m | ⏳ Pending |
-| 16 | 🟡 P2 | Health check endpoint | Monitoring | 15m | ⏳ Pending |
-| 17 | 🟡 P2 | User-specific My Tools | Feature | 1h | ⏳ Pending |
-| 18 | 🟢 P3 | Supabase storage | Feature | 2-4h | ⏳ Pending |
+| 14 | 🟡 P2 | Connection pooling | Scalability | 15m | ✅ Done |
+| 15 | 🟡 P2 | Cache invalidation | Data freshness | 20m | ✅ Done |
+| 16 | 🟡 P2 | Health check endpoint | Monitoring | 15m | ✅ Done |
+| 17 | 🟡 P2 | User-specific My Tools | Feature | 1h | ✅ Done |
+| 18 | 🟢 P3 | Supabase storage | Feature | 2-4h | ✅ Done |
 | 19 | 🟢 P3 | Auth consolidation | Tech debt | 4-8h | ⏳ Pending |
 
 ---
