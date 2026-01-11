@@ -3,8 +3,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AdBanner } from './AdBanner';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import type { CategoryListItem } from '@/lib/types/free-ai-tools';
 
 /**
@@ -18,43 +20,6 @@ interface CategorySidebarProps {
   /** Additional CSS classes */
   className?: string;
 }
-
-/**
- * Icon mapping for free AI tools categories
- * Maps category slugs to icon paths or uses a default icon
- */
-const CATEGORY_ICONS: Record<string, string> = {
-  'chatbots-virtual-companions': '💬',
-  'office-productivity': '📊',
-  'image-generation-editing': '🖼️',
-  'art-creative-design': '🎨',
-  'coding-development': '💻',
-  'video-animation': '🎬',
-  'education-translation': '📚',
-  'writing-editing': '✍️',
-  'voice-generation-conversion': '🎤',
-  'business-management': '💼',
-  'music-audio': '🎵',
-  'ai-detection-anti-detection': '🔍',
-  'marketing-advertising': '📢',
-  'research-data-analysis': '📈',
-  'social-media': '📱',
-  'legal-finance': '⚖️',
-  'daily-life': '🏠',
-  'health-wellness': '❤️',
-  'image-analysis': '👁️',
-  'interior-architectural-design': '🏛️',
-  'business-research': '🔬',
-  'other-1': '📦',
-};
-
-/**
- * Get icon for a category by slug
- */
-function getCategoryIcon(slug: string): string {
-  return CATEGORY_ICONS[slug] || '📦';
-}
-
 
 /**
  * Determines if a navigation link should be active based on current pathname
@@ -74,6 +39,8 @@ export function isActiveLink(pathname: string, href: string): boolean {
   return false;
 }
 
+
+
 /**
  * CategorySidebar Component
  * 
@@ -91,13 +58,13 @@ export function isActiveLink(pathname: string, href: string): boolean {
  * @param activeSlug - Currently active category slug
  * @param className - Additional CSS classes
  */
-export function CategorySidebar({ 
-  categories, 
+export function CategorySidebar({
+  categories,
   activeSlug,
-  className 
+  className
 }: CategorySidebarProps) {
   const pathname = usePathname();
-  
+
   // Determine active slug from pathname if not provided
   const currentActiveSlug = activeSlug ?? pathname.split('/').pop();
   const isIntroductionActive = pathname === '/free-ai-tools';
@@ -130,7 +97,12 @@ export function CategorySidebar({
             )}
             aria-current={isIntroductionActive ? 'page' : undefined}
           >
-            <span className="w-5 h-5 flex items-center justify-center text-base">📖</span>
+            <BookOpen
+              className={cn(
+                'w-5 h-5 flex-shrink-0',
+                isIntroductionActive ? 'text-[var(--primary)]' : 'text-[#3B82F6]'
+              )}
+            />
             <span>Introduction</span>
           </Link>
 
@@ -145,7 +117,6 @@ export function CategorySidebar({
               {categories.map((category) => {
                 const href = `/free-ai-tools/${category.slug}`;
                 const isActive = isActiveLink(pathname, href) || currentActiveSlug === category.slug;
-                const icon = getCategoryIcon(category.slug);
 
                 return (
                   <Link
@@ -161,20 +132,19 @@ export function CategorySidebar({
                     aria-current={isActive ? 'page' : undefined}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      {/* Icon - 20x20px per Requirement 3.3 */}
-                      <span 
-                        className="w-5 h-5 flex items-center justify-center text-base flex-shrink-0"
-                        aria-hidden="true"
-                      >
-                        {icon}
-                      </span>
+                      {/* Colorful Icon */}
+                      <CategoryIcon
+                        slug={category.slug}
+                        size="sm"
+                        className="flex-shrink-0"
+                      />
                       {/* Category Name */}
                       <span className="truncate">{category.name}</span>
                     </div>
 
                     {/* Tool Count - Requirement 3.8 */}
                     {category.toolCount > 0 && (
-                      <span 
+                      <span
                         className={cn(
                           'text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ml-2',
                           isActive
