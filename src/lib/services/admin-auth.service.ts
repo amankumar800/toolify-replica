@@ -1,13 +1,13 @@
 /**
  * Admin Authentication Service
  * 
- * Handles all admin authentication operations including login, logout,
- * session verification, and protected route helpers.
+ * Handles all admin authentication operations using custom JWT tokens
+ * with httpOnly cookies for secure session management.
  * 
- * This service is completely independent from Supabase Auth and uses:
- * - JWT tokens for session management
+ * This service uses:
+ * - Custom JWT tokens for admin authentication
+ * - Admins table for lockout tracking and admin metadata
  * - bcrypt for password verification
- * - httpOnly cookies for secure token storage
  * 
  * @module admin-auth.service
  */
@@ -15,10 +15,10 @@
 import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createAdminsRepository, isAccountLocked, MAX_FAILED_ATTEMPTS } from '@/lib/db/repositories/admins.repository';
-import { verifyPassword } from '@/lib/utils/password';
-import { signToken, verifyToken } from '@/lib/utils/jwt';
 import { validateEmail } from '@/lib/utils/validation';
 import { createLogger } from '@/lib/logger';
+import { signToken, verifyToken } from '@/lib/utils/jwt';
+import { verifyPassword } from '@/lib/utils/password';
 
 const log = createLogger('AdminAuthService');
 
@@ -30,7 +30,7 @@ const log = createLogger('AdminAuthService');
  * Represents an authenticated admin user
  */
 export interface AdminUser {
-  /** Admin UUID */
+  /** Admin UUID from admins table */
   id: string;
   /** Admin email address */
   email: string;
@@ -64,7 +64,7 @@ export interface LoginResult {
 // Constants
 // ============================================================================
 
-/** Cookie name for admin session */
+/** Cookie name for admin session (legacy - kept for backwards compatibility) */
 export const COOKIE_NAME = 'admin_session';
 
 /** Cookie max age in seconds (8 hours) */
@@ -73,7 +73,7 @@ export const COOKIE_MAX_AGE = 8 * 60 * 60;
 /** Cookie path - sent to all routes (needed for both /admin and /api/admin) */
 export const COOKIE_PATH = '/';
 
-/** Generic error message for invalid credentials (prevents info leakage) */
+/** Generic error message for invalid credentials */
 export const ERROR_INVALID_CREDENTIALS = 'Invalid email or password';
 
 /** Error message for locked accounts */
