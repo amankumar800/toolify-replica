@@ -25,11 +25,10 @@ export const CATEGORY_DEFAULTS = {
 } as const;
 
 /**
- * Extended Category type with group relationship.
- * Used when category needs to reference its parent group.
+ * Extended Category type with additional fields.
+ * Used when category needs additional metadata.
  */
 export interface CategoryWithGroup extends Category {
-  groupId?: string;
   displayOrder: number;
   metadata: Record<string, unknown>;
   createdAt?: string;
@@ -62,17 +61,16 @@ export function mapCategoryRowToCategory(row: CategoryRow): Category {
 }
 
 /**
- * Maps a database category row to an extended Category type with group relationship.
- * Includes all fields including group_id, display_order, and metadata.
+ * Maps a database category row to an extended Category type.
+ * Includes all fields including display_order and metadata.
  *
  * @param row - Database row with snake_case columns
- * @returns Extended Category object with group relationship
+ * @returns Extended Category object
  *
  * @example
  * ```ts
  * const row = await categoriesRepo.findBySlug('ai-chatbots');
  * const category = mapCategoryRowToCategoryWithGroup(row);
- * console.log(category.groupId); // UUID of parent group
  * ```
  */
 export function mapCategoryRowToCategoryWithGroup(row: CategoryRow): CategoryWithGroup {
@@ -83,7 +81,6 @@ export function mapCategoryRowToCategoryWithGroup(row: CategoryRow): CategoryWit
     description: row.description ?? CATEGORY_DEFAULTS.description,
     count: row.tool_count ?? CATEGORY_DEFAULTS.toolCount,
     toolCount: row.tool_count ?? CATEGORY_DEFAULTS.toolCount,
-    groupId: row.group_id ?? undefined,
     displayOrder: row.display_order ?? CATEGORY_DEFAULTS.displayOrder,
     metadata: (row.metadata as Record<string, unknown>) ?? CATEGORY_DEFAULTS.metadata,
     createdAt: row.created_at ?? undefined,
@@ -106,7 +103,7 @@ export function mapCategoryRowToCategoryWithGroup(row: CategoryRow): CategoryWit
  * ```
  */
 export function mapCategoryWithToolCount(row: CategoryWithToolCount): Category {
-  const r = row as CategoryWithToolCount & { id: string; name: string; slug: string; description: string | null; group_id: string | null };
+  const r = row as CategoryWithToolCount & { id: string; name: string; slug: string; description: string | null };
   return {
     id: r.id,
     name: r.name,
@@ -119,13 +116,13 @@ export function mapCategoryWithToolCount(row: CategoryWithToolCount): Category {
 
 /**
  * Maps a database category row with computed tool count to extended Category type.
- * Includes group relationship and computed tool count.
+ * Includes computed tool count.
  *
  * @param row - Database row with computed tool count
- * @returns Extended Category object with group and computed count
+ * @returns Extended Category object with computed count
  */
 export function mapCategoryWithToolCountAndGroup(row: CategoryWithToolCount): CategoryWithGroup {
-  const r = row as CategoryWithToolCount & { id: string; name: string; slug: string; description: string | null; group_id: string | null; display_order: number | null; metadata: Record<string, unknown> | null; created_at: string | null; updated_at: string | null };
+  const r = row as CategoryWithToolCount & { id: string; name: string; slug: string; description: string | null; display_order: number | null; metadata: Record<string, unknown> | null; created_at: string | null; updated_at: string | null };
   return {
     id: r.id,
     name: r.name,
@@ -133,7 +130,6 @@ export function mapCategoryWithToolCountAndGroup(row: CategoryWithToolCount): Ca
     description: r.description ?? CATEGORY_DEFAULTS.description,
     count: row.computed_tool_count ?? CATEGORY_DEFAULTS.toolCount,
     toolCount: row.computed_tool_count ?? CATEGORY_DEFAULTS.toolCount,
-    groupId: r.group_id ?? undefined,
     displayOrder: r.display_order ?? CATEGORY_DEFAULTS.displayOrder,
     metadata: (r.metadata as Record<string, unknown>) ?? CATEGORY_DEFAULTS.metadata,
     createdAt: r.created_at ?? undefined,
@@ -142,10 +138,9 @@ export function mapCategoryWithToolCountAndGroup(row: CategoryWithToolCount): Ca
 }
 
 /**
- * Input type for creating a category with group relationship.
+ * Input type for creating a category.
  */
 export interface CategoryInput extends Omit<Category, 'id' | 'count'> {
-  groupId?: string;
   displayOrder?: number;
   icon?: string;
   metadata?: Record<string, unknown>;
@@ -173,7 +168,6 @@ export function mapCategoryToInsert(category: CategoryInput): CategoryInsert {
     icon: category.icon || null,
     tool_count: category.toolCount ?? null,
     display_order: category.displayOrder ?? null,
-    group_id: category.groupId ?? null,
     metadata: (category.metadata as CategoryInsert['metadata']) ?? null,
   };
 }
@@ -203,7 +197,6 @@ export function mapCategoryToUpdate(
   if (updates.icon !== undefined) result.icon = updates.icon || null;
   if (updates.toolCount !== undefined) result.tool_count = updates.toolCount;
   if (updates.displayOrder !== undefined) result.display_order = updates.displayOrder;
-  if (updates.groupId !== undefined) result.group_id = updates.groupId || null;
   if (updates.metadata !== undefined) result.metadata = updates.metadata;
 
   return result;
