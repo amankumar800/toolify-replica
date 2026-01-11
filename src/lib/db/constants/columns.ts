@@ -56,16 +56,6 @@ export const SUBCATEGORY_COLUMNS = {
   updatedAt: 'updated_at',
 } as const;
 
-/** Maps application property names to database column names for category_groups table */
-export const CATEGORY_GROUP_COLUMNS = {
-  id: 'id',
-  name: 'name',
-  iconName: 'icon_name',
-  displayOrder: 'display_order',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-} as const;
-
 /** Maps application property names to database column names for faqs table */
 export const FAQ_COLUMNS = {
   id: 'id',

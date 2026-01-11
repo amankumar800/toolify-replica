@@ -2,10 +2,10 @@
  * Database table name constants.
  * Centralized table naming for single-point updates when tables are renamed.
  * 
- * Optimized Schema (10 tables):
- * - 8 existing tables (tools, categories, category_groups, subcategories, 
- *   tool_categories, featured_tools, faqs, user_favorites)
- * - 2 new tables (midjourney_prompts, ai_news)
+ * Optimized Schema:
+ * - Core tables (tools, categories, subcategories, tool_categories, featured_tools, faqs, user_favorites)
+ * - Feature tables (midjourney_prompts, ai_news)
+ * - Admin tables (admins, social_links, company_pages)
  * 
  * Merged tables:
  * - tool_submissions → tools (via status column)
@@ -20,7 +20,6 @@ export const TABLES = {
   // Core tables
   TOOLS: 'tools',
   CATEGORIES: 'categories',
-  CATEGORY_GROUPS: 'category_groups',
   SUBCATEGORIES: 'subcategories',
   TOOL_CATEGORIES: 'tool_categories',
   FEATURED_TOOLS: 'featured_tools',
