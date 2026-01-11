@@ -26,7 +26,6 @@ interface StatCardConfig {
 const STAT_CARD_ROUTES: StatCardConfig[] = [
   { title: 'Total Tools', href: '/admin/tools' },
   { title: 'Categories', href: '/admin/categories' },
-  { title: 'Category Groups', href: '/admin/category-groups' },
   { title: 'Subcategories', href: '/admin/subcategories' },
   { title: 'AI News', href: '/admin/news' },
   { title: 'Prompts', href: '/admin/prompts' },
@@ -41,7 +40,6 @@ const STAT_CARD_ROUTES: StatCardConfig[] = [
 const ROUTE_TO_SECTION: Record<string, string> = {
   '/admin/tools': 'Tools',
   '/admin/categories': 'Categories',
-  '/admin/category-groups': 'Category Groups',
   '/admin/subcategories': 'Subcategories',
   '/admin/news': 'AI News',
   '/admin/prompts': 'Prompts',
@@ -100,11 +98,11 @@ describe('Admin Dashboard Property Tests', () => {
     });
 
     it('stat card count should match expected table count', () => {
-      // Property: Dashboard should display exactly 9 stat cards (one per table minus junction tables)
-      // Tables: tools, categories, category_groups, subcategories, ai_news, 
+      // Property: Dashboard should display exactly 8 stat cards (one per table minus junction tables)
+      // Tables: tools, categories, subcategories, ai_news, 
       //         midjourney_prompts, faqs, featured_tools, admins
       // Excluded: tool_categories (junction), user_favorites (read-only view, not stat card)
-      expect(STAT_CARD_ROUTES.length).toBe(9);
+      expect(STAT_CARD_ROUTES.length).toBe(8);
     });
 
     it('for any stat card, the route should be deterministic based on title', async () => {
