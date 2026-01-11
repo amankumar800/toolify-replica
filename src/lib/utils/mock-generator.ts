@@ -1,4 +1,4 @@
-import { Tool, CategoryGroup } from '@/lib/types/tool';
+import { Tool, Category } from '@/lib/types/tool';
 
 /**
  * Runtime Data Generator
@@ -31,12 +31,9 @@ export function generateMockTools(seedTools: Tool[], multiplier: number = 5): To
     return generated.sort((a, b) => b.savedCount - a.savedCount); // Default Popular sort
 }
 
-export function enrichCategoriesWithCounts(groups: CategoryGroup[], tools: Tool[]): CategoryGroup[] {
-    return groups.map(group => ({
-        ...group,
-        categories: group.categories.map(cat => ({
-            ...cat,
-            toolCount: tools.filter(t => t.categories.includes(cat.name) || t.categories.includes(cat.id)).length
-        }))
+export function enrichCategoriesWithCounts(categories: Category[], tools: Tool[]): Category[] {
+    return categories.map(cat => ({
+        ...cat,
+        toolCount: tools.filter(t => t.categories.includes(cat.name) || t.categories.includes(cat.id)).length
     }));
 }

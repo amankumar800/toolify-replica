@@ -14,7 +14,6 @@ import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import {
   toolSchema,
-  categoryGroupSchema,
   categorySchema,
   subcategorySchema,
   aiNewsSchema,
@@ -387,12 +386,10 @@ describe('Property 20: Form Validation', () => {
         fc.property(
           validNameArb,
           validSlugArb,
-          validUuidArb,
-          (name, slug, groupId) => {
+          (name, slug) => {
             const data = {
               name,
               slug,
-              group_id: groupId,
             };
 
             const result = validateFormData(categorySchema, data);

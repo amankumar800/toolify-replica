@@ -131,25 +131,6 @@ export const toolSchema = z.object({
 export type ToolSchemaType = z.infer<typeof toolSchema>;
 
 // ============================================================================
-// Category Group Validation Schema
-// ============================================================================
-
-/**
- * Category group form validation schema
- * Requirements: 4.4
- */
-export const categoryGroupSchema = z.object({
-  name: z
-    .string({ error: REQUIRED_FIELD_MESSAGE })
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be at most 50 characters'),
-  icon_name: z.string().optional(),
-  display_order: z.number().optional(),
-});
-
-export type CategoryGroupSchemaType = z.infer<typeof categoryGroupSchema>;
-
-// ============================================================================
 // Category Validation Schema
 // ============================================================================
 
@@ -165,7 +146,6 @@ export const categorySchema = z.object({
   slug: slugSchema,
   description: z.string().max(500, 'Description must be at most 500 characters').optional(),
   icon: z.string().optional(),
-  group_id: z.string().uuid('Invalid group ID').optional(),
   display_order: z.number().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
