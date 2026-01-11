@@ -1,11 +1,10 @@
 /**
  * Categories service layer for business logic orchestration.
- * Provides functions for managing categories, subcategories, category groups, and FAQs.
+ * Provides functions for managing categories, subcategories, and FAQs.
  *
  * @module categories.service
  */
 
-import { unstable_cache } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createCategoriesRepository } from '@/lib/db/repositories/categories.repository';
 import { createSubcategoriesRepository } from '@/lib/db/repositories/subcategories.repository';
@@ -15,18 +14,12 @@ import {
   mapCategoryWithToolCount,
 } from '@/lib/db/mappers/category.mapper';
 import { mapSubcategoryRowToSubcategory } from '@/lib/db/mappers/subcategory.mapper';
-import { TABLES } from '@/lib/db/constants/tables';
-import type { Category, CategoryGroup } from '@/lib/types/tool';
-import { createLogger } from '@/lib/logger';
-
-const log = createLogger('CategoriesService');
+import type { Category } from '@/lib/types/tool';
 
 /**
  * Options for filtering and paginating categories.
  */
 export interface GetCategoriesOptions {
-  /** Filter by group ID */
-  groupId?: string;
   /** Include computed tool counts from junction table */
   withToolCount?: boolean;
   /** Maximum number of results */
@@ -75,20 +68,11 @@ function getSupabaseClient() {
  * ```ts
  * // Get all categories with tool counts
  * const categories = await getCategories({ withToolCount: true });
- *
- * // Get categories by group
- * const categories = await getCategories({ groupId: 'group-uuid' });
  * ```
  */
 export async function getCategories(options?: GetCategoriesOptions): Promise<Category[]> {
   const supabase = getSupabaseClient();
   const repo = createCategoriesRepository(supabase);
-
-  // If filtering by group, use findByGroup
-  if (options?.groupId) {
-    const rows = await repo.findByGroup(options.groupId);
-    return rows.map(mapCategoryRowToCategory);
-  }
 
   // If requesting tool counts, use findWithToolCount
   if (options?.withToolCount) {
@@ -131,117 +115,6 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
   }
 
   return mapCategoryRowToCategory(row);
-}
-
-/**
- * Fetches all category groups with their categories.
- *
- * @returns Array of category groups with nested categories
- *
- * @example
- * ```ts
- * const groups = await getCategoryGroups();
- * groups.forEach(group => {
- *   console.log(group.name, group.categories.length);
- * });
- * ```
- */
-export const getCategoryGroups = unstable_cache(
-  async (): Promise<CategoryGroup[]> => {
-    return getCategoryGroupsInternal();
-  },
-  ['category-groups'],
-  {
-    revalidate: 3600, // Cache for 1 hour
-    tags: ['categories'],
-  }
-);
-
-/**
- * Internal implementation of getCategoryGroups
- */
-async function getCategoryGroupsInternal(): Promise<CategoryGroup[]> {
-  const supabase = getSupabaseClient();
-
-  // Get all category groups
-  const { data: groups, error: groupsError } = await supabase
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from(TABLES.CATEGORY_GROUPS as any)
-    .select('*')
-    .order('display_order', { ascending: true });
-
-  if (groupsError) {
-    log.error('Error fetching category groups', groupsError, { 
-      action: 'getCategoryGroupsInternal',
-      data: { 
-        table: TABLES.CATEGORY_GROUPS,
-        errorCode: groupsError.code,
-        errorMessage: groupsError.message,
-        errorDetails: groupsError.details,
-        errorHint: groupsError.hint,
-      }
-    });
-    return [];
-  }
-
-  if (!groups || groups.length === 0) {
-    return [];
-  }
-
-  // Get all categories with tool counts
-  let categories: Category[] = [];
-  try {
-    const categoriesRepo = createCategoriesRepository(supabase);
-    const categoriesWithCounts = await categoriesRepo.findWithToolCount();
-    categories = categoriesWithCounts.map(mapCategoryWithToolCount);
-  } catch (error) {
-    log.error('Error fetching categories with tool counts', error, { action: 'getCategoryGroupsInternal' });
-    // Fall back to getting categories without tool counts
-    try {
-      const categoriesRepo = createCategoriesRepository(supabase);
-      const basicCategories = await categoriesRepo.findAll({
-        orderBy: 'display_order',
-        ascending: true,
-      });
-      categories = basicCategories.map(mapCategoryRowToCategory);
-    } catch (fallbackError) {
-      log.error('Error fetching basic categories', fallbackError, { action: 'getCategoryGroupsInternal' });
-      return [];
-    }
-  }
-
-  // Group categories by their group_id in metadata
-  // Use a Set to track which categories have been assigned to prevent duplicates
-  const assignedCategoryIds = new Set<string>();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (groups as any[]).map((group) => {
-    const groupCategories = categories.filter((cat) => {
-      // Skip if this category has already been assigned to a group
-      if (assignedCategoryIds.has(cat.id)) {
-        return false;
-      }
-
-      // Categories are linked to groups via metadata.group_id
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const catMetadata = (cat as any).metadata;
-      const belongsToGroup = catMetadata?.group_id === group.id;
-
-      if (belongsToGroup) {
-        assignedCategoryIds.add(cat.id);
-        return true;
-      }
-
-      return false;
-    });
-
-    return {
-      id: group.id,
-      name: group.name,
-      iconName: group.icon_name ?? undefined,
-      categories: groupCategories,
-    } as CategoryGroup;
-  });
 }
 
 

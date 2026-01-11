@@ -14,14 +14,13 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Dashboard statistics interface.
- * Contains counts for all 11 database tables.
+ * Contains counts for all database tables.
  * 
  * Requirements: 2.1
  */
 export interface DashboardStats {
   totalTools: number;
   totalCategories: number;
-  totalCategoryGroups: number;
   totalSubcategories: number;
   totalAiNews: number;
   totalPrompts: number;
@@ -96,29 +95,6 @@ export async function getCategoriesCount(
 
   if (error) {
     throw new Error(`Failed to get categories count: ${error.message}`);
-  }
-
-  return count ?? 0;
-}
-
-/**
- * Get total count of category groups from the database.
- * 
- * @param supabase - Optional Supabase client (for testing)
- * @returns Total number of category groups
- */
-export async function getCategoryGroupsCount(
-  supabase?: SupabaseClient<Database>
-): Promise<number> {
-  const client = supabase ?? await createClient();
-  
-  const { count, error } = await client
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from(TABLES.CATEGORY_GROUPS as any)
-    .select('*', { count: 'exact', head: true });
-
-  if (error) {
-    throw new Error(`Failed to get category groups count: ${error.message}`);
   }
 
   return count ?? 0;
@@ -412,7 +388,6 @@ export async function getDashboardStats(
   const [
     totalTools,
     totalCategories,
-    totalCategoryGroups,
     totalSubcategories,
     totalAiNews,
     totalPrompts,
@@ -422,7 +397,6 @@ export async function getDashboardStats(
   ] = await Promise.all([
     getToolsCount(client),
     getCategoriesCount(client),
-    getCategoryGroupsCount(client),
     getSubcategoriesCount(client),
     getAiNewsCount(client),
     getPromptsCount(client),
@@ -434,7 +408,6 @@ export async function getDashboardStats(
   return {
     totalTools,
     totalCategories,
-    totalCategoryGroups,
     totalSubcategories,
     totalAiNews,
     totalPrompts,

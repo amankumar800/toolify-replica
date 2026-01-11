@@ -83,17 +83,6 @@ export interface ToolFilters extends FilterParams {
 }
 
 // ============================================================================
-// Category Group Filters
-// ============================================================================
-
-/**
- * Filter parameters for category groups list
- */
-export interface CategoryGroupFilters extends FilterParams {
-  // Category groups have minimal filtering needs
-}
-
-// ============================================================================
 // Category Filters
 // ============================================================================
 
@@ -102,7 +91,7 @@ export interface CategoryGroupFilters extends FilterParams {
  * Requirements: 5.2
  */
 export interface CategoryFilters extends FilterParams {
-  group_id?: string;
+  // Categories can be filtered by search
 }
 
 // ============================================================================
@@ -230,7 +219,6 @@ export interface UserActivityStats {
 export interface DashboardStats {
   totalTools: number;
   totalCategories: number;
-  totalCategoryGroups: number;
   totalSubcategories: number;
   totalNews: number;
   totalPrompts: number;

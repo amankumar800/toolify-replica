@@ -20,7 +20,6 @@
  *   // Categories service
  *   getCategories,
  *   getCategoryBySlug,
- *   getCategoryGroups,
  *   getSubcategories,
  *   getFaqs,
  * } from '@/lib/services';
@@ -45,7 +44,6 @@ export {
 export {
   getCategories,
   getCategoryBySlug,
-  getCategoryGroups,
   getSubcategories,
   getFaqs,
   type GetCategoriesOptions,
