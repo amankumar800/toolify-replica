@@ -23,7 +23,6 @@ describe.skipIf(shouldSkip)('Database Unique Constraints', { timeout: 120000 }, 
   let supabase: SupabaseClient;
   const testToolIds: string[] = [];
   const testCategoryIds: string[] = [];
-  const testCategoryGroupIds: string[] = [];
   const testUserFavoriteIds: string[] = [];
 
   beforeAll(() => {
@@ -42,9 +41,6 @@ describe.skipIf(shouldSkip)('Database Unique Constraints', { timeout: 120000 }, 
     }
     if (testCategoryIds.length > 0) {
       await supabase.from('categories').delete().in('id', testCategoryIds);
-    }
-    if (testCategoryGroupIds.length > 0) {
-      await supabase.from('category_groups').delete().in('id', testCategoryGroupIds);
     }
   });
 
@@ -116,38 +112,6 @@ describe.skipIf(shouldSkip)('Database Unique Constraints', { timeout: 120000 }, 
             const { error: secondError } = await supabase.from('categories').insert({
               name: 'Test Category 2',
               slug: uniqueSlug
-            });
-
-            expect(secondError).not.toBeNull();
-            expect(secondError?.message).toContain('duplicate');
-          }
-        ),
-        { numRuns: 10 }
-      );
-    });
-
-    it('should reject duplicate category_groups names', async () => {
-      await fc.assert(
-        fc.asyncProperty(
-          fc.string({ minLength: 3, maxLength: 50 }),
-          async (name) => {
-            const uniqueName = `Test Group ${name} ${Date.now()}`;
-            
-            // First insert should succeed
-            const { data: firstData, error: firstError } = await supabase.from('category_groups').insert({
-              name: uniqueName
-            }).select('id');
-
-            expect(firstError).toBeNull();
-            expect(firstData).not.toBeNull();
-            
-            if (firstData && firstData[0]) {
-              testCategoryGroupIds.push(firstData[0].id);
-            }
-
-            // Second insert with same name should fail
-            const { error: secondError } = await supabase.from('category_groups').insert({
-              name: uniqueName
             });
 
             expect(secondError).not.toBeNull();

@@ -10,7 +10,6 @@
  * Tables with updated_at triggers:
  * - tools
  * - categories
- * - category_groups
  * - subcategories
  * - midjourney_prompts
  * - ai_news
@@ -44,7 +43,6 @@ describe.skipIf(shouldSkip)('Property 7: Trigger Behavior', { timeout: 180000 },
   // Track test data for cleanup
   const testToolIds: string[] = [];
   const testCategoryIds: string[] = [];
-  const testCategoryGroupIds: string[] = [];
   const testSubcategoryIds: string[] = [];
   const testMidjourneyPromptIds: string[] = [];
   const testAiNewsIds: string[] = [];
@@ -68,10 +66,6 @@ describe.skipIf(shouldSkip)('Property 7: Trigger Behavior', { timeout: 180000 },
     if (testCategoryIds.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase.from as any)('categories').delete().in('id', testCategoryIds);
-    }
-    if (testCategoryGroupIds.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase.from as any)('category_groups').delete().in('id', testCategoryGroupIds);
     }
     if (testMidjourneyPromptIds.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -242,54 +236,6 @@ describe.skipIf(shouldSkip)('Property 7: Trigger Behavior', { timeout: 180000 },
     });
   });
 
-
-  /**
-   * Category Groups table updated_at trigger tests
-   */
-  describe('Category Groups Table Trigger', () => {
-    const groupNameArb = fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9 ]{2,29}$/);
-
-    it('should update updated_at timestamp when category_group is modified (property test)', async () => {
-      await fc.assert(
-        fc.asyncProperty(groupNameArb, groupNameArb, async (originalName, newName) => {
-          fc.pre(originalName !== newName);
-
-          const uniqueName = `${originalName} ${Date.now()}`;
-          const newUniqueName = `${newName} ${Date.now() + 1}`;
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: created, error: createError } = await (supabase.from as any)('category_groups')
-            .insert({
-              name: uniqueName,
-            })
-            .select('id, updated_at')
-            .single();
-
-          expect(createError).toBeNull();
-          testCategoryGroupIds.push(created.id);
-
-          const originalUpdatedAt = created.updated_at;
-          await sleep(10);
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: updated, error: updateError } = await (supabase.from as any)('category_groups')
-            .update({ name: newUniqueName })
-            .eq('id', created.id)
-            .select('updated_at')
-            .single();
-
-          expect(updateError).toBeNull();
-
-          const originalTime = new Date(originalUpdatedAt).getTime();
-          const updatedTime = new Date(updated.updated_at).getTime();
-          expect(updatedTime).toBeGreaterThanOrEqual(originalTime);
-
-          return true;
-        }),
-        { numRuns: 20 }
-      );
-    }, 180000);
-  });
 
   /**
    * Subcategories table updated_at trigger tests

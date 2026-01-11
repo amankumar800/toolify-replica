@@ -9,7 +9,7 @@
  *
  * Requirements covered:
  * - 11.1: RLS enabled on all tables
- * - 11.2: Public read access to tools, categories, category_groups, subcategories,
+ * - 11.2: Public read access to tools, categories, subcategories,
  *         tool_categories, featured_tools, faqs, midjourney_prompts
  * - 11.3: Public read access to ai_news only WHERE is_published = true
  * - 11.4: user_favorites restricted to owner-only access
@@ -50,7 +50,6 @@ describe.skipIf(shouldSkip)('Property 6: RLS Policy Enforcement', { timeout: 180
   // Track test data for cleanup
   const testToolIds: string[] = [];
   const testCategoryIds: string[] = [];
-  const testCategoryGroupIds: string[] = [];
   const testSubcategoryIds: string[] = [];
   const testFeaturedToolIds: string[] = [];
   const testFaqIds: string[] = [];
@@ -87,9 +86,6 @@ describe.skipIf(shouldSkip)('Property 6: RLS Policy Enforcement', { timeout: 180
     if (testCategoryIds.length > 0) {
       await serviceClient.from('categories').delete().in('id', testCategoryIds);
     }
-    if (testCategoryGroupIds.length > 0) {
-      await serviceClient.from('category_groups').delete().in('id', testCategoryGroupIds);
-    }
     if (testFaqIds.length > 0) {
       await serviceClient.from('faqs').delete().in('id', testFaqIds);
     }
@@ -108,7 +104,6 @@ describe.skipIf(shouldSkip)('Property 6: RLS Policy Enforcement', { timeout: 180
     const tables = [
       'tools',
       'categories',
-      'category_groups',
       'subcategories',
       'tool_categories',
       'featured_tools',
@@ -149,7 +144,6 @@ describe.skipIf(shouldSkip)('Property 6: RLS Policy Enforcement', { timeout: 180
     const publicReadTables = [
       'tools',
       'categories',
-      'category_groups',
       'subcategories',
       'tool_categories',
       'featured_tools',
@@ -728,7 +722,6 @@ describe.skipIf(shouldSkip)('Property 6: RLS Policy Enforcement', { timeout: 180
       const publicTables = [
         'tools',
         'categories',
-        'category_groups',
         'subcategories',
         'featured_tools',
         'faqs',

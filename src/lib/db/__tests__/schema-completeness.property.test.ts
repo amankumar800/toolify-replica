@@ -2,7 +2,7 @@
  * Property-based tests for database schema completeness
  *
  * **Feature: database-schema-redesign, Property 1: Schema Completeness**
- * **Validates: Requirements 1.1, 1.3-1.5, 1.7, 2.1, 3.1, 4.1, 6.1, 6.3-6.5, 7.1-7.2, 8.1, 8.3-8.5, 9.1, 9.3-9.4, 10.1-10.6**
+ * **Validates: Requirements 1.1, 1.3-1.5, 1.7, 2.1, 4.1, 6.1, 6.3-6.5, 7.1-7.2, 8.1, 8.3-8.5, 9.1, 9.3-9.4, 10.1-10.6**
  *
  * *For any* table in the schema, all required columns SHALL exist with correct data types,
  * constraints, and default values as specified in the requirements.
@@ -71,19 +71,7 @@ const EXPECTED_SCHEMA = {
       icon: { type: 'text', nullable: true },
       tool_count: { type: 'integer', nullable: true },
       display_order: { type: 'integer', nullable: true },
-      group_id: { type: 'uuid', nullable: true },
       metadata: { type: 'jsonb', nullable: true },
-      created_at: { type: 'timestamp with time zone', nullable: true },
-      updated_at: { type: 'timestamp with time zone', nullable: true },
-    },
-  },
-  // Requirement 3: Category Groups Table Schema
-  category_groups: {
-    columns: {
-      id: { type: 'uuid', nullable: false },
-      name: { type: 'text', nullable: false },
-      icon_name: { type: 'text', nullable: true },
-      display_order: { type: 'integer', nullable: true },
       created_at: { type: 'timestamp with time zone', nullable: true },
       updated_at: { type: 'timestamp with time zone', nullable: true },
     },
@@ -352,8 +340,6 @@ describe.skipIf(shouldSkip)('Schema Completeness Property Tests', { timeout: 120
             } else if (tableName === 'categories') {
               testRecord.name = 'Test';
               testRecord.slug = `test-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-            } else if (tableName === 'category_groups') {
-              testRecord.name = `Test ${Date.now()}`;
             } else if (tableName === 'subcategories') {
               // Need a valid category_id - skip this test
               continue;
@@ -464,24 +450,12 @@ describe.skipIf(shouldSkip)('Schema Completeness Property Tests', { timeout: 120
         'icon',
         'tool_count',
         'display_order',
-        'group_id',
         'metadata',
       ];
 
       const { error } = await supabase
         .from('categories')
         .select(categoryFields.join(', '))
-        .limit(0);
-
-      expect(error).toBeNull();
-    });
-
-    it('should verify category_groups table has all required fields (Req 3.1)', async () => {
-      const groupFields = ['id', 'name', 'icon_name', 'display_order'];
-
-      const { error } = await supabase
-        .from('category_groups')
-        .select(groupFields.join(', '))
         .limit(0);
 
       expect(error).toBeNull();

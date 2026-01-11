@@ -2,7 +2,7 @@
  * Property-based tests for database index completeness
  *
  * **Feature: database-schema-redesign, Property 2: Index Completeness**
- * **Validates: Requirements 1.10-1.11, 2.3, 3.2, 4.3, 5.4, 6.6, 7.3, 8.6, 9.5-9.6, 10.7-10.8**
+ * **Validates: Requirements 1.10-1.11, 2.3, 4.3, 5.4, 6.6, 7.3, 8.6, 9.5-9.6, 10.7-10.8**
  *
  * *For any* table in the schema, all required indexes (B-tree and GIN) SHALL exist
  * on the specified columns.
@@ -28,12 +28,7 @@ const EXPECTED_INDEXES = {
   },
   // Requirement 2.3: Categories table indexes
   categories: {
-    btree: ['slug', 'group_id', 'display_order'],
-    gin: [],
-  },
-  // Requirement 3.2: Category groups table indexes
-  category_groups: {
-    btree: ['display_order'],
+    btree: ['slug', 'display_order'],
     gin: [],
   },
   // Requirement 4.3: Subcategories table indexes
@@ -202,17 +197,12 @@ describe.skipIf(shouldSkip)('Index Completeness Property Tests', { timeout: 1200
     });
 
     it('should have categories table indexed columns queryable (Req 2.3)', async () => {
-      const btreeColumns = ['slug', 'group_id', 'display_order'];
+      const btreeColumns = ['slug', 'display_order'];
 
       for (const col of btreeColumns) {
         const canQuery = await verifyIndexedColumnQuery('categories', col);
         expect(canQuery).toBe(true);
       }
-    });
-
-    it('should have category_groups table indexed columns queryable (Req 3.2)', async () => {
-      const canQuery = await verifyIndexedColumnQuery('category_groups', 'display_order');
-      expect(canQuery).toBe(true);
     });
 
     it('should have subcategories table indexed columns queryable (Req 4.3)', async () => {
