@@ -3,17 +3,21 @@ import Image from 'next/image';
 import { Share2, Bookmark } from 'lucide-react';
 import { Tool } from '@/lib/types/tool';
 
+const FALLBACK_IMAGE = '/images/fallback-tool-icon.svg';
+
 interface ToolCardProps {
     tool: Tool;
     priority?: boolean;
 }
 
 export function ToolCard({ tool, priority = false }: ToolCardProps) {
+    const imageUrl = tool.image && tool.image.trim() !== '' ? tool.image : FALLBACK_IMAGE;
+    
     return (
         <article className="group relative bg-white border border-[var(--border)] rounded-[var(--radius)] overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
             <div className="relative h-48 w-full bg-gray-100 overflow-hidden">
                 <Image
-                    src={tool.image}
+                    src={imageUrl}
                     alt={`${tool.name} interface`}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
