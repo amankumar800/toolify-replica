@@ -31,10 +31,3 @@ export type Category = {
     // Computed fields
     toolCount?: number;
 };
-
-export interface CategoryGroup {
-    id: string;
-    name: string;
-    iconName?: string; // New: Lucide icon mapping key
-    categories: Category[];
-}

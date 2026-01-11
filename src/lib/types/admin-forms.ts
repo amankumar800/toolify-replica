@@ -49,20 +49,6 @@ export interface ToolFormData {
 }
 
 // ============================================================================
-// Category Group Form Types
-// ============================================================================
-
-/**
- * Form data for creating/editing category groups
- * Requirements: 4.4
- */
-export interface CategoryGroupFormData {
-  name: string;
-  icon_name?: string;
-  display_order?: number;
-}
-
-// ============================================================================
 // Category Form Types
 // ============================================================================
 
@@ -75,7 +61,6 @@ export interface CategoryFormData {
   slug: string;
   description?: string;
   icon?: string;
-  group_id?: string;
   display_order?: number;
   metadata?: Record<string, unknown>;
 }
