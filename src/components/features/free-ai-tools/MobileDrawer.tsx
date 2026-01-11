@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { AdBanner } from './AdBanner';
+
 import type { CategoryListItem } from '@/lib/types/free-ai-tools';
 
 /**
@@ -76,7 +76,7 @@ export function getBodyOverflowStyle(isOpen: boolean): string {
 /**
  * Selector for focusable elements within the drawer
  */
-const FOCUSABLE_SELECTOR = 
+const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
@@ -254,9 +254,6 @@ export function MobileDrawer({
         {/* Scrollable content area */}
         <div className="overflow-y-auto h-[calc(100%-65px)] p-4">
           <div className="flex flex-col gap-4">
-            {/* AD Banner - Requirement 3.7 */}
-            <AdBanner />
-
             {/* Introduction Link - Requirement 3.1 */}
             <Link
               href="/free-ai-tools"
