@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AdBanner } from './AdBanner';
+
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import type { CategoryListItem } from '@/lib/types/free-ai-tools';
 
@@ -82,9 +82,6 @@ export function CategorySidebar({
     >
       <div className="sticky top-[calc(var(--header-height)+1rem)] max-h-[calc(100vh-var(--header-height)-2rem)] overflow-y-auto">
         <div className="flex flex-col gap-4 pr-4">
-          {/* AD Banner - Requirement 3.7 */}
-          <AdBanner />
-
           {/* Introduction Link - Requirement 3.1 */}
           <Link
             href="/free-ai-tools"
