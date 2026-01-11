@@ -24,20 +24,6 @@ function SidebarSkeleton() {
   return (
     <aside className="hidden md:block w-60 flex-shrink-0">
       <div className="sticky top-[calc(var(--header-height)+1rem)] space-y-4 pr-4">
-        {/* AD Banner Skeleton */}
-        <div className="bg-[var(--muted)] rounded-lg p-4 animate-pulse">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-[var(--border)] rounded-full" />
-            <div className="flex-1">
-              <div className="h-4 w-20 bg-[var(--border)] rounded mb-1" />
-              <div className="h-3 w-16 bg-[var(--border)] rounded" />
-            </div>
-          </div>
-          <div className="h-3 w-full bg-[var(--border)] rounded mb-2" />
-          <div className="h-3 w-3/4 bg-[var(--border)] rounded mb-3" />
-          <div className="h-8 w-full bg-[var(--border)] rounded" />
-        </div>
-
         {/* Introduction Link Skeleton */}
         <div className="flex items-center gap-3 px-3 py-2 animate-pulse">
           <div className="w-5 h-5 bg-[var(--border)] rounded" />
@@ -55,8 +41,8 @@ function SidebarSkeleton() {
             <div key={i} className="flex items-center justify-between px-3 py-2">
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 bg-[var(--border)] rounded" />
-                <div 
-                  className="h-4 bg-[var(--border)] rounded" 
+                <div
+                  className="h-4 bg-[var(--border)] rounded"
                   style={{ width: `${80 + Math.random() * 60}px` }}
                 />
               </div>
@@ -82,7 +68,7 @@ function ContentSkeleton() {
         <div className="h-10 w-80 bg-[var(--border)] rounded mb-4" />
         <div className="h-4 w-full max-w-xl bg-[var(--muted)] rounded mb-2" />
         <div className="h-4 w-3/4 max-w-lg bg-[var(--muted)] rounded mb-6" />
-        
+
         {/* CTA Buttons Skeleton */}
         <div className="flex gap-4">
           <div className="h-10 w-36 bg-[var(--border)] rounded-lg" />
@@ -154,7 +140,7 @@ function RightPanelSkeleton() {
       <div className="sticky top-[calc(var(--header-height)+1rem)] animate-pulse">
         {/* Featured Header Skeleton */}
         <div className="h-5 w-20 bg-[var(--border)] rounded mb-4" />
-        
+
         {/* Featured Tool Cards Skeleton */}
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -184,17 +170,17 @@ function TimeoutMessage({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="w-16 h-16 mb-4 text-[var(--muted-foreground)]">
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          strokeWidth={1.5} 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
           stroke="currentColor"
         >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" 
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
           />
         </svg>
       </div>
