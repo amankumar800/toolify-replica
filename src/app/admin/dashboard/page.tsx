@@ -5,7 +5,6 @@ import {
   Archive, 
   Newspaper, 
   Clock, 
-  FolderTree, 
   Folder, 
   FolderOpen,
   Sparkles,
@@ -63,13 +62,6 @@ export default async function DashboardPage() {
       description: 'Tool categories',
       icon: Folder,
       href: '/admin/categories',
-    },
-    {
-      title: 'Category Groups',
-      value: stats.totalCategoryGroups,
-      description: 'Category groupings',
-      icon: FolderTree,
-      href: '/admin/category-groups',
     },
     {
       title: 'Subcategories',
