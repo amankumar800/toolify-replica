@@ -150,7 +150,7 @@ export const getFeaturedToolsForHomepage = unstable_cache(
 
 /**
  * Get categories for homepage display.
- * Queries categories table, transforms to CategoryItem format.
+ * Queries free_ai_tools_categories table (same source as /free-ai-tools page).
  *
  * Cache: 1 hour, tagged for revalidation
  */
@@ -159,7 +159,7 @@ export const getCategoriesForHomepage = unstable_cache(
     const supabase = createAnonClient();
 
     const { data, error } = await supabase
-      .from('categories')
+      .from('free_ai_tools_categories')
       .select('id, name, slug, icon, tool_count, display_order')
       .order('display_order', { ascending: true })
       .limit(12);
@@ -173,7 +173,7 @@ export const getCategoriesForHomepage = unstable_cache(
       id: cat.slug,
       name: cat.name,
       slug: cat.slug,
-      icon: iconToEmoji(cat.icon),
+      icon: cat.icon || '🔧',
       toolCount: cat.tool_count ?? 0,
       color: '#F3F4F6',
     }));
