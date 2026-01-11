@@ -9,7 +9,6 @@ import {
   Wrench,
   Newspaper,
   Sparkles,
-  FolderTree,
   Folder,
   FolderOpen,
   Star,
@@ -66,7 +65,6 @@ const navGroups: NavGroup[] = [
   {
     label: 'Taxonomy',
     items: [
-      { label: 'Category Groups', href: '/admin/category-groups', icon: FolderTree },
       { label: 'Categories', href: '/admin/categories', icon: Folder },
       { label: 'Subcategories', href: '/admin/subcategories', icon: FolderOpen },
     ],
