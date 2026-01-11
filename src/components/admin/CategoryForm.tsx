@@ -9,7 +9,6 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('CategoryForm');
 import { TextareaField } from '@/components/admin/form-fields/TextareaField';
 import { NumberField } from '@/components/admin/form-fields/NumberField';
-import { SelectField } from '@/components/admin/form-fields/SelectField';
 import { IconPickerField } from '@/components/admin/form-fields/IconPickerField';
 import { JsonEditorField } from '@/components/admin/form-fields/JsonEditorField';
 import { useToast } from '@/components/admin/Toast';
@@ -23,11 +22,6 @@ import Link from 'next/link';
 // Types
 // ============================================================================
 
-interface CategoryGroup {
-  id: string;
-  name: string;
-}
-
 interface CategoryFormProps {
   initialData?: {
     id: string;
@@ -35,7 +29,6 @@ interface CategoryFormProps {
     slug: string;
     description: string | null;
     icon: string | null;
-    group_id: string | null;
     display_order: number | null;
     metadata: Record<string, unknown> | null;
     created_at?: string | null;
@@ -59,38 +52,17 @@ export function CategoryForm({ initialData, isNew }: CategoryFormProps) {
     slug: initialData?.slug ?? '',
     description: initialData?.description ?? undefined,
     icon: initialData?.icon ?? undefined,
-    group_id: initialData?.group_id ?? undefined,
     display_order: initialData?.display_order ?? undefined,
     metadata: initialData?.metadata ?? undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
-  const [isLoadingGroups, setIsLoadingGroups] = useState(true);
   const [autoGenerateSlug, setAutoGenerateSlug] = useState(isNew);
 
   // Related tools state (Requirements: 20.1, 20.5)
   const [relatedTools, setRelatedTools] = useState<RelatedDataItem[]>([]);
   const [relatedToolsCount, setRelatedToolsCount] = useState(0);
   const [isLoadingRelatedTools, setIsLoadingRelatedTools] = useState(false);
-
-  // Fetch category groups for the select field
-  useEffect(() => {
-    async function fetchGroups() {
-      try {
-        const response = await fetch('/api/admin/category-groups');
-        if (response.ok) {
-          const data = await response.json();
-          setCategoryGroups(data.data || []);
-        }
-      } catch (error) {
-        log.error('Error fetching category groups', error, { action: 'fetchGroups' });
-      } finally {
-        setIsLoadingGroups(false);
-      }
-    }
-    fetchGroups();
-  }, []);
 
   // Fetch related tools for edit mode (Requirements: 20.1, 20.5)
   useEffect(() => {
@@ -209,15 +181,6 @@ export function CategoryForm({ initialData, isNew }: CategoryFormProps) {
     }
   };
 
-  // Group options for select field
-  const groupOptions = [
-    { value: '', label: 'No Group' },
-    ...categoryGroups.map((group) => ({
-      value: group.id,
-      label: group.name,
-    })),
-  ];
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Form Card */}
@@ -258,18 +221,6 @@ export function CategoryForm({ initialData, isNew }: CategoryFormProps) {
           maxLength={500}
           rows={3}
           helpText="Optional. Max 500 characters."
-        />
-
-        {/* Group Field */}
-        <SelectField
-          name="group_id"
-          label="Category Group"
-          value={formData.group_id ?? ''}
-          onChange={(value) => handleChange('group_id', value || undefined)}
-          options={groupOptions}
-          error={errors.group_id}
-          disabled={isLoadingGroups}
-          helpText="Optional. Assign this category to a group."
         />
 
         {/* Icon Field */}
