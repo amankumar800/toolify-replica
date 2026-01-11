@@ -45,7 +45,6 @@ const expectedRouteMappings: Record<string, string> = {
   'Tools': '/admin/tools',
   'AI News': '/admin/news',
   'Prompts': '/admin/prompts',
-  'Category Groups': '/admin/category-groups',
   'Categories': '/admin/categories',
   'Subcategories': '/admin/subcategories',
   'Featured Tools': '/admin/featured',
@@ -212,7 +211,6 @@ describe('Property 2: Active Route Highlighting', () => {
       { href: '/admin/tools', pathname: '/admin/tools/123/edit', expected: true },
       { href: '/admin/dashboard', pathname: '/admin/dashboard', expected: true },
       { href: '/admin/dashboard', pathname: '/admin/dashboard/extra', expected: false },
-      { href: '/admin/categories', pathname: '/admin/category-groups', expected: false },
       { href: '/admin/news', pathname: '/admin/newsletter', expected: false },
     ];
 
@@ -311,7 +309,6 @@ describe('Navigation Groups Structure', () => {
     const taxonomyGroup = navGroups.find((g) => g.label === 'Taxonomy');
     expect(taxonomyGroup).toBeDefined();
     expect(taxonomyGroup?.items.map((i) => i.label)).toEqual([
-      'Category Groups',
       'Categories',
       'Subcategories',
     ]);

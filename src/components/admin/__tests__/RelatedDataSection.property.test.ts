@@ -5,7 +5,7 @@
  * - Property 32: Related Data Display
  *
  * **Feature: admin-panel-crud**
- * **Validates: Requirements 20.1, 20.2, 20.3, 20.4, 20.5**
+ * **Validates: Requirements 20.1, 20.3, 20.4, 20.5**
  */
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
@@ -83,9 +83,9 @@ function hasContent(items: RelatedDataItem[], isLoading: boolean): boolean {
 describe('Property 32: Related Data Display', () => {
   /**
    * **Feature: admin-panel-crud, Property 32: Related Data Display**
-   * **Validates: Requirements 20.1, 20.2, 20.3, 20.4, 20.5**
+   * **Validates: Requirements 20.1, 20.3, 20.4, 20.5**
    *
-   * *For any* entity with related records (Category→Tools, CategoryGroup→Categories,
+   * *For any* entity with related records (Category→Tools,
    * Tool→Categories, FeaturedTool→Tool), viewing the entity SHALL display related
    * records limited to 10 items with a "View All" link.
    */
@@ -291,23 +291,6 @@ describe('Property 32: Related Data Display', () => {
 
       const displayed = getDisplayedItems(tools, 10);
       const shouldShowViewAll = shouldShowViewAllLink(25, 10);
-
-      expect(displayed.length).toBe(10);
-      expect(shouldShowViewAll).toBe(true);
-    });
-  });
-
-  describe('CategoryGroup → Categories Relationship (Requirement 20.2)', () => {
-    it('should correctly limit categories in group to 10 items', () => {
-      const categories = Array.from({ length: 15 }, (_, i) => ({
-        id: `cat-${i}`,
-        label: `Category ${i}`,
-        href: `/admin/categories/cat-${i}/edit`,
-        sublabel: `/category-${i}`,
-      }));
-
-      const displayed = getDisplayedItems(categories, 10);
-      const shouldShowViewAll = shouldShowViewAllLink(15, 10);
 
       expect(displayed.length).toBe(10);
       expect(shouldShowViewAll).toBe(true);
