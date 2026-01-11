@@ -4,7 +4,7 @@ export const revalidate = 3600;
 import { Container } from '@/components/layout/Container';
 import { ToolGrid } from '@/components/features/ToolGrid';
 import { getTools } from '@/lib/services/tools.service';
-import { getCategoryGroups } from '@/lib/services/categories.service';
+import { getCategories } from '@/lib/services/categories.service';
 import type { Tool } from '@/lib/types/tool';
 
 interface CategoryPageProps {
@@ -17,16 +17,8 @@ interface CategoryPageProps {
  */
 export async function generateStaticParams() {
     try {
-        const groups = await getCategoryGroups();
-        const slugs: { slug: string }[] = [];
-        
-        for (const group of groups) {
-            for (const category of group.categories) {
-                slugs.push({ slug: category.slug });
-            }
-        }
-        
-        return slugs;
+        const categories = await getCategories();
+        return categories.map((category) => ({ slug: category.slug }));
     } catch {
         return [];
     }
