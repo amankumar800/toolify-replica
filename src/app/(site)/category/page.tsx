@@ -1,144 +1,102 @@
 import { Metadata } from 'next';
+import Script from 'next/script';
+import { CategoryPageClient } from '@/components/features/category/CategoryPageClient';
+import { getCategories } from '@/lib/services/categories.service';
+import { isValidCategory } from '@/lib/utils/category-utils';
 
-// ISR revalidation - cache for 1 hour
+// ISR revalidation - cache for 1 hour (Requirement 7.2)
 export const revalidate = 3600;
 
-import { CategoryLayout } from '@/components/features/category/CategoryLayout';
-import { CategorySidebar } from '@/components/features/category/CategorySidebar';
-import { CategoryMainList } from '@/components/features/CategoryMainList';
-import { CategoryControlBar } from '@/components/features/category/CategoryControlBar';
-import { CategoryClientWrapper } from '@/components/features/category/CategoryClientWrapper';
-import { MobileCategoryNav } from '@/components/features/category/MobileCategoryNav';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import { ScrollToTop } from '@/components/ui/ScrollToTop';
-import { getCategoryGroups } from '@/lib/services/categories.service';
-import { getTools } from '@/lib/services/tools.service';
-import type { Tool } from '@/lib/types/tool';
-import Script from 'next/script';
-
 export const metadata: Metadata = {
-    title: 'AI Tool Categories | AI Tools Book',
-    description: 'Browse all AI tools by category. Find the best AI software for Text, Image, Audio, Video, and more.',
-    alternates: {
-        canonical: 'https://aitoolsbook.com/category',
-    },
-    openGraph: {
-        title: 'AI Tool Categories | AI Tools Book',
-        description: 'Browse all AI tools by category.',
-        url: 'https://aitoolsbook.com/category',
-        siteName: 'AI Tools Book',
-        locale: 'en_US',
-        type: 'website',
-    },
+  title: 'Explore AI Tool Categories | AI Tools Book',
+  description:
+    'Browse all AI tools by category. Find the best AI software for Chatbots, Image Generation, Coding, Video, Music, and more.',
+  alternates: {
+    canonical: 'https://aitoolsbook.com/category',
+  },
+  openGraph: {
+    title: 'Explore AI Tool Categories | AI Tools Book',
+    description: 'Browse all AI tools by category.',
+    url: 'https://aitoolsbook.com/category',
+    siteName: 'AI Tools Book',
+    locale: 'en_US',
+    type: 'website',
+  },
 };
 
+/**
+ * Category page server component
+ * Fetches categories from Supabase, filters invalid/test data, and renders the page.
+ *
+ * Requirements:
+ * - 1.1: Display only categories where toolCount > 0
+ * - 1.2: Filter out test data categories
+ * - 7.2: ISR with 3600s revalidation
+ * - 7.3: Single database query for categories
+ */
 export default async function CategoryPage() {
-    const [groups, toolsResult] = await Promise.all([
-        getCategoryGroups(),
-        getTools({ limit: 2000 })
-    ]);
+  // Single query to fetch categories with tool counts (Requirement 7.3)
+  const allCategories = await getCategories({ withToolCount: true });
 
-    // Map to Tool type expected by CategoryMainList
-    const allTools: Tool[] = toolsResult.items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        slug: item.slug,
-        description: item.description ?? '',
-        shortDescription: item.short_description ?? '',
-        image: item.image_url ?? '',
-        websiteUrl: item.website_url,
-        pricing: (item.pricing ?? 'Free') as Tool['pricing'],
-        categories: [],
-        tags: item.tags ?? [],
-        savedCount: 0,
-        reviewCount: item.review_count ?? 0,
-        reviewScore: item.review_score ?? 0,
-        isFeatured: item.is_featured ?? false,
-        isNew: item.is_new ?? false,
-    }));
+  // Server-side filtering - remove test data and zero-count categories (Requirements 1.1, 1.2)
+  const filteredCategories = allCategories.filter(isValidCategory);
 
-    // Advanced JSON-LD Structured Data
-    const jsonLd = {
-        '@context': 'https://schema.org',
-        '@graph': [
-            {
-                '@type': 'BreadcrumbList',
-                'itemListElement': [
-                    {
-                        '@type': 'ListItem',
-                        'position': 1,
-                        'name': 'Home',
-                        'item': 'https://aitoolsbook.com'
-                    },
-                    {
-                        '@type': 'ListItem',
-                        'position': 2,
-                        'name': 'Categories',
-                        'item': 'https://aitoolsbook.com/category'
-                    }
-                ]
-            },
-            {
-                '@type': 'CollectionPage',
-                'name': 'AI Tool Categories',
-                'description': 'Comprehensive directory of AI tools categorized by function.',
-                'url': 'https://aitoolsbook.com/category',
-                'about': {
-                    '@type': 'Thing',
-                    'name': 'Artificial Intelligence Software'
-                }
-            }
-        ]
-    };
+  // Transform to CategoryGridItem format expected by CategoryPageClient
+  const categoryItems = filteredCategories.map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+    slug: cat.slug,
+    toolCount: cat.toolCount ?? cat.count ?? 0,
+    icon: undefined, // Categories use default icon in CategoryCard
+  }));
 
-    return (
-        <main className="min-h-screen bg-toolify-bg">
-            <CategoryClientWrapper>
-                <MobileCategoryNav groups={groups} />
+  // Calculate total tools from filtered categories
+  const totalTools = categoryItems.reduce((sum, cat) => sum + cat.toolCount, 0);
 
-                <CategoryLayout className="flex gap-8 relative py-8">
-                    {/* Desktop Sidebar - Sticky */}
-                    <aside className="hidden lg:block w-[280px] flex-shrink-0 z-sidebar">
-                        <div className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar">
-                            <CategorySidebar groups={groups} />
-                        </div>
-                    </aside>
+  // JSON-LD Structured Data for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://aitoolsbook.com',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Categories',
+            item: 'https://aitoolsbook.com/category',
+          },
+        ],
+      },
+      {
+        '@type': 'CollectionPage',
+        name: 'AI Tool Categories',
+        description:
+          'Comprehensive directory of AI tools categorized by function.',
+        url: 'https://aitoolsbook.com/category',
+        about: {
+          '@type': 'Thing',
+          name: 'Artificial Intelligence Software',
+        },
+      },
+    ],
+  };
 
-                    {/* Main Content - Fluid */}
-                    <div className="flex-1 min-w-0">
-                        <div className="px-4 lg:px-0 mt-4 lg:mt-0">
-                            <Breadcrumb items={[{ label: 'Categories' }]} />
-                        </div>
+  return (
+    <main className="min-h-screen bg-toolify-bg">
+      <CategoryPageClient categories={categoryItems} totalTools={totalTools} />
 
-                        {/* Header */}
-                        <div className="mb-0 lg:mb-8 mt-2 px-4 lg:px-0">
-                            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
-                                <div>
-                                    <h1 className="text-2xl lg:text-3xl font-bold text-toolify-black mb-2">
-                                        Find AI By Categories
-                                    </h1>
-                                    <p className="text-sm lg:text-base text-toolify-gray-500">
-                                        Discover {allTools.length}+ AI tools across {groups.length} major categories
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Filters & Search */}
-                            <CategoryControlBar />
-                        </div>
-
-                        <CategoryMainList groups={groups} allTools={allTools} />
-                    </div>
-                </CategoryLayout>
-
-                <ScrollToTop />
-            </CategoryClientWrapper>
-
-            <Script
-                id="category-json-ld"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-        </main>
-    );
+      <Script
+        id="category-json-ld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+    </main>
+  );
 }
