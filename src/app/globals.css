@@ -91,8 +91,8 @@ body {
 /* Semantic & Utility */
 .container {
   width: 100%;
-  max-width: 1280px;
-  /* Standard wide container */
+  max-width: 1440px;
+  /* Standard wide container - increased from 1280px for better horizontal space utilization */
   margin-left: auto;
   margin-right: auto;
   padding-left: var(--spacing-4);
