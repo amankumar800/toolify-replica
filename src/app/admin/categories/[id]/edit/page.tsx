@@ -19,7 +19,6 @@ interface CategoryData {
   slug: string;
   description: string | null;
   icon: string | null;
-  group_id: string | null;
   display_order: number | null;
   metadata: Record<string, unknown> | null;
   created_at: string | null;
@@ -35,7 +34,7 @@ interface PageProps {
  * Edit Category Page
  * 
  * Requirements: 5.5, 5.6
- * - Implement all fields including group_id select
+ * - Implement all fields
  * - Display read-only tool_count
  */
 export default function EditCategoryPage({ params }: PageProps) {

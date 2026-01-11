@@ -15,19 +15,11 @@ import {
   Trash2,
   GripVertical,
   Folder,
-  FolderTree,
 } from 'lucide-react';
 
 // ============================================================================
 // Types
 // ============================================================================
-
-interface CategoryGroup {
-  id: string;
-  name: string;
-  icon_name: string | null;
-  display_order: number | null;
-}
 
 interface CategoryListItem {
   id: string;
@@ -35,10 +27,8 @@ interface CategoryListItem {
   slug: string;
   description: string | null;
   icon: string | null;
-  group_id: string | null;
   display_order: number | null;
   created_at: string | null;
-  group: CategoryGroup | null;
   computed_tool_count: number;
 }
 
@@ -56,9 +46,8 @@ interface AffectedRecords {
  * Categories List Page
  * 
  * Requirements: 5.1, 5.2, 5.3, 5.4
- * - Display columns: Name, Slug, Group Name, Tool Count, Display Order, Created Date
- * - Filter by group_id
- * - Drag-drop reordering within group
+ * - Display columns: Name, Slug, Tool Count, Display Order, Created Date
+ * - Drag-drop reordering
  * - Row actions: Edit, Delete
  */
 export default function CategoriesPage() {
@@ -67,9 +56,7 @@ export default function CategoriesPage() {
 
   // State
   const [categories, setCategories] = useState<CategoryListItem[]>([]);
-  const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     category: CategoryListItem | null;
@@ -79,27 +66,11 @@ export default function CategoriesPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-  // Fetch category groups for filter
-  const fetchGroups = useCallback(async () => {
-    try {
-      const response = await fetch('/api/admin/category-groups');
-      if (response.ok) {
-        const data = await response.json();
-        setCategoryGroups(data.data || []);
-      }
-    } catch (error) {
-      log.error('Error fetching category groups', error, { action: 'fetchGroups' });
-    }
-  }, []);
-
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     setIsLoading(true);
     try {
-      const url = selectedGroupId
-        ? `/api/admin/categories?group_id=${selectedGroupId}`
-        : '/api/admin/categories';
-      const response = await fetch(url);
+      const response = await fetch('/api/admin/categories');
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
@@ -115,11 +86,7 @@ export default function CategoriesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [addToast, selectedGroupId]);
-
-  useEffect(() => {
-    fetchGroups();
-  }, [fetchGroups]);
+  }, [addToast]);
 
   useEffect(() => {
     fetchCategories();
@@ -190,7 +157,6 @@ export default function CategoriesPage() {
   };
 
   // Drag and drop handlers
-  // Requirements: 5.3 - Drag-drop reordering within group
   const handleDragStart = (index: number) => {
     setIsDragging(true);
     setDraggedIndex(index);
@@ -199,14 +165,6 @@ export default function CategoriesPage() {
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === index) return;
-
-    // Only allow reordering within the same group
-    const draggedCategory = categories[draggedIndex];
-    const targetCategory = categories[index];
-    
-    if (draggedCategory.group_id !== targetCategory.group_id) {
-      return; // Don't allow dragging between groups
-    }
 
     // Reorder the list
     const newCategories = [...categories];
@@ -299,30 +257,9 @@ export default function CategoriesPage() {
         </Button>
       </div>
 
-      {/* Filter by Group */}
-      <div className="flex items-center gap-4">
-        <label htmlFor="group-filter" className="text-sm font-medium text-gray-700">
-          Filter by Group:
-        </label>
-        <select
-          id="group-filter"
-          value={selectedGroupId}
-          onChange={(e) => setSelectedGroupId(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">All Groups</option>
-          <option value="none">No Group</option>
-          {categoryGroups.map((group) => (
-            <option key={group.id} value={group.id}>
-              {group.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {/* Drag-drop hint */}
       <p className="text-sm text-gray-500">
-        Drag and drop rows to reorder categories within the same group.
+        Drag and drop rows to reorder categories.
       </p>
 
       {/* Data Table */}
@@ -337,9 +274,6 @@ export default function CategoriesPage() {
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Slug
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Group
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Tools
@@ -369,9 +303,6 @@ export default function CategoriesPage() {
                       <div className="h-4 bg-gray-200 rounded w-24" />
                     </td>
                     <td className="px-4 py-3">
-                      <div className="h-4 bg-gray-200 rounded w-20" />
-                    </td>
-                    <td className="px-4 py-3">
                       <div className="h-4 bg-gray-200 rounded w-8" />
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
@@ -387,13 +318,11 @@ export default function CategoriesPage() {
                 ))
               ) : categories.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center">
+                  <td colSpan={7} className="px-4 py-12 text-center">
                     <div className="flex flex-col items-center gap-2 text-gray-500">
                       <Folder className="w-8 h-8 text-gray-300" />
                       <p className="text-sm">
-                        {selectedGroupId
-                          ? 'No categories found in this group.'
-                          : 'No categories found. Create your first category to get started.'}
+                        No categories found. Create your first category to get started.
                       </p>
                     </div>
                   </td>
@@ -425,16 +354,6 @@ export default function CategoriesPage() {
                       <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-700">
                         {category.slug}
                       </code>
-                    </td>
-                    <td className="px-4 py-3">
-                      {category.group ? (
-                        <div className="flex items-center gap-1.5">
-                          <FolderTree className="w-3.5 h-3.5 text-gray-400" />
-                          <span className="text-sm text-gray-700">{category.group.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
