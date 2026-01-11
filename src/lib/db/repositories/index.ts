@@ -33,8 +33,6 @@ export {
   type CategoryInsert,
   type CategoryUpdate,
   type CategoryWithToolCount,
-  type CategoryWithGroup,
-  type CategoryWithGroupAndToolCount,
 } from './categories.repository';
 
 // Subcategories repository
@@ -107,17 +105,6 @@ export {
   type AdminRecord,
   type AdminInsert,
 } from './admins.repository';
-
-// Category Groups repository
-export {
-  createCategoryGroupsRepository,
-  type CategoryGroupsRepository,
-  type CategoryGroupRow,
-  type CategoryGroupInsert,
-  type CategoryGroupUpdate,
-  type CategoryGroupWithCategoryCount,
-  type CategoryInfo,
-} from './category-groups.repository';
 
 // Company Pages repository
 export {
