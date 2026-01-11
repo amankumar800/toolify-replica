@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
-import { createCategoriesRepository, createCategoryGroupsRepository, createSubcategoriesRepository } from '@/lib/db/repositories';
+import { createCategoriesRepository, createSubcategoriesRepository } from '@/lib/db/repositories';
 import { categorySchema, validateFormData } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { TABLES } from '@/lib/db/constants/tables';
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const supabase = await createClient();
     const repo = createCategoriesRepository(supabase);
 
-    const category = await repo.findWithGroup(id);
+    const category = await repo.findById(id);
     if (!category) {
       return NextResponse.json(
         { error: 'Category not found' },
@@ -101,26 +101,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Validate group_id if provided
-    if (validation.data.group_id) {
-      const groupsRepo = createCategoryGroupsRepository(supabase);
-      try {
-        await groupsRepo.findById(validation.data.group_id);
-      } catch {
-        return NextResponse.json(
-          { error: 'Invalid group ID' },
-          { status: 400 }
-        );
-      }
-    }
-
     // Update the category
     const category = await repo.update(id, {
       name: validation.data.name,
       slug: validation.data.slug,
       description: validation.data.description || null,
       icon: validation.data.icon || null,
-      group_id: validation.data.group_id || null,
       display_order: validation.data.display_order,
       metadata: (validation.data.metadata as Json) || null,
     });

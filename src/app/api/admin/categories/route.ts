@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin-auth.service';
 import { createClient } from '@/lib/supabase/server';
-import { createCategoriesRepository, createCategoryGroupsRepository } from '@/lib/db/repositories';
+import { createCategoriesRepository } from '@/lib/db/repositories';
 import { categorySchema, validateFormData } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { createLogger } from '@/lib/logger';
@@ -20,8 +20,7 @@ const log = createLogger('AdminCategoriesAPI');
 /**
  * GET /api/admin/categories
  * 
- * Fetches all categories with group info and tool counts.
- * Supports filtering by group_id.
+ * Fetches all categories with tool counts.
  * Requirements: 5.1, 5.2
  */
 export async function GET(request: NextRequest) {
@@ -31,23 +30,16 @@ export async function GET(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     await requireAdmin();
-    const { searchParams } = new URL(request.url);
-    const groupId = searchParams.get('group_id');
 
     const supabase = await createClient();
     const repo = createCategoriesRepository(supabase);
 
-    // Get all categories with groups and tool counts
-    const categories = await repo.findAllWithGroupsAndToolCount();
-
-    // Filter by group_id if provided
-    const filteredCategories = groupId
-      ? categories.filter((cat) => (cat as { group_id?: string }).group_id === groupId)
-      : categories;
+    // Get all categories with tool counts
+    const categories = await repo.findAllWithToolCount();
 
     return NextResponse.json({
-      data: filteredCategories,
-      total: filteredCategories.length,
+      data: categories,
+      total: categories.length,
     });
   } catch (error) {
     log.error('Error fetching categories', error, { action: 'GET' });
@@ -94,19 +86,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate group_id if provided
-    if (validation.data.group_id) {
-      const groupsRepo = createCategoryGroupsRepository(supabase);
-      try {
-        await groupsRepo.findById(validation.data.group_id);
-      } catch {
-        return NextResponse.json(
-          { error: 'Invalid group ID' },
-          { status: 400 }
-        );
-      }
-    }
-
     // Get next display order if not provided
     let display_order = validation.data.display_order;
     if (display_order === undefined) {
@@ -124,7 +103,6 @@ export async function POST(request: NextRequest) {
       slug: validation.data.slug,
       description: validation.data.description || null,
       icon: validation.data.icon || null,
-      group_id: validation.data.group_id || null,
       display_order,
       metadata: (validation.data.metadata as Json) || null,
     });
