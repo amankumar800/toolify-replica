@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { CategoryItem } from '@/lib/types/home.types';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 
 interface CategoryGridProps {
     /** Array of categories to display */
@@ -8,7 +9,7 @@ interface CategoryGridProps {
 }
 
 /**
- * Category Grid - Displays categories with emojis and tool counts
+ * Category Grid - Displays categories with professional Lucide icons
  * 
  * Fixes applied:
  * - #7: Focus-visible styles
@@ -17,7 +18,7 @@ interface CategoryGridProps {
  * - #24: Shared types
  * - #36: Empty state
  * - #42: Touch-friendly padding (p-6 for 48px+ targets)
- * - #52: Emoji with proper aria-hidden
+ * - Professional SVG icons via CategoryIcon component
  */
 export function CategoryGrid({ categories }: CategoryGridProps) {
     // Issue #36: Empty state
@@ -50,10 +51,8 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
                         className="group bg-gray-50 hover:bg-gray-100 rounded-xl p-6 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:outline-none touch-target"
                         aria-label={`${category.name} - ${category.toolCount.toLocaleString()} tools`}
                     >
-                        {/* Icon - Issue #52: aria-hidden for decorative emoji */}
-                        <div className="text-3xl mb-3" aria-hidden="true">
-                            {category.icon}
-                        </div>
+                        {/* Colorful Icon Container */}
+                        <CategoryIcon slug={category.slug} size="lg" showBackground />
 
                         {/* Name */}
                         <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-1 group-hover:text-[var(--primary)] transition-colors">
