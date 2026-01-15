@@ -145,6 +145,130 @@ export const getFeaturedToolsForHomepage = unstable_cache(
 );
 
 // ============================================================================
+// Tools by Filter for Homepage
+// ============================================================================
+
+const VALID_FILTERS = ['today', 'new', 'most-saved', 'most-used', 'apps', 'browser-extension', 'discord'] as const;
+type FilterType = (typeof VALID_FILTERS)[number];
+
+function isValidFilter(filter: string): filter is FilterType {
+  return VALID_FILTERS.includes(filter as FilterType);
+}
+
+/**
+ * Get tools filtered by platform type or metric.
+ * Falls back to 'today' (featured tools) for invalid filters.
+ *
+ * Cache: 30 minutes, tagged for revalidation
+ */
+export const getToolsByFilter = unstable_cache(
+  async (filter: string): Promise<FeaturedTool[]> => {
+    const safeFilter: FilterType = isValidFilter(filter) ? filter : 'today';
+
+    // 'today' uses existing featured tools logic
+    if (safeFilter === 'today') {
+      // Call the inner function directly to avoid cache nesting
+      const supabase = createAnonClient();
+      const { data, error } = await supabase
+        .from('featured_tools')
+        .select(`
+          id,
+          display_order,
+          tools (
+            id,
+            name,
+            slug,
+            short_description,
+            image_url,
+            website_url,
+            pricing
+          )
+        `)
+        .eq('placement_type', 'homepage')
+        .order('display_order', { ascending: true })
+        .limit(16);
+
+      if (error) {
+        console.error('[homepage.service] getToolsByFilter(today) failed:', error);
+        return [];
+      }
+
+      return (data ?? [])
+        .filter((ft) => ft.tools !== null)
+        .map((ft) => {
+          const tool = ft.tools as {
+            id: string;
+            name: string;
+            slug: string;
+            short_description: string | null;
+            image_url: string | null;
+            website_url: string;
+            pricing: string | null;
+          };
+          return {
+            id: tool.slug,
+            name: tool.name,
+            icon: tool.image_url || getFaviconUrl(tool.website_url),
+            iconBgColor: getColorFromString(tool.name, DEFAULT_ICON_BG_COLORS),
+            description: tool.short_description || '',
+            isFree: tool.pricing === 'Free',
+            slug: tool.slug,
+            websiteUrl: tool.website_url,
+          };
+        });
+    }
+
+    // For other filters, query tools table directly
+    const supabase = createAnonClient();
+    let query = supabase
+      .from('tools')
+      .select('id, name, slug, short_description, image_url, website_url, pricing')
+      .eq('status', 'published');
+
+    switch (safeFilter) {
+      case 'apps':
+        query = query.eq('platform', 'app');
+        break;
+      case 'browser-extension':
+        query = query.eq('platform', 'browser-extension');
+        break;
+      case 'discord':
+        query = query.eq('platform', 'discord');
+        break;
+      case 'most-saved':
+        query = query.order('saved_count', { ascending: false, nullsFirst: false });
+        break;
+      case 'most-used':
+        query = query.order('monthly_visits', { ascending: false, nullsFirst: false });
+        break;
+      case 'new':
+        query = query.eq('is_new', true).order('created_at', { ascending: false });
+        break;
+    }
+
+    const { data, error } = await query.limit(16);
+
+    if (error) {
+      console.error(`[homepage.service] getToolsByFilter(${safeFilter}) failed:`, error);
+      return [];
+    }
+
+    return (data ?? []).map((tool) => ({
+      id: tool.slug,
+      name: tool.name,
+      icon: tool.image_url || getFaviconUrl(tool.website_url),
+      iconBgColor: getColorFromString(tool.name, DEFAULT_ICON_BG_COLORS),
+      description: tool.short_description || '',
+      isFree: tool.pricing === 'Free',
+      slug: tool.slug,
+      websiteUrl: tool.website_url,
+    }));
+  },
+  ['homepage-tools-by-filter'],
+  { revalidate: 1800, tags: ['tools', 'homepage', 'filter'] }
+);
+
+// ============================================================================
 // Categories for Homepage
 // ============================================================================
 
@@ -343,4 +467,70 @@ export async function getMyToolsForUser(
   }
 
   return myTools;
+}
+
+// ============================================================================
+// Platform-Based Tool Fetching
+// ============================================================================
+
+/**
+ * Raw tool data type from Supabase query
+ */
+type RawToolData = {
+  id: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  image_url: string | null;
+  website_url: string;
+  pricing: string | null;
+};
+
+/**
+ * Map raw tool data to FeaturedTool format
+ */
+function mapToFeaturedTools(data: RawToolData[]): FeaturedTool[] {
+  return data.map((tool) => ({
+    id: tool.slug,
+    name: tool.name,
+    icon: tool.image_url || getFaviconUrl(tool.website_url),
+    iconBgColor: getColorFromString(tool.name, DEFAULT_ICON_BG_COLORS),
+    description: tool.short_description || '',
+    isFree: tool.pricing === 'Free',
+    slug: tool.slug,
+    websiteUrl: tool.website_url,
+  }));
+}
+
+/**
+ * Platform types supported for filtering
+ */
+export type ToolPlatform = 'browser-extension' | 'app' | 'discord';
+
+/**
+ * Get tools by platform type.
+ * Used for browser-extension, apps, discord filters on homepage.
+ * 
+ * @param platform - The platform type to filter by
+ * @returns Array of tools matching the platform
+ */
+export async function getToolsByPlatform(
+  platform: ToolPlatform
+): Promise<FeaturedTool[]> {
+  const supabase = createAnonClient();
+
+  const { data, error } = await supabase
+    .from('tools')
+    .select('id, name, slug, short_description, image_url, website_url, pricing')
+    .eq('platform', platform)
+    .eq('status', 'published')
+    .order('saved_count', { ascending: false })
+    .limit(16);
+
+  if (error) {
+    console.error(`[homepage.service] Failed to fetch ${platform} tools:`, error);
+    return [];
+  }
+
+  return mapToFeaturedTools((data ?? []) as RawToolData[]);
 }
