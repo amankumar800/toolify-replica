@@ -36,13 +36,25 @@ export function ToolCardsGrid({
     const displayedTools = tools.slice(0, initialCount);
     const hasMore = tools.length > initialCount;
 
-    // Issue #36: Empty state
+    // Filter-specific empty state messages
+    const emptyMessages: Record<string, { icon: string; title: string; subtitle: string }> = {
+        'apps': { icon: '📱', title: 'No mobile apps found yet', subtitle: "We're still adding apps to our directory." },
+        'browser-extension': { icon: '🧩', title: 'No extensions found yet', subtitle: 'Browser extensions coming soon!' },
+        'discord': { icon: '🤖', title: 'No Discord bots found yet', subtitle: 'Discord AI bots will be added shortly!' },
+        'most-saved': { icon: '⭐', title: 'No saved tools yet', subtitle: 'Tools will appear as users save them.' },
+        'most-used': { icon: '📊', title: 'No usage data yet', subtitle: 'Check back soon for popular tools!' },
+        'new': { icon: '✨', title: 'No new tools this week', subtitle: 'Check back soon for the latest additions!' },
+        'default': { icon: '🔍', title: 'No tools found', subtitle: 'Check back later for new additions!' }
+    };
+
+    // Issue #36: Filter-aware empty state
     if (!tools || tools.length === 0) {
+        const msg = emptyMessages[activeFilter] || emptyMessages.default;
         return (
             <div className="text-center py-12">
-                <div className="text-gray-400 text-4xl mb-3">🔍</div>
-                <p className="text-gray-500 font-medium">No tools found</p>
-                <p className="text-gray-400 text-sm mt-1">Check back later for new additions!</p>
+                <div className="text-gray-400 text-4xl mb-3">{msg.icon}</div>
+                <p className="text-gray-500 font-medium">{msg.title}</p>
+                <p className="text-gray-400 text-sm mt-1">{msg.subtitle}</p>
             </div>
         );
     }
