@@ -74,4 +74,6 @@ export {
   getCategoriesForHomepage,
   getMyToolsForHomepage,
   getMyToolsForUser,
+  getToolsByFilter,
+  getToolsByPlatform,
 } from './homepage.service';
