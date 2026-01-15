@@ -19,6 +19,13 @@ jest.mock('next/link', () => ({
     ),
 }));
 
+// Mock useRouter
+const mockPush = jest.fn();
+const mockRefresh = jest.fn();
+jest.mock('next/navigation', () => ({
+    useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
+}));
+
 const mockTools: MyTool[] = [
     { id: '1', name: 'Tool 1', icon: 'https://example.com/icon1.png', url: '/tool/1', color: '#FF0000' },
     { id: '2', name: 'Tool 2', icon: 'https://example.com/icon2.png', url: '/tool/2', color: '#00FF00' },
@@ -26,6 +33,10 @@ const mockTools: MyTool[] = [
 ];
 
 describe('MyToolsSection', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     /**
      * Issue #36: Empty state
      */
@@ -45,26 +56,29 @@ describe('MyToolsSection', () => {
     });
 
     /**
-     * Issue #38: Edit button disabled state
+     * Issue #38: Redirects to login when not authenticated
      */
-    it('shows disabled Edit button when editable is false', () => {
-        render(<MyToolsSection tools={mockTools} editable={false} />);
-        const editSpan = screen.getByTitle('Login to edit your tools');
-        expect(editSpan).toBeInTheDocument();
-        expect(editSpan).toHaveClass('cursor-not-allowed');
-    });
-
-    /**
-     * Issue #38: Edit button functional when editable
-     */
-    it('shows functional Edit button when editable is true', async () => {
-        const onEditClick = jest.fn();
-        render(<MyToolsSection tools={mockTools} editable={true} onEditClick={onEditClick} />);
+    it('redirects to login when edit clicked and not authenticated', async () => {
+        render(<MyToolsSection tools={mockTools} isAuthenticated={false} />);
 
         const editButton = screen.getByRole('button', { name: /edit my tools/i });
         await userEvent.click(editButton);
 
-        expect(onEditClick).toHaveBeenCalledTimes(1);
+        expect(mockPush).toHaveBeenCalledWith('/login?redirect=/');
+    });
+
+    /**
+     * Issue #38: Edit button opens modal when authenticated
+     * Note: Modal is lazy loaded, so we just verify the click handler works
+     */
+    it('does not redirect when edit clicked and authenticated', async () => {
+        render(<MyToolsSection tools={mockTools} isAuthenticated={true} />);
+
+        const editButton = screen.getByRole('button', { name: /edit my tools/i });
+        await userEvent.click(editButton);
+
+        // Should NOT redirect to login when authenticated
+        expect(mockPush).not.toHaveBeenCalled();
     });
 
     /**
