@@ -46,6 +46,10 @@ export interface ToolFormData {
   submitter_name?: string;
   submitter_email?: string;
   rejection_reason?: string;
+  // Platform availability
+  has_mobile_app?: boolean;
+  has_browser_extension?: boolean;
+  has_discord_bot?: boolean;
 }
 
 // ============================================================================
@@ -87,11 +91,11 @@ export interface SubcategoryFormData {
 /**
  * Category options for AI news articles
  */
-export type NewsCategory = 
-  | 'AI Research' 
-  | 'Industry News' 
-  | 'Product Launch' 
-  | 'Tutorial' 
+export type NewsCategory =
+  | 'AI Research'
+  | 'Industry News'
+  | 'Product Launch'
+  | 'Tutorial'
   | 'Opinion';
 
 /**
