@@ -7,6 +7,7 @@
 // Main sections
 export { StatsBar } from './StatsBar';
 export { MyToolsSection } from './MyToolsSection';
+export { MyToolsEditModal } from './MyToolsEditModal';
 export { FilterTabs, getFilterFromUrl } from './FilterTabs';
 export { CompactToolCard } from './CompactToolCard';
 export { ToolCardsGrid } from './ToolCardsGrid';
