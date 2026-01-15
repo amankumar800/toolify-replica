@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -8,15 +8,16 @@ import { Pencil, Plus } from 'lucide-react';
 import { MyTool } from '@/lib/types/home.types';
 import { FALLBACK_ICON_URL } from '@/lib/constants/home.constants';
 
+// Lazy load modal to avoid bundle bloat
+const MyToolsEditModal = lazy(() =>
+    import('./MyToolsEditModal').then(mod => ({ default: mod.MyToolsEditModal }))
+);
+
 interface MyToolsSectionProps {
     /** Array of tools to display */
     tools: MyTool[];
-    /** Whether the edit button should be functional (user is authenticated) */
-    editable?: boolean;
     /** Whether user is authenticated */
     isAuthenticated?: boolean;
-    /** Callback when edit button is clicked */
-    onEditClick?: () => void;
 }
 
 /**
@@ -35,13 +36,13 @@ interface MyToolsSectionProps {
  */
 export function MyToolsSection({
     tools,
-    editable = false,
     isAuthenticated = false,
-    onEditClick
 }: MyToolsSectionProps) {
     const router = useRouter();
     // Track failed images for fallback - Issue #1
     const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+    // Modal state for editing tools
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const handleImageError = useCallback((toolId: string) => {
         setFailedImages(prev => new Set(prev).add(toolId));
@@ -60,16 +61,22 @@ export function MyToolsSection({
     }
 
     // Handle edit/add click - redirect to login if not authenticated
-    const handleEditClick = () => {
+    const handleEditClick = useCallback(() => {
         if (!isAuthenticated) {
             // Redirect to login with return URL
             router.push('/login?redirect=/');
             return;
         }
-        if (onEditClick) {
-            onEditClick();
-        }
-    };
+        setIsEditModalOpen(true);
+    }, [isAuthenticated, router]);
+
+    const handleCloseModal = useCallback(() => {
+        setIsEditModalOpen(false);
+    }, []);
+
+    const handleToolsChange = useCallback(() => {
+        router.refresh(); // Refresh page to get updated tools from server
+    }, [router]);
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
@@ -116,6 +123,18 @@ export function MyToolsSection({
                     </button>
                 </div>
             </div>
+
+            {/* Edit Modal - Lazy loaded */}
+            {isAuthenticated && (
+                <Suspense fallback={null}>
+                    <MyToolsEditModal
+                        isOpen={isEditModalOpen}
+                        onClose={handleCloseModal}
+                        currentTools={tools}
+                        onToolsChange={handleToolsChange}
+                    />
+                </Suspense>
+            )}
         </div>
     );
 }
