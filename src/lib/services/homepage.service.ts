@@ -183,12 +183,12 @@ export const getCategoriesForHomepage = unstable_cache(
 );
 
 // ============================================================================
-// My Tools for Homepage (Popular Tools)
+// My Tools for Homepage (Default Tools)
 // ============================================================================
 
 /**
  * Get "My Tools" for homepage display.
- * For anonymous users, returns popular/featured tools.
+ * Fetches from the configured default_my_tools table.
  * Transforms to MyTool format expected by MyToolsSection component.
  *
  * Cache: 1 hour, tagged for revalidation
@@ -197,29 +197,53 @@ export const getMyToolsForHomepage = unstable_cache(
   async (): Promise<MyTool[]> => {
     const supabase = createAnonClient();
 
+    // Query default_my_tools joined with tools table
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
-      .from('tools')
-      .select('id, name, slug, image_url, website_url')
-      .eq('status', 'published')
-      .order('saved_count', { ascending: false })
-      .order('is_featured', { ascending: false })
-      .limit(11);
+      .from('default_my_tools' as any)
+      .select(`
+        display_order,
+        icon_color,
+        tool_slug,
+        tools!fk_default_my_tools_tool_slug (
+          id, name, slug, image_url, website_url
+        )
+      `)
+      .order('display_order', { ascending: true });
 
     if (error) {
-      console.error('[homepage.service] Failed to fetch my tools:', error);
+      console.error('[homepage.service] Failed to fetch default my tools:', error);
       return [];
     }
 
-    return (data ?? []).map((tool) => ({
-      id: tool.slug,
-      name: tool.name,
-      icon: tool.image_url || getFaviconUrl(tool.website_url),
-      url: `/tool/${tool.slug}`,
-      color: getColorFromString(tool.name, DEFAULT_TOOL_COLORS),
-    }));
+    type DefaultMyToolRow = {
+      display_order: number;
+      icon_color: string | null;
+      tool_slug: string;
+      tools: {
+        id: string;
+        name: string;
+        slug: string;
+        image_url: string | null;
+        website_url: string;
+      } | null;
+    };
+
+    return ((data ?? []) as unknown as DefaultMyToolRow[])
+      .filter((item) => item.tools !== null)
+      .map((item) => {
+        const tool = item.tools!;
+        return {
+          id: tool.slug,
+          name: tool.name,
+          icon: tool.image_url || getFaviconUrl(tool.website_url),
+          url: `/tool/${tool.slug}`,
+          color: item.icon_color || getColorFromString(tool.name, DEFAULT_TOOL_COLORS),
+        };
+      });
   },
-  ['homepage-my-tools'],
-  { revalidate: 3600, tags: ['tools', 'homepage'] }
+  ['homepage-my-tools-default'],
+  { revalidate: 3600, tags: ['default-my-tools', 'homepage'] }
 );
 
 // ============================================================================
