@@ -96,6 +96,10 @@ const DEFAULT_FORM_DATA: ToolFormData = {
   submitter_name: '',
   submitter_email: '',
   rejection_reason: '',
+  // Platform availability
+  has_mobile_app: false,
+  has_browser_extension: false,
+  has_discord_bot: false,
 };
 
 // ============================================================================
@@ -540,6 +544,35 @@ export function ToolForm({
             value={formData.verified ?? false}
             onChange={(v) => updateField('verified', v)}
             helpText="Verified by admin"
+          />
+        </div>
+      </FormSection>
+
+      {/* Platform Availability */}
+      <FormSection title="Platform Availability" description="Select where this tool is available">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <ToggleField
+            name="has_mobile_app"
+            label="Mobile App"
+            value={formData.has_mobile_app ?? false}
+            onChange={(v) => updateField('has_mobile_app', v)}
+            helpText="iOS/Android app available"
+          />
+
+          <ToggleField
+            name="has_browser_extension"
+            label="Browser Extension"
+            value={formData.has_browser_extension ?? false}
+            onChange={(v) => updateField('has_browser_extension', v)}
+            helpText="Chrome/Firefox extension"
+          />
+
+          <ToggleField
+            name="has_discord_bot"
+            label="Discord Bot"
+            value={formData.has_discord_bot ?? false}
+            onChange={(v) => updateField('has_discord_bot', v)}
+            helpText="Discord integration"
           />
         </div>
       </FormSection>
