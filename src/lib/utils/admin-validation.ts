@@ -126,6 +126,10 @@ export const toolSchema = z.object({
   submitter_name: z.string().optional(),
   submitter_email: optionalEmailSchema,
   rejection_reason: z.string().optional(),
+  // Platform availability
+  has_mobile_app: z.boolean().optional(),
+  has_browser_extension: z.boolean().optional(),
+  has_discord_bot: z.boolean().optional(),
 });
 
 export type ToolSchemaType = z.infer<typeof toolSchema>;
@@ -401,11 +405,11 @@ export function validateFormData<T extends z.ZodSchema>(
   data: unknown
 ): { success: true; data: z.infer<T> } | { success: false; errors: Record<string, string> } {
   const result = schema.safeParse(data);
-  
+
   if (result.success) {
     return { success: true, data: result.data };
   }
-  
+
   return { success: false, errors: extractErrors(result.error) };
 }
 
