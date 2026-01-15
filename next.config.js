@@ -62,6 +62,14 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'raw.githubusercontent.com',
             },
+            {
+                protocol: 'https',
+                hostname: 'www.remove.bg',
+            },
+            {
+                protocol: 'https',
+                hostname: 'ai.google.dev',
+            },
         ],
     },
     async redirects() {
