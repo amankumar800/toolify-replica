@@ -17,11 +17,12 @@ import {
 import { MultiModelSearch } from '@/components/features/MultiModelSearch';
 import {
   getHomePageStats,
-  getFeaturedToolsForHomepage,
   getCategoriesForHomepage,
   getMyToolsForUser,
+  getToolsByFilter,
 } from '@/lib/services';
 import { createClient } from '@/lib/supabase/server';
+
 
 // Types
 import {
@@ -62,16 +63,25 @@ export async function generateMetadata(): Promise<Metadata> {
  * 
  * All 52 critique issues addressed throughout this page and its components.
  */
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
+  // Read filter from URL with default 'today'
+  const params = await searchParams;
+  const filter = params.filter || 'today';
+
   // Get user session for personalized content
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   // Fetch all data in parallel from database
+  // getToolsByFilter handles all filter types internally (apps, extensions, most-saved, etc.)
   const [trendingNews, stats, featuredToolsData, categoriesData, myToolsData] = await Promise.all([
     NewsService.getTrendingNews(),
     getHomePageStats(),
-    getFeaturedToolsForHomepage(),
+    getToolsByFilter(filter),
     getCategoriesForHomepage(),
     getMyToolsForUser(user?.email ?? null, supabase), // Pass user email and authenticated client for personalized favorites
   ]);
@@ -131,7 +141,7 @@ export default async function HomePage() {
               <Suspense fallback={<ToolCardsSkeleton />}>
                 <ToolCardsGrid
                   tools={validatedFeaturedTools || []}
-                  activeFilter="today"
+                  activeFilter={filter}
                 />
               </Suspense>
             </HomeErrorBoundary>
