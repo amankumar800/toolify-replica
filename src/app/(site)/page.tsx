@@ -116,7 +116,8 @@ export default async function HomePage() {
               <Suspense fallback={<MyToolsSkeleton />}>
                 <MyToolsSection
                   tools={validatedMyTools || []}
-                  editable={false}
+                  editable={!!user}
+                  isAuthenticated={!!user}
                 />
               </Suspense>
             </HomeErrorBoundary>
