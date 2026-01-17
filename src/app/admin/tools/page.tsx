@@ -22,7 +22,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
-import type { ToolStatus, ToolPricing } from '@/lib/types/admin-forms';
+import type { ToolStatus, ToolPricing, ToolPlatform } from '@/lib/types/admin-forms';
 
 // ============================================================================
 // Types
@@ -34,6 +34,7 @@ interface ToolListItem {
   slug: string;
   status: ToolStatus | null;
   pricing: string | null;
+  platform: string | null;
   is_featured: boolean | null;
   created_at: string | null;
   website_url: string;
@@ -74,6 +75,14 @@ const FEATURED_OPTIONS = [
   { value: 'false', label: 'Not Featured' },
 ];
 
+const PLATFORM_OPTIONS: { value: ToolPlatform; label: string }[] = [
+  { value: 'web', label: 'Web' },
+  { value: 'app', label: 'Mobile App' },
+  { value: 'browser-extension', label: 'Browser Extension' },
+  { value: 'discord', label: 'Discord' },
+  { value: 'api', label: 'API' },
+];
+
 // ============================================================================
 // Helper Components
 // ============================================================================
@@ -110,6 +119,25 @@ function PricingBadge({ pricing }: { pricing: string | null }) {
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${config.bg} ${config.text}`}>
       {label}
+    </span>
+  );
+}
+
+function PlatformBadge({ platform }: { platform: string | null }) {
+  const platformConfig: Record<string, { bg: string; text: string; icon: string; label: string }> = {
+    web: { bg: 'bg-gray-100', text: 'text-gray-700', icon: '🌐', label: 'Web' },
+    app: { bg: 'bg-purple-100', text: 'text-purple-700', icon: '📱', label: 'Mobile' },
+    'browser-extension': { bg: 'bg-blue-100', text: 'text-blue-700', icon: '🧩', label: 'Extension' },
+    discord: { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: '💬', label: 'Discord' },
+    api: { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: '⚡', label: 'API' },
+  };
+
+  const config = platformConfig[platform ?? 'web'] ?? platformConfig.web;
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${config.bg} ${config.text}`}>
+      <span>{config.icon}</span>
+      {config.label}
     </span>
   );
 }
@@ -230,6 +258,12 @@ export default function ToolsPage() {
       render: (value) => <PricingBadge pricing={value as string | null} />,
     },
     {
+      key: 'platform',
+      label: 'Platform',
+      sortable: false,
+      render: (value) => <PlatformBadge platform={value as string | null} />,
+    },
+    {
       key: 'is_featured',
       label: 'Featured',
       sortable: false,
@@ -267,6 +301,12 @@ export default function ToolsPage() {
       label: 'Pricing',
       type: 'select',
       options: PRICING_OPTIONS,
+    },
+    {
+      key: 'platform',
+      label: 'Platform',
+      type: 'select',
+      options: PLATFORM_OPTIONS,
     },
     {
       key: 'is_featured',
