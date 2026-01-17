@@ -291,7 +291,7 @@ class FreeAIToolsService {
           description: string;
           free_tier_details: string | null;
           pricing: string | null;
-          category_ids: string[];
+          category_ids: string[] | null;
         }) => ({
           id: tool.id,
           name: tool.name,

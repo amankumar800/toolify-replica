@@ -220,6 +220,34 @@ export const getToolsByFilter = unstable_cache(
 
     // For other filters, query tools table directly
     const supabase = createAnonClient();
+    
+    // Special handling for discord filter which needs additional fields
+    if (safeFilter === 'discord') {
+      const { data, error } = await supabase
+        .from('tools')
+        .select('id, name, slug, short_description, image_url, website_url, pricing, discord_url, discord_members, discord_online_7d')
+        .not('discord_url', 'is', null)
+        .eq('status', 'published')
+        .order('discord_members', { ascending: false, nullsFirst: false })
+        .limit(16);
+
+      if (error) {
+        console.error(`[homepage.service] getToolsByFilter(discord) failed:`, error);
+        return [];
+      }
+
+      return (data || []).map((tool) => ({
+        id: tool.slug,
+        name: tool.name,
+        icon: tool.image_url || getFaviconUrl(tool.website_url),
+        iconBgColor: getColorFromString(tool.name, DEFAULT_ICON_BG_COLORS),
+        description: tool.short_description || '',
+        isFree: tool.pricing === 'Free',
+        slug: tool.slug,
+        websiteUrl: tool.website_url,
+      }));
+    }
+    
     let query = supabase
       .from('tools')
       .select('id, name, slug, short_description, image_url, website_url, pricing')
@@ -231,15 +259,6 @@ export const getToolsByFilter = unstable_cache(
         break;
       case 'browser-extension':
         query = query.eq('platform', 'browser-extension');
-        break;
-      case 'discord':
-        // Query tools with Discord communities (discord_url is set)
-        query = supabase
-          .from('tools')
-          .select('id, name, slug, short_description, image_url, website_url, pricing, discord_url, discord_members, discord_online_7d')
-          .not('discord_url', 'is', null)
-          .eq('status', 'published')
-          .order('discord_members', { ascending: false, nullsFirst: false });
         break;
       case 'most-saved':
         query = query.order('saved_count', { ascending: false, nullsFirst: false });
