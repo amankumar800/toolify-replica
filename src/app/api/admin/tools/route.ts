@@ -16,7 +16,7 @@ import { toolSchema } from '@/lib/utils/admin-validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { createLogger } from '@/lib/logger';
 import type { ToolFilters } from '@/lib/services/admin-crud.types';
-import type { ToolStatus, ToolPricing } from '@/lib/types/admin-forms';
+import type { ToolStatus, ToolPricing, ToolPlatform } from '@/lib/types/admin-forms';
 import type { Json } from '@/lib/supabase/types';
 
 const log = createLogger('AdminToolsAPI');
@@ -59,6 +59,11 @@ export async function GET(request: NextRequest) {
     const pricing = searchParams.get('pricing');
     if (pricing) {
       filters.pricing = pricing as ToolPricing;
+    }
+
+    const platform = searchParams.get('platform');
+    if (platform) {
+      filters.platform = platform as ToolPlatform;
     }
 
     const isFeatured = searchParams.get('is_featured');
