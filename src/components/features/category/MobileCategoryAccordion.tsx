@@ -187,9 +187,10 @@ export function MobileCategoryAccordion({
         >
             <div
                 className={cn(
-                    'bg-white dark:bg-gray-900',
-                    'rounded-xl border border-gray-200 dark:border-gray-700',
-                    'overflow-hidden'
+                    'bg-white/95 dark:bg-gray-900/95',
+                    'backdrop-blur-sm',
+                    'rounded-2xl border border-gray-200 dark:border-gray-700',
+                    'overflow-hidden shadow-lg shadow-gray-200/50 dark:shadow-none'
                 )}
             >
                 <h2 className="sr-only">Browse categories</h2>

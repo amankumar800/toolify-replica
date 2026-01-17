@@ -172,12 +172,13 @@ export function CategoryBrowseSidebar({
                                 className={cn(
                                     'group flex items-center gap-3 px-3 py-2.5 rounded-lg',
                                     'text-sm font-medium',
-                                    'transition-all duration-150',
+                                    'transition-all duration-200',
                                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500',
+                                    'border-l-2',
 
                                     isActive
-                                        ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'bg-gradient-to-r from-purple-500/15 to-transparent border-purple-500 text-purple-600 dark:text-purple-400'
+                                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
                                 )}
                                 aria-current={isActive ? 'true' : undefined}
                             >

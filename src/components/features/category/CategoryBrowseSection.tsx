@@ -61,50 +61,34 @@ export function CategorySection({
             )}
             aria-labelledby={`${sectionId}-heading`}
         >
-            {/* Category Header */}
+            {/* Category Header - Premium Design */}
             <header className="mb-6">
-                <div className="flex items-center gap-3 mb-2">
-                    {/* Category Icon */}
-                    <CategoryIcon
-                        slug={slug}
-                        size="md"
-                        className="flex-shrink-0"
-                    />
+                <div className="flex items-center gap-4 mb-3">
+                    {/* Icon container with subtle background */}
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/30 dark:to-purple-800/20">
+                        <CategoryIcon
+                            slug={slug}
+                            size="md"
+                            className="flex-shrink-0"
+                        />
+                    </div>
 
                     {/* Category Name */}
                     <h2
                         id={`${sectionId}-heading`}
-                        className={cn(
-                            'text-xl md:text-2xl font-bold',
-                            'text-gray-900 dark:text-white'
-                        )}
+                        className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white"
                     >
                         {name}
                     </h2>
 
                     {/* Tool Count Badge */}
-                    <span
-                        className={cn(
-                            'text-sm font-medium',
-                            'text-gray-500 dark:text-gray-400',
-                            'bg-gray-100 dark:bg-gray-800',
-                            'px-2.5 py-1 rounded-full'
-                        )}
-                        aria-label={`${toolCount} total tools`}
-                    >
+                    <span className="text-sm font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 px-3 py-1 rounded-full border border-purple-200 dark:border-purple-700/50">
                         {toolCount.toLocaleString()} tools
                     </span>
                 </div>
 
-                {/* Decorative gradient underline */}
-                <div
-                    className={cn(
-                        'h-0.5 w-16',
-                        'bg-gradient-to-r from-purple-500 to-purple-300',
-                        'rounded-full'
-                    )}
-                    aria-hidden="true"
-                />
+                {/* Gradient underline */}
+                <div className="h-1 w-20 rounded-full bg-gradient-to-r from-purple-500 via-violet-500 to-purple-400 opacity-80" aria-hidden="true" />
             </header>
 
             {/* Subcategory Grid */}

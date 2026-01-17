@@ -47,58 +47,47 @@ export function SubcategoryCard({
         <Link
             href={href}
             className={cn(
-                // Base styles
+                // Base
                 'group block p-4 rounded-xl',
-                'bg-white dark:bg-gray-900',
-                'border border-gray-200 dark:border-gray-700',
+                'bg-white/90 dark:bg-gray-900/90',
+                'border border-gray-200/80 dark:border-gray-700/80',
 
-                // Hover effects - using translateY for performance
-                'hover:-translate-y-0.5',
-                'hover:shadow-lg hover:shadow-purple-500/10',
-                'hover:border-purple-400 dark:hover:border-purple-500',
+                // Premium hover
+                'category-card-premium',
+                'hover:bg-white dark:hover:bg-gray-900',
+                'hover:border-purple-300 dark:hover:border-purple-600',
 
-                // Transition timing
-                'transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]',
-
-                // Focus states for keyboard navigation
-                'focus:outline-none',
-                'focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2',
+                // Focus
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2',
                 'dark:focus-visible:ring-offset-gray-900',
 
-                // Reduced motion support
-                'motion-reduce:transform-none motion-reduce:transition-none',
+                // Motion
+                'motion-reduce:transform-none',
 
                 className
             )}
         >
             <div className="flex items-center justify-between gap-3">
-                {/* Subcategory name */}
-                <span
-                    className={cn(
-                        'font-medium text-gray-900 dark:text-white',
-                        'group-hover:text-purple-600 dark:group-hover:text-purple-400',
-                        'transition-colors duration-150',
-                        'truncate'
-                    )}
-                >
+                {/* Name */}
+                <span className="font-medium text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200 truncate">
                     {name}
                 </span>
 
-                {/* Tool count badge */}
-                <span
-                    className={cn(
-                        'flex-shrink-0',
-                        'text-sm font-medium',
-                        'text-purple-600 dark:text-purple-400',
-                        'bg-purple-50 dark:bg-purple-900/30',
-                        'px-2.5 py-0.5 rounded-full',
-                        'group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50',
-                        'transition-colors duration-150'
-                    )}
-                    aria-label={`${toolCount} tools`}
-                >
-                    {toolCount.toLocaleString()}
-                </span>
+                {/* Badge + Arrow */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-sm font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/40 px-2.5 py-0.5 rounded-full group-hover:bg-purple-100 dark:group-hover:bg-purple-800/50 transition-colors">
+                        {toolCount.toLocaleString()}
+                    </span>
+                    <svg
+                        className="w-4 h-4 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-0.5 transition-all duration-200"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
             </div>
         </Link>
     );

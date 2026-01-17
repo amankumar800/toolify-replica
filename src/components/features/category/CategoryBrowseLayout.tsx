@@ -65,50 +65,57 @@ export function CategoryBrowseLayout({
     );
 
     return (
-        <div className={cn('min-h-screen bg-[var(--background)]', className)}>
-            {/* Hero Section */}
-            <section className="bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-950 border-b border-gray-200 dark:border-gray-800">
-                <Container className="py-12 md:py-16">
+        <div className={cn('min-h-screen bg-white dark:bg-gray-950', className)}>
+            {/* ========== PREMIUM HERO SECTION ========== */}
+            <section className="relative overflow-hidden">
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 category-hero-gradient" aria-hidden="true" />
+
+                {/* Floating gradient orbs */}
+                <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+                    <div className="category-orb category-orb-1 w-[500px] h-[500px] bg-purple-500/30 -top-20 -left-20" />
+                    <div className="category-orb category-orb-2 w-[400px] h-[400px] bg-indigo-500/25 top-1/2 -right-32" />
+                    <div className="category-orb category-orb-1 w-[300px] h-[300px] bg-violet-500/20 -bottom-20 left-1/3" />
+                </div>
+
+                {/* Hero content */}
+                <Container className="relative z-10 py-16 md:py-20 lg:py-24">
                     <div className="max-w-3xl">
-                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                            Find AI By Categories
+                        {/* Title */}
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                            Find AI By{' '}
+                            <span className="category-gradient-text">Categories</span>
                         </h1>
-                        <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                            Browse over {totalSubcategories.toLocaleString()} subcategories across {categories.length} categories
-                            with {calculatedTotalTools.toLocaleString()}+ AI tools.
+
+                        {/* Subtitle */}
+                        <p className="text-lg text-purple-100/80 mb-8 max-w-2xl">
+                            Browse over {totalSubcategories.toLocaleString()} subcategories across{' '}
+                            {categories.length} categories with {calculatedTotalTools.toLocaleString()}+ AI tools.
                         </p>
 
-                        {/* Quick stats */}
-                        <div className="flex flex-wrap gap-4">
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-                                <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                                    {categories.length}
-                                </span>
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                    Categories
-                                </span>
+                        {/* Glassmorphism stats */}
+                        <div className="flex flex-wrap gap-3">
+                            <div className="category-glass rounded-full px-5 py-2.5 flex items-center gap-2">
+                                <span className="text-2xl font-bold text-white">{categories.length}</span>
+                                <span className="text-sm text-purple-200/70">Categories</span>
                             </div>
-
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-                                <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                                    {totalSubcategories.toLocaleString()}
-                                </span>
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                    Subcategories
-                                </span>
+                            <div className="category-glass rounded-full px-5 py-2.5 flex items-center gap-2">
+                                <span className="text-2xl font-bold text-white">{totalSubcategories.toLocaleString()}</span>
+                                <span className="text-sm text-purple-200/70">Subcategories</span>
                             </div>
-
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-                                <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                                    {calculatedTotalTools.toLocaleString()}+
-                                </span>
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                    AI Tools
-                                </span>
+                            <div className="category-glass rounded-full px-5 py-2.5 flex items-center gap-2">
+                                <span className="text-2xl font-bold text-white">{calculatedTotalTools.toLocaleString()}+</span>
+                                <span className="text-sm text-purple-200/70">AI Tools</span>
                             </div>
                         </div>
                     </div>
                 </Container>
+
+                {/* Bottom fade to content */}
+                <div
+                    className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white dark:from-gray-950 to-transparent"
+                    aria-hidden="true"
+                />
             </section>
 
             {/* Main Content Area */}
