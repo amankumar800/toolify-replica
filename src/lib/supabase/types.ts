@@ -938,3 +938,50 @@ export interface CompanyPageFormData {
   title: string;
   content: string;
 }
+
+// Company Page Slug type
+export type CompanyPageSlug = 'about' | 'contact' | 'privacy' | 'terms';
+
+// Social Links
+export type SocialLinkRow = Database['public']['Tables']['social_links']['Row']
+export type SocialLinkInsert = Database['public']['Tables']['social_links']['Insert']
+export type SocialLinkUpdate = Database['public']['Tables']['social_links']['Update']
+
+// Social Links Form Data - for admin social links page
+export interface SocialLinksFormData {
+  twitter_url: string;
+  linkedin_url: string;
+  facebook_url: string;
+  instagram_url: string;
+  community_url: string;
+  help_center_url: string;
+}
+
+// Social Links API Response types - used as object maps with platform keys
+export interface SocialLinksResponse {
+  twitter?: string;
+  linkedin?: string;
+  facebook?: string;
+  instagram?: string;
+}
+
+export interface ExternalLinksResponse {
+  community?: string;
+  help_center?: string;
+}
+
+// AI News
+export type AINewsRow = Database['public']['Tables']['ai_news']['Row']
+export type AINewsInsert = Database['public']['Tables']['ai_news']['Insert']
+export type AINewsUpdate = Database['public']['Tables']['ai_news']['Update']
+
+// Midjourney Prompts
+export type MidjourneyPromptRow = Database['public']['Tables']['midjourney_prompts']['Row']
+export type MidjourneyPromptInsert = Database['public']['Tables']['midjourney_prompts']['Insert']
+export type MidjourneyPromptUpdate = Database['public']['Tables']['midjourney_prompts']['Update']
+
+// Midjourney Prompt Type
+export type MidjourneyPromptType = 'sref' | 'prompt';
+
+// Tool Status Type
+export type ToolStatusType = 'pending' | 'published' | 'rejected' | 'draft';
