@@ -14,7 +14,7 @@ const log = createLogger('HomeTypes');
 export const MyToolSchema = z.object({
     id: z.string(),
     name: z.string(),
-    icon: z.string().url(),
+    icon: z.string(), // Allow empty strings or non-URL fallback values
     url: z.string(),
     color: z.string(),
 });
@@ -26,12 +26,22 @@ export const MyToolSchema = z.object({
 export const FeaturedToolSchema = z.object({
     id: z.string(),
     name: z.string(),
-    icon: z.string().url(),
+    icon: z.string(), // Allow empty strings or non-URL fallback values
     iconBgColor: z.string(),
     description: z.string(),
     isFree: z.boolean(),
     slug: z.string(),
-    websiteUrl: z.string().url().optional(),
+    websiteUrl: z.string().optional(), // Allow any string or undefined
+});
+
+/**
+ * Schema for Discord tool cards
+ * @see DiscordToolCard.tsx
+ */
+export const DiscordToolSchema = FeaturedToolSchema.extend({
+    discordUrl: z.string().url().nullable(),
+    discordMembers: z.number().int().nonnegative().default(0),
+    discordOnline7d: z.number().int().nonnegative().default(0),
 });
 
 /**
@@ -74,6 +84,7 @@ export const HomeStatsSchema = z.object({
 
 export type MyTool = z.infer<typeof MyToolSchema>;
 export type FeaturedTool = z.infer<typeof FeaturedToolSchema>;
+export type DiscordTool = z.infer<typeof DiscordToolSchema>;
 export type CategoryItem = z.infer<typeof CategoryItemSchema>;
 export type FilterTab = z.infer<typeof FilterTabSchema>;
 export type HomeStats = z.infer<typeof HomeStatsSchema>;

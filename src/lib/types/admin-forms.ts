@@ -50,6 +50,10 @@ export interface ToolFormData {
   has_mobile_app?: boolean;
   has_browser_extension?: boolean;
   has_discord_bot?: boolean;
+  // Discord community fields
+  discord_url?: string;
+  discord_members?: number;
+  discord_online_7d?: number;
 }
 
 // ============================================================================
