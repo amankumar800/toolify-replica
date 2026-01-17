@@ -927,3 +927,14 @@ export type FaqUpdate = Database['public']['Tables']['faqs']['Update']
 export type UserFavoriteRow = Database['public']['Tables']['user_favorites']['Row']
 export type UserFavoriteInsert = Database['public']['Tables']['user_favorites']['Insert']
 export type UserFavoriteUpdate = Database['public']['Tables']['user_favorites']['Update']
+
+// Company Pages
+export type CompanyPageRow = Database['public']['Tables']['company_pages']['Row']
+export type CompanyPageInsert = Database['public']['Tables']['company_pages']['Insert']
+export type CompanyPageUpdate = Database['public']['Tables']['company_pages']['Update']
+
+// Form data types for admin forms
+export interface CompanyPageFormData {
+  title: string;
+  content: string;
+}
