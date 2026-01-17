@@ -22,6 +22,11 @@ export type ToolPricing = 'free' | 'freemium' | 'paid' | 'contact';
 export type ToolStatus = 'draft' | 'pending' | 'published' | 'rejected' | 'archived';
 
 /**
+ * Platform options for tools
+ */
+export type ToolPlatform = 'web' | 'app' | 'browser-extension' | 'discord' | 'api';
+
+/**
  * Form data for creating/editing tools
  * Requirements: 3.8
  */
@@ -34,6 +39,7 @@ export interface ToolFormData {
   image_url?: string;
   pricing?: ToolPricing;
   status?: ToolStatus;
+  platform?: ToolPlatform;
   is_featured?: boolean;
   is_new?: boolean;
   verified?: boolean;
