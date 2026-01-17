@@ -58,7 +58,7 @@
     {
         "id": "ai-studio",
         "name": "AI Studio",
-        "icon": "https://www.google.com/s2/favicons?domain=aistudio.google.com&sz=64",
+        "icon": "/images/google-ai-studio-icon.svg",
         "url": "/tool/ai-studio",
         "color": "#4285F4"
     },
