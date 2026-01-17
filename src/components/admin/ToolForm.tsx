@@ -24,7 +24,7 @@ import {
 } from '@/components/admin/form-fields';
 import { RelatedDataSection, type RelatedDataItem } from '@/components/admin/RelatedDataSection';
 import { toolSchema, generateSlug } from '@/lib/utils/admin-validation';
-import type { ToolFormData, ToolStatus, ToolPricing } from '@/lib/types/admin-forms';
+import type { ToolFormData, ToolStatus, ToolPricing, ToolPlatform } from '@/lib/types/admin-forms';
 import { ExternalLink, Eye, Save, ArrowLeft, AlertTriangle } from 'lucide-react';
 
 // ============================================================================
@@ -75,6 +75,14 @@ const PRICING_OPTIONS: { value: ToolPricing; label: string }[] = [
   { value: 'contact', label: 'Contact for Pricing' },
 ];
 
+const PLATFORM_OPTIONS: { value: ToolPlatform; label: string }[] = [
+  { value: 'web', label: 'Web' },
+  { value: 'app', label: 'Mobile App' },
+  { value: 'browser-extension', label: 'Browser Extension' },
+  { value: 'discord', label: 'Discord' },
+  { value: 'api', label: 'API' },
+];
+
 const DEFAULT_FORM_DATA: ToolFormData = {
   name: '',
   slug: '',
@@ -84,6 +92,7 @@ const DEFAULT_FORM_DATA: ToolFormData = {
   image_url: '',
   pricing: 'freemium',
   status: 'draft',
+  platform: 'web',
   is_featured: false,
   is_new: true,
   verified: false,
@@ -501,6 +510,16 @@ export function ToolForm({
           onChange={(v) => updateField('status', v as ToolStatus)}
           options={STATUS_OPTIONS}
           error={errors.status}
+        />
+
+        <SelectField
+          name="platform"
+          label="Platform Type"
+          value={formData.platform ?? 'web'}
+          onChange={(v) => updateField('platform', v as ToolPlatform)}
+          options={PLATFORM_OPTIONS}
+          error={errors.platform}
+          helpText="Main platform for this tool"
         />
 
         <MultiSelectField
