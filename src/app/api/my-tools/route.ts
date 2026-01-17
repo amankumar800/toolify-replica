@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         const repo = createUserFavoritesRepository(supabase);
         const result = await repo.addFavorite(user.email, toolId, toolName);
 
-        revalidateTag('homepage');
+        revalidateTag('homepage', 'max');
         return NextResponse.json({ success: true, tool: result });
     } catch (error) {
         console.error('[api/my-tools] Failed to add tool:', error);
@@ -130,7 +130,7 @@ export async function DELETE(request: NextRequest) {
         const repo = createUserFavoritesRepository(supabase);
         await repo.removeFavorite(user.email, toolId);
 
-        revalidateTag('homepage');
+        revalidateTag('homepage', 'max');
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('[api/my-tools] Failed to remove tool:', error);
@@ -175,7 +175,7 @@ export async function PUT(request: NextRequest) {
         const repo = createUserFavoritesRepository(supabase);
         await repo.reorderShortcuts(user.email, toolIds);
 
-        revalidateTag('homepage');
+        revalidateTag('homepage', 'max');
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('[api/my-tools] Failed to reorder tools:', error);
