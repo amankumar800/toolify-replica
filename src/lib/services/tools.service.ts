@@ -62,6 +62,10 @@ export interface ToolWithCategories {
   submitter_name: string | null;
   submitter_email: string | null;
   rejection_reason: string | null;
+  // Discord community fields
+  discord_url: string | null;
+  discord_members: number | null;
+  discord_online_7d: number | null;
   created_at: string | null;
   updated_at: string | null;
   categories: { id: string; name: string; slug: string }[];
@@ -552,12 +556,12 @@ export async function getTools(options: GetToolsOptions = {}): Promise<{
   hasMore: boolean;
 }> {
   const { search, category, limit = 20, offset = 0 } = options;
-  
+
   // Use cached version for non-search queries
   if (!search) {
     return getCachedTools(category, limit, offset);
   }
-  
+
   // For search queries, don't cache (too many variations)
   // Use anon client since this is public data
   const supabase = createAnonClient();

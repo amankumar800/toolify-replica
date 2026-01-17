@@ -9,7 +9,7 @@
 
 import { unstable_cache } from 'next/cache';
 import { createAnonClient } from '@/lib/supabase/anon';
-import type { MyTool, FeaturedTool, CategoryItem } from '@/lib/types/home.types';
+import type { MyTool, FeaturedTool, CategoryItem, DiscordTool } from '@/lib/types/home.types';
 
 // ============================================================================
 // Constants
@@ -233,7 +233,13 @@ export const getToolsByFilter = unstable_cache(
         query = query.eq('platform', 'browser-extension');
         break;
       case 'discord':
-        query = query.eq('platform', 'discord');
+        // Query tools with Discord communities (discord_url is set)
+        query = supabase
+          .from('tools')
+          .select('id, name, slug, short_description, image_url, website_url, pricing, discord_url, discord_members, discord_online_7d')
+          .not('discord_url', 'is', null)
+          .eq('status', 'published')
+          .order('discord_members', { ascending: false, nullsFirst: false });
         break;
       case 'most-saved':
         query = query.order('saved_count', { ascending: false, nullsFirst: false });
@@ -264,8 +270,8 @@ export const getToolsByFilter = unstable_cache(
       websiteUrl: tool.website_url,
     }));
   },
-  ['homepage-tools-by-filter'],
-  { revalidate: 1800, tags: ['tools', 'homepage', 'filter'] }
+  ['homepage-tools-by-filter-v2'],
+  { revalidate: 1800, tags: ['tools', 'homepage', 'filter', 'discord'] }
 );
 
 // ============================================================================
@@ -533,4 +539,45 @@ export async function getToolsByPlatform(
   }
 
   return mapToFeaturedTools((data ?? []) as RawToolData[]);
+}
+
+// ============================================================================
+// Discord Tools for Dedicated Page
+// ============================================================================
+
+/**
+ * Get tools with Discord communities for the /discord page.
+ * Returns tools with discord_url set, sorted by member count.
+ * 
+ * @returns Array of Discord tools with community stats
+ */
+export async function getDiscordToolsForPage(): Promise<DiscordTool[]> {
+  const supabase = createAnonClient();
+
+  const { data, error } = await supabase
+    .from('tools')
+    .select('id, name, slug, short_description, image_url, website_url, pricing, discord_url, discord_members, discord_online_7d')
+    .not('discord_url', 'is', null)
+    .eq('status', 'published')
+    .order('discord_members', { ascending: false, nullsFirst: false })
+    .limit(50);
+
+  if (error) {
+    console.error('[homepage.service] getDiscordToolsForPage failed:', error);
+    return [];
+  }
+
+  return (data ?? []).map((tool) => ({
+    id: tool.slug,
+    name: tool.name,
+    icon: tool.image_url || getFaviconUrl(tool.website_url),
+    iconBgColor: getColorFromString(tool.name, DEFAULT_ICON_BG_COLORS),
+    description: tool.short_description || '',
+    isFree: tool.pricing === 'Free',
+    slug: tool.slug,
+    websiteUrl: tool.website_url,
+    discordUrl: tool.discord_url,
+    discordMembers: tool.discord_members ?? 0,
+    discordOnline7d: tool.discord_online_7d ?? 0,
+  }));
 }

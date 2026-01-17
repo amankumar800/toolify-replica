@@ -76,4 +76,5 @@ export {
   getMyToolsForUser,
   getToolsByFilter,
   getToolsByPlatform,
+  getDiscordToolsForPage,
 } from './homepage.service';
