@@ -10,6 +10,7 @@
 import type {
   ToolStatus,
   ToolPricing,
+  ToolPlatform,
   NewsCategory,
   PromptType,
   FAQCategory,
@@ -79,6 +80,7 @@ export interface ToolFilters extends FilterParams {
   status?: ToolStatus;
   is_featured?: boolean;
   pricing?: ToolPricing;
+  platform?: ToolPlatform;
   includeArchived?: boolean;
 }
 
