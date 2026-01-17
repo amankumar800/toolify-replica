@@ -50,6 +50,10 @@ export default async function EditToolPage({ params }: EditToolPageProps) {
     submitter_name: tool.submitter_name ?? '',
     submitter_email: tool.submitter_email ?? '',
     rejection_reason: tool.rejection_reason ?? '',
+    // Discord community
+    discord_url: tool.discord_url ?? '',
+    discord_members: tool.discord_members ?? undefined,
+    discord_online_7d: tool.discord_online_7d ?? undefined,
     created_at: tool.created_at ?? undefined,
     updated_at: tool.updated_at ?? undefined,
     categories: tool.categories,

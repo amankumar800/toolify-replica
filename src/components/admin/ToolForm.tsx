@@ -100,6 +100,10 @@ const DEFAULT_FORM_DATA: ToolFormData = {
   has_mobile_app: false,
   has_browser_extension: false,
   has_discord_bot: false,
+  // Discord community
+  discord_url: '',
+  discord_members: undefined,
+  discord_online_7d: undefined,
 };
 
 // ============================================================================
@@ -573,6 +577,40 @@ export function ToolForm({
             value={formData.has_discord_bot ?? false}
             onChange={(v) => updateField('has_discord_bot', v)}
             helpText="Discord integration"
+          />
+        </div>
+      </FormSection>
+
+      {/* Discord Community */}
+      <FormSection title="Discord Community" description="Discord server information">
+        <TextField
+          name="discord_url"
+          label="Discord URL"
+          type="url"
+          value={formData.discord_url ?? ''}
+          onChange={(v) => updateField('discord_url', v)}
+          error={errors.discord_url}
+          placeholder="https://discord.gg/..."
+          helpText="Discord invite link for the community"
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <NumberField
+            name="discord_members"
+            label="Member Count"
+            value={formData.discord_members ?? null}
+            onChange={(v) => updateField('discord_members', v ?? undefined)}
+            min={0}
+            error={errors.discord_members}
+            helpText="Total Discord server members"
+          />
+          <NumberField
+            name="discord_online_7d"
+            label="7-Day Online Average"
+            value={formData.discord_online_7d ?? null}
+            onChange={(v) => updateField('discord_online_7d', v ?? undefined)}
+            min={0}
+            error={errors.discord_online_7d}
+            helpText="Average online members"
           />
         </div>
       </FormSection>
