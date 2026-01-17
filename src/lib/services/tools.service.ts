@@ -51,6 +51,7 @@ export interface ToolWithCategories {
   image_url: string | null;
   pricing: string | null;
   status: string | null;
+  platform: string | null;
   is_featured: boolean | null;
   is_new: boolean | null;
   verified: boolean | null;
@@ -62,6 +63,10 @@ export interface ToolWithCategories {
   submitter_name: string | null;
   submitter_email: string | null;
   rejection_reason: string | null;
+  // Platform availability
+  has_mobile_app: boolean | null;
+  has_browser_extension: boolean | null;
+  has_discord_bot: boolean | null;
   // Discord community fields
   discord_url: string | null;
   discord_members: number | null;
@@ -126,6 +131,10 @@ export async function listTools(
 
   if (filters.pricing) {
     query = query.eq('pricing', filters.pricing);
+  }
+
+  if (filters.platform) {
+    query = query.eq('platform', filters.platform);
   }
 
   // Apply sorting
