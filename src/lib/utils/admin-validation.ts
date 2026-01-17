@@ -99,6 +99,11 @@ export const toolPricingOptions = ['free', 'freemium', 'paid', 'contact'] as con
 export const toolStatusOptions = ['draft', 'pending', 'published', 'rejected', 'archived'] as const;
 
 /**
+ * Tool platform options
+ */
+export const toolPlatformOptions = ['web', 'app', 'browser-extension', 'discord', 'api'] as const;
+
+/**
  * Tool form validation schema
  * Requirements: 3.8
  */
@@ -114,6 +119,7 @@ export const toolSchema = z.object({
   image_url: optionalUrlSchema,
   pricing: z.enum(toolPricingOptions).optional(),
   status: z.enum(toolStatusOptions).optional(),
+  platform: z.enum(toolPlatformOptions).optional().default('web'),
   is_featured: z.boolean().optional(),
   is_new: z.boolean().optional(),
   verified: z.boolean().optional(),
@@ -130,6 +136,10 @@ export const toolSchema = z.object({
   has_mobile_app: z.boolean().optional(),
   has_browser_extension: z.boolean().optional(),
   has_discord_bot: z.boolean().optional(),
+  // Discord community fields
+  discord_url: optionalUrlSchema,
+  discord_members: z.number().min(0, 'Discord members must be non-negative').optional(),
+  discord_online_7d: z.number().min(0, 'Online members must be non-negative').optional(),
 });
 
 export type ToolSchemaType = z.infer<typeof toolSchema>;
