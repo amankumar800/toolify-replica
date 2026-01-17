@@ -34,7 +34,11 @@ export function ToolCardsGrid({
 }: ToolCardsGridProps) {
     // Just slice to initialCount - no state needed
     const displayedTools = tools.slice(0, initialCount);
-    const hasMore = tools.length > initialCount;
+
+    // Filters that have dedicated pages should always show "More" button
+    const filtersWithDedicatedPages = ['apps', 'browser-extension', 'discord'];
+    const hasDedicatedPage = filtersWithDedicatedPages.includes(activeFilter);
+    const hasMore = tools.length > initialCount || (hasDedicatedPage && tools.length > 0);
 
     // Filter-specific empty state messages
     const emptyMessages: Record<string, { icon: string; title: string; subtitle: string }> = {

@@ -48,19 +48,8 @@ export function MyToolsSection({
         setFailedImages(prev => new Set(prev).add(toolId));
     }, []);
 
-    // Empty state - Issue #36
-    if (!tools || tools.length === 0) {
-        return (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">My Tools</h2>
-                <p className="text-gray-500 text-center py-4">
-                    No tools saved yet. Browse and save your favorites!
-                </p>
-            </div>
-        );
-    }
-
     // Handle edit/add click - redirect to login if not authenticated
+    // IMPORTANT: All hooks must be called before any conditional returns (Rules of Hooks)
     const handleEditClick = useCallback(() => {
         if (!isAuthenticated) {
             // Redirect to login with return URL
@@ -77,6 +66,19 @@ export function MyToolsSection({
     const handleToolsChange = useCallback(() => {
         router.refresh(); // Refresh page to get updated tools from server
     }, [router]);
+
+    // Empty state - Issue #36
+    // This check must come AFTER all hooks are called
+    if (!tools || tools.length === 0) {
+        return (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">My Tools</h2>
+                <p className="text-gray-500 text-center py-4">
+                    No tools saved yet. Browse and save your favorites!
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">

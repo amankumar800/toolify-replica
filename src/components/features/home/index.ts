@@ -10,6 +10,7 @@ export { MyToolsSection } from './MyToolsSection';
 export { MyToolsEditModal } from './MyToolsEditModal';
 export { FilterTabs, getFilterFromUrl } from './FilterTabs';
 export { CompactToolCard } from './CompactToolCard';
+export { DiscordToolCard } from './DiscordToolCard';
 export { ToolCardsGrid } from './ToolCardsGrid';
 export { CategoryGrid } from './CategoryGrid';
 
