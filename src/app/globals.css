@@ -269,6 +269,7 @@ a:focus-visible,
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -280,6 +281,7 @@ a:focus-visible,
     transform: translateX(0);
     opacity: 1;
   }
+
   to {
     transform: translateX(100%);
     opacity: 0;
@@ -292,4 +294,92 @@ a:focus-visible,
 
 .toast-slide-out {
   animation: toast-slide-out 0.3s ease-in forwards;
+}
+
+/* ============================================
+   CATEGORY PAGE PREMIUM UTILITIES
+   ============================================ */
+
+/* Animated gradient for hero background */
+.category-hero-gradient {
+  background: linear-gradient(-45deg,
+      #1e1b4b,
+      #312e81,
+      #4c1d95,
+      #581c87,
+      #312e81);
+  background-size: 400% 400%;
+  animation: category-gradient 15s ease infinite;
+}
+
+/* Floating orb base */
+.category-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.category-orb-1 {
+  animation: category-float-1 8s ease-in-out infinite;
+}
+
+.category-orb-2 {
+  animation: category-float-2 10s ease-in-out infinite;
+}
+
+/* Glassmorphism for stat pills */
+.category-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Gradient text effect */
+.category-gradient-text {
+  background: linear-gradient(135deg, #A78BFA, #C4B5FD, #DDD6FE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Premium card hover */
+.category-card-premium {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -15px rgba(139, 92, 246, 0.25);
+}
+
+/* Dark mode card hover shadow */
+.dark .category-card-premium:hover {
+  box-shadow: 0 20px 40px -15px rgba(139, 92, 246, 0.4);
+}
+
+/* Category page dark mode container */
+.category-page-container {
+  background: var(--background);
+}
+
+.dark .category-page-container {
+  background: #0f0f14;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+  .category-orb,
+  .category-hero-gradient {
+    animation: none !important;
+  }
+
+  .category-card-premium:hover {
+    transform: none;
+  }
 }

@@ -164,3 +164,36 @@
 .animate-scale-in {
   animation: scaleIn var(--transition-normal) forwards;
 }
+
+/* ========================================
+ * CATEGORY PAGE ANIMATIONS
+ * Premium floating orbs and gradient effects
+ * ======================================== */
+
+@keyframes category-float-1 {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1); 
+    opacity: 0.6; 
+  }
+  50% { 
+    transform: translate(30px, -20px) scale(1.1); 
+    opacity: 0.8; 
+  }
+}
+
+@keyframes category-float-2 {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1); 
+    opacity: 0.5; 
+  }
+  50% { 
+    transform: translate(-25px, 25px) scale(0.9); 
+    opacity: 0.7; 
+  }
+}
+
+@keyframes category-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
