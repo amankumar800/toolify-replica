@@ -1,12 +1,23 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, type ComponentType } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
-import { DeleteModal } from '@/components/admin/DeleteModal';
+import type { DeleteModalProps } from '@/components/admin/DeleteModal';
 import { createLogger } from '@/lib/logger';
+
+// Dynamic import for heavy modal component - reduces initial bundle size
+const DeleteModal = dynamic(
+  () => import('@/components/admin/DeleteModal').then((mod) => mod.DeleteModal),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+) as ComponentType<DeleteModalProps>;
+
 
 const log = createLogger('AdminCategoriesPage');
 import {
@@ -137,7 +148,7 @@ export default function CategoriesPage() {
       }
 
       const result = await response.json();
-      
+
       addToast({
         variant: 'success',
         message: `Category deleted successfully. ${result.deleted.subcategories} subcategories and ${result.deleted.tool_categories} tool associations removed.`,
@@ -171,7 +182,7 @@ export default function CategoriesPage() {
     const draggedItem = newCategories[draggedIndex];
     newCategories.splice(draggedIndex, 1);
     newCategories.splice(index, 0, draggedItem);
-    
+
     setCategories(newCategories);
     setDraggedIndex(index);
   };
@@ -218,9 +229,9 @@ export default function CategoriesPage() {
   // Build affected records for delete modal
   const buildAffectedRecords = () => {
     if (!deleteModal.affectedRecords) return undefined;
-    
+
     const records = [];
-    
+
     if (deleteModal.affectedRecords.subcategories.length > 0) {
       records.push({
         type: 'Subcategories',
@@ -228,7 +239,7 @@ export default function CategoriesPage() {
         items: deleteModal.affectedRecords.subcategories.map((s) => s.name),
       });
     }
-    
+
     if (deleteModal.affectedRecords.tools.length > 0) {
       records.push({
         type: 'Tool Associations',
@@ -236,7 +247,7 @@ export default function CategoriesPage() {
         items: deleteModal.affectedRecords.tools.slice(0, 5).map((t) => t.name),
       });
     }
-    
+
     return records.length > 0 ? records : undefined;
   };
 
@@ -335,9 +346,8 @@ export default function CategoriesPage() {
                     onDragStart={() => handleDragStart(index)}
                     onDragOver={(e) => handleDragOver(e, index)}
                     onDragEnd={handleDragEnd}
-                    className={`hover:bg-gray-50 transition-colors ${
-                      isDragging && draggedIndex === index ? 'opacity-50 bg-blue-50' : ''
-                    }`}
+                    className={`hover:bg-gray-50 transition-colors ${isDragging && draggedIndex === index ? 'opacity-50 bg-blue-50' : ''
+                      }`}
                   >
                     <td className="px-4 py-3">
                       <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">

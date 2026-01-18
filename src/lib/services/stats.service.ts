@@ -31,6 +31,20 @@ const FALLBACK_STATS: HomePageStats = {
 };
 
 /**
+ * Check if a Supabase error is meaningful (not null, undefined, or empty object)
+ */
+function hasError(error: unknown): boolean {
+  if (!error) return false;
+  if (typeof error !== 'object') return true;
+  // Check if it's an empty object
+  const keys = Object.keys(error);
+  if (keys.length === 0) return false;
+  // Check if it has a message or code property with a value
+  const err = error as Record<string, unknown>;
+  return !!(err.message || err.code || err.details || err.hint);
+}
+
+/**
  * Fetches homepage statistics from the database.
  * Counts published tools and all categories across both main and free AI tools tables.
  *
@@ -69,17 +83,17 @@ async function fetchHomePageStats(): Promise<HomePageStats> {
         .select('*', { count: 'exact', head: true }),
     ]);
 
-    // Handle errors gracefully - log but don't throw
-    if (publishedToolsResult.error) {
+    // Handle errors gracefully - log but don't throw (only log meaningful errors)
+    if (hasError(publishedToolsResult.error)) {
       log.error('Error fetching published tools count', publishedToolsResult.error, { action: 'fetchHomePageStats' });
     }
-    if (freeToolsResult.error) {
+    if (hasError(freeToolsResult.error)) {
       log.error('Error fetching free tools count', freeToolsResult.error, { action: 'fetchHomePageStats' });
     }
-    if (categoriesResult.error) {
+    if (hasError(categoriesResult.error)) {
       log.error('Error fetching categories count', categoriesResult.error, { action: 'fetchHomePageStats' });
     }
-    if (freeCategoriesResult.error) {
+    if (hasError(freeCategoriesResult.error)) {
       log.error('Error fetching free categories count', freeCategoriesResult.error, { action: 'fetchHomePageStats' });
     }
 

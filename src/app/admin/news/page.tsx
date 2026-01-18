@@ -1,14 +1,40 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, type ComponentType } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { DataTable, type Column, type Filter, type RowAction, type BulkAction, type SortConfig } from '@/components/admin/DataTable';
+import type { Column, Filter, RowAction, BulkAction, SortConfig, DataTableProps } from '@/components/admin/DataTable';
+import type { DeleteModalProps } from '@/components/admin/DeleteModal';
 import { useToast } from '@/components/admin/Toast';
-import { DeleteModal } from '@/components/admin/DeleteModal';
 import { exportToCSV, downloadCSV } from '@/lib/utils/csv-export';
 import { createLogger } from '@/lib/logger';
+
+// Dynamic imports for heavy components - reduces initial bundle size
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const DataTable = dynamic(
+  () => import('@/components/admin/DataTable').then((mod) => mod.DataTable),
+  {
+    loading: () => (
+      <div className="animate-pulse space-y-4">
+        <div className="h-10 bg-gray-200 rounded w-full" />
+        <div className="h-64 bg-gray-100 rounded w-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+) as ComponentType<DataTableProps<any>>;
+
+const DeleteModal = dynamic(
+  () => import('@/components/admin/DeleteModal').then((mod) => mod.DeleteModal),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+) as ComponentType<DeleteModalProps>;
+
+
 
 const log = createLogger('AdminNewsPage');
 import {
