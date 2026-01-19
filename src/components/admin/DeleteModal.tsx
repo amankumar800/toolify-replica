@@ -80,7 +80,7 @@ export function DeleteModal({
   // ============================================
   // State
   // ============================================
-  
+
   const [confirmationInput, setConfirmationInput] = useState('');
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -100,16 +100,20 @@ export function DeleteModal({
     }
   }, [isOpen, requireConfirmation]);
 
+  // Store onClose in ref for stable event subscription
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; });
+
   // Handle escape key to close modal
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen && !isLoading) {
-        onClose();
+        onCloseRef.current();
       }
-    }
+    };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isLoading, onClose]);
+  }, [isOpen, isLoading]); // onClose removed - ref pattern handles updates
 
   // Prevent body scroll when modal is open
   useEffect(() => {
