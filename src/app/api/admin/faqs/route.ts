@@ -22,7 +22,10 @@ export async function GET(request: NextRequest) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
+    // Auth check before any data operations
     await requireAdmin();
+
+    // Create Supabase client after security checks pass
     const supabase = createAdminClient();
     const { searchParams } = new URL(request.url);
 
@@ -98,11 +101,13 @@ export async function POST(request: NextRequest) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const supabase = createAdminClient();
-    const body = await request.json();
+    // Parallelize auth and body parsing (both independent after rate limit)
+    const [, body] = await Promise.all([
+      requireAdmin(),
+      request.json()
+    ]);
 
-    // Validate input
+    // Validate input FIRST (before any DB calls)
     const validationResult = faqSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
@@ -111,6 +116,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Create Supabase client after validation passes
+    const supabase = createAdminClient();
     const data = validationResult.data;
 
     // Get max display_order if not provided
