@@ -121,19 +121,23 @@ export function MyToolsEditModal({
         }
     }, [isOpen]);
 
+    // Store onClose in ref for stable event subscription
+    const onCloseRef = useRef(onClose);
+    useEffect(() => { onCloseRef.current = onClose; });
+
     // Handle ESC key (pattern from DeleteModal)
     useEffect(() => {
         if (!isOpen) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                onClose();
+                onCloseRef.current();
             }
         };
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
+    }, [isOpen]); // onClose removed - ref pattern handles updates
 
     // Prevent body scroll (pattern from DeleteModal)
     useEffect(() => {
