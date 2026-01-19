@@ -34,8 +34,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
+
+    // Fetch data only after security checks pass
     const news = await getNewsById(id);
 
     if (!news) {
@@ -67,30 +72,33 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
-    const body = await request.json();
-
-    // Get current news item to check is_published state
-    const currentNews = await getNewsById(id);
-    if (!currentNews) {
-      return NextResponse.json(
-        { error: 'News item not found' },
-        { status: 404 }
-      );
-    }
+    // Parallelize auth, params, and body parsing (all independent after rate limit)
+    const [, { id }, body] = await Promise.all([
+      requireAdmin(),
+      params,
+      request.json()
+    ]);
 
     // Convert published_at string to Date if present
     if (body.published_at && typeof body.published_at === 'string') {
       body.published_at = new Date(body.published_at);
     }
 
-    // Validate input
+    // Validate input FIRST (before any DB calls)
     const validationResult = aiNewsSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.flatten() },
         { status: 400 }
+      );
+    }
+
+    // Get current news item AFTER validation passes (deferred DB call)
+    const currentNews = await getNewsById(id);
+    if (!currentNews) {
+      return NextResponse.json(
+        { error: 'News item not found' },
+        { status: 404 }
       );
     }
 
@@ -125,8 +133,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
 
     // Check if news exists
     const news = await getNewsById(id);
