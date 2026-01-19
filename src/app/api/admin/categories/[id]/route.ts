@@ -33,8 +33,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
+
+    // Create Supabase client after security checks pass
     const supabase = await createClient();
     const repo = createCategoriesRepository(supabase);
 
@@ -76,11 +81,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
-    const body = await request.json();
+    // Parallelize auth, params, and body parsing (all independent after rate limit)
+    const [, { id }, body] = await Promise.all([
+      requireAdmin(),
+      params,
+      request.json()
+    ]);
 
-    // Validate form data
+    // Validate form data FIRST (before any DB calls)
     const validation = validateFormData(categorySchema, body);
     if (!validation.success) {
       return NextResponse.json(
@@ -89,6 +97,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Create Supabase client after validation passes
     const supabase = await createClient();
     const repo = createCategoriesRepository(supabase);
 
@@ -137,8 +146,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
+
+    // Create Supabase client after security checks pass
     const supabase = await createClient();
     const categoriesRepo = createCategoriesRepository(supabase);
     const subcategoriesRepo = createSubcategoriesRepository(supabase);
@@ -154,7 +168,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Get affected records for the warning
     const subcategories = await subcategoriesRepo.findByCategory(id);
-    
+
     // Get tool_categories count
     const { count: toolCategoriesCount, error: countError } = await supabase
       .from(TABLES.TOOL_CATEGORIES)
