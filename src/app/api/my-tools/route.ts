@@ -32,7 +32,11 @@ function checkRateLimit(userId: string): boolean {
  * Returns the current user's favorite tools
  */
 export async function GET() {
-    const supabase = await createClient();
+    // Start Supabase client creation immediately
+    const supabasePromise = createClient();
+
+    // Get client (required for auth)
+    const supabase = await supabasePromise;
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user || !user.email) {
@@ -59,8 +63,18 @@ export async function GET() {
  * Body: { toolId: string, toolName?: string }
  */
 export async function POST(request: NextRequest) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // Start independent operations immediately
+    const supabasePromise = createClient();
+    const bodyPromise = request.json();
+
+    // Get client (required for auth)
+    const supabase = await supabasePromise;
+
+    // Parallelize auth check with body parsing completion
+    const [{ data: { user } }, body] = await Promise.all([
+        supabase.auth.getUser(),
+        bodyPromise
+    ]);
 
     if (!user || !user.email) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -74,7 +88,6 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const body = await request.json();
         const { toolId, toolName } = body;
 
         if (!toolId || typeof toolId !== 'string') {
@@ -103,7 +116,11 @@ export async function POST(request: NextRequest) {
  * Removes a tool from the user's favorites
  */
 export async function DELETE(request: NextRequest) {
-    const supabase = await createClient();
+    // Start Supabase client creation immediately
+    const supabasePromise = createClient();
+
+    // Get client (required for auth)
+    const supabase = await supabasePromise;
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user || !user.email) {
@@ -147,8 +164,18 @@ export async function DELETE(request: NextRequest) {
  * Body: { toolIds: string[] }
  */
 export async function PUT(request: NextRequest) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // Start independent operations immediately
+    const supabasePromise = createClient();
+    const bodyPromise = request.json();
+
+    // Get client (required for auth)
+    const supabase = await supabasePromise;
+
+    // Parallelize auth check with body parsing completion
+    const [{ data: { user } }, body] = await Promise.all([
+        supabase.auth.getUser(),
+        bodyPromise
+    ]);
 
     if (!user || !user.email) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -162,7 +189,6 @@ export async function PUT(request: NextRequest) {
     }
 
     try {
-        const body = await request.json();
         const { toolIds } = body;
 
         if (!Array.isArray(toolIds)) {
