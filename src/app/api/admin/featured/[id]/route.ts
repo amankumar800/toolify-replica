@@ -38,8 +38,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
+
+    // Fetch data only after security checks pass
     const featuredTool = await getFeaturedToolById(id);
 
     if (!featuredTool) {
@@ -71,9 +76,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
-    const body = await request.json();
+    // Parallelize auth, params, and body parsing (all independent after rate limit)
+    const [, { id }, body] = await Promise.all([
+      requireAdmin(),
+      params,
+      request.json()
+    ]);
 
     // Convert date strings to Date objects for validation
     if (body.start_date && typeof body.start_date === 'string') {
@@ -124,8 +132,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
+
     await deleteFeaturedTool(id);
 
     return NextResponse.json({ success: true });
