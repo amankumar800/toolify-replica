@@ -1,8 +1,8 @@
-import { useEffect, RefObject, useCallback } from 'react';
+import { useEffect, RefObject, useRef } from 'react';
 
 /**
  * Hook to detect clicks outside of a referenced element.
- * Replaces the "backdrop div" hack with proper event-based detection.
+ * Uses ref pattern for stable subscriptions - handler changes don't cause re-subscriptions.
  * 
  * @param ref - React ref to the element to monitor
  * @param handler - Callback when click outside is detected
@@ -19,7 +19,13 @@ export function useClickOutside<T extends HTMLElement>(
     handler: (event: MouseEvent | TouchEvent) => void,
     enabled: boolean = true
 ): void {
-    const stableHandler = useCallback(handler, [handler]);
+    // Store handler in ref to avoid re-subscriptions when handler changes
+    const handlerRef = useRef(handler);
+
+    // Update ref on every render to capture latest handler
+    useEffect(() => {
+        handlerRef.current = handler;
+    });
 
     useEffect(() => {
         if (!enabled) return;
@@ -32,7 +38,8 @@ export function useClickOutside<T extends HTMLElement>(
                 return;
             }
 
-            stableHandler(event);
+            // Call the latest handler via ref
+            handlerRef.current(event);
         };
 
         // Use mousedown/touchstart for immediate response
@@ -43,7 +50,8 @@ export function useClickOutside<T extends HTMLElement>(
             document.removeEventListener('mousedown', listener);
             document.removeEventListener('touchstart', listener);
         };
-    }, [ref, stableHandler, enabled]);
+    }, [ref, enabled]); // handler removed - ref pattern handles updates
 }
 
 export default useClickOutside;
+
