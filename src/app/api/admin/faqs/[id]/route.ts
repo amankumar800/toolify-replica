@@ -25,8 +25,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
+
+    // Create Supabase client after security checks pass
     const supabase = createAdminClient();
 
     const { data, error } = await supabase
@@ -71,12 +76,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
-    const supabase = createAdminClient();
-    const body = await request.json();
+    // Parallelize auth, params, and body parsing (all independent after rate limit)
+    const [, { id }, body] = await Promise.all([
+      requireAdmin(),
+      params,
+      request.json()
+    ]);
 
-    // Validate input
+    // Validate input FIRST (before any DB calls)
     const validationResult = faqSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
@@ -85,6 +92,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Create Supabase client after validation passes
+    const supabase = createAdminClient();
     const data = validationResult.data;
 
     // Update FAQ
@@ -130,8 +139,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
+
+    // Create Supabase client after security checks pass
     const supabase = createAdminClient();
 
     const { error } = await supabase
