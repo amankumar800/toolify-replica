@@ -80,19 +80,23 @@ function ConfirmationDialog({ isOpen, onConfirm, onCancel }: ConfirmationDialogP
     }
   }, [isOpen]);
 
+  // Store onCancel in ref for stable event subscription
+  const onCancelRef = useRef(onCancel);
+  useEffect(() => { onCancelRef.current = onCancel; });
+
   // Handle escape key
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onCancel();
+        onCancelRef.current();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onCancel]);
+  }, [isOpen]); // onCancel removed - ref pattern handles updates
 
   if (!isOpen) return null;
 
