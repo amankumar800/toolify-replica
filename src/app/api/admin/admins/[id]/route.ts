@@ -36,8 +36,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminRead', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
+
+    // Fetch data only after security checks pass
     const admin = await getAdminById(id);
 
     if (!admin) {
@@ -69,28 +74,32 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
-    const body = await request.json();
+    // Parallelize auth, params, and body parsing (all independent after rate limit)
+    const [, { id }, body] = await Promise.all([
+      requireAdmin(),
+      params,
+      request.json()
+    ]);
 
-    // Get current admin to check for last active admin
-    const currentAdmin = await getAdminById(id);
-    if (!currentAdmin) {
-      return NextResponse.json(
-        { error: 'Admin not found' },
-        { status: 404 }
-      );
-    }
-
-    // Get the logged-in admin
-    const loggedInAdmin = await getAdminFromRequest();
-
-    // Validate input
+    // Validate input FIRST (before any DB calls)
     const validationResult = adminEditSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
         { error: 'Validation failed', details: validationResult.error.flatten() },
         { status: 400 }
+      );
+    }
+
+    // Parallelize database fetches AFTER validation passes (deferred DB calls)
+    const [currentAdmin, loggedInAdmin] = await Promise.all([
+      getAdminById(id),
+      getAdminFromRequest()
+    ]);
+
+    if (!currentAdmin) {
+      return NextResponse.json(
+        { error: 'Admin not found' },
+        { status: 404 }
       );
     }
 
@@ -101,7 +110,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     log.error('Error updating admin', error, { action: 'PUT' });
     const message = error instanceof Error ? error.message : 'Failed to update admin';
-    
+
     // Check for specific errors
     if (message.includes('already exists')) {
       return NextResponse.json(
@@ -109,14 +118,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         { status: 409 }
       );
     }
-    
+
     if (message.includes('last active admin')) {
       return NextResponse.json(
         { error: message },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       { error: message },
       { status: 500 }
@@ -136,11 +145,18 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const rateLimitResponse = await checkRateLimit(request, { type: 'adminMutation', useAuth: true });
     if (rateLimitResponse) return rateLimitResponse;
 
-    await requireAdmin();
-    const { id } = await params;
+    // Parallelize auth and params (both independent after rate limit passes)
+    const [, { id }] = await Promise.all([
+      requireAdmin(),
+      params
+    ]);
 
-    // Get the logged-in admin
-    const loggedInAdmin = await getAdminFromRequest();
+    // Parallelize database fetches (both independent)
+    const [loggedInAdmin, admin] = await Promise.all([
+      getAdminFromRequest(),
+      getAdminById(id)
+    ]);
+
     if (!loggedInAdmin) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -148,8 +164,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Check if admin exists
-    const admin = await getAdminById(id);
     if (!admin) {
       return NextResponse.json(
         { error: 'Admin not found' },
@@ -163,7 +177,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     log.error('Error deleting admin', error, { action: 'DELETE' });
     const message = error instanceof Error ? error.message : 'Failed to delete admin';
-    
+
     // Check for self-deletion error
     if (message.includes('own account')) {
       return NextResponse.json(
@@ -171,7 +185,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       { error: message },
       { status: 500 }
